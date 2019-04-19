@@ -1,0 +1,110 @@
+# coding=utf-8
+
+import os
+import sys
+
+job_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
+sys.path.append(job_root_path)
+
+from job.appium.helper.job_appium_base import AppiumBaseJob
+from job.appium.helper import utils_appium
+from config import conf_modify
+from config import utils_logger
+
+
+class JobAppiumFeizhu(AppiumBaseJob):
+    def __init__(self):
+        AppiumBaseJob.__init__(self, "com.taobao.trip", "com.alipay.mobile.quinox.LauncherActivity")
+
+    def run_task(self):
+        if AppiumBaseJob.run_task(self) is False:
+            return False
+        wait_status = self.wait_activity(self.driver, ".home.HomeActivity")
+        if not wait_status:
+            self.job_scheduler_failed(message='not in .home.HomeActivity')
+            return False
+
+        if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("领里程"), click_mode="click") is None:
+            # 新版做兼容处理
+            if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("今日已签")) is not None:
+                return True
+            elif self.query_ele_wrapper(self.get_query_str_within_xpath_only_text(text='里程', is_force_match=False),
+                                        click_mode="click") is not None \
+                    or self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("马上签到"),
+                                              click_mode="click") is not None:
+                # '首页'是"+2里程"类似文案
+                if self.query_only_point_within_text(search_text=r'^签到\+.里程$', is_auto_click=True) is not None:
+                    # 匹配：   签到\+.里程  --->  签到+2里程
+                    return False
+                else:
+                    self.job_scheduler_failed('未找到\"签到\+.里程\"')
+                    return False
+            else:
+                self.job_scheduler_failed("not fount 新版签到入口")
+                return False
+        else:
+            # 判断是否是签到页面
+            sign_immediately_element = self.query_ele_wrapper(self.get_query_str_by_desc("立即签到"), click_mode="click")
+            if sign_immediately_element is not None:
+                return True
+            else:
+                utils_logger.log("##############未找到立即签到，执行搜素偶已签到逻辑")
+                # find "已签到"字符之前先执行下"是否今日还没有签到"的逻辑判断
+                if self.query_ele_wrapper(self.get_query_str_by_desc("已签到")) is not None:
+                    return True
+                else:
+                    self.job_scheduler_failed("caught unknown exception when sign in feizhu")
+            return False
+
+    def except_case_in_query_ele(self):
+        if AppiumBaseJob.except_case_in_query_ele(self) is True:
+            return True
+        # 用户还没有登录
+        cur_act = utils_appium.get_cur_act(self.driver)
+        if cur_act == 'com.ali.user.mobile.login.ui.UserLoginActivity':
+            # 校验账号密码
+            account = conf_modify.query("", "feizu_account")
+            pwd = conf_modify.query("", "feizu_password")
+            if account is None or pwd is None:
+                self.self.job_scheduler_failed("请设置飞猪账号&密钥")
+                return False
+
+            ele_name = self.query_ele_wrapper(self.get_query_str_by_desc('账户名输入框'), is_ignore_except_case=True)
+            if ele_name is not None:
+                ele_name.send_keys(str(account))
+            ele_pwd = self.query_ele_wrapper(self.get_query_str_by_desc('密码输入框'), is_ignore_except_case=True)
+            if ele_pwd is not None:
+                ele_pwd.send_keys(str(pwd))
+            if self.query_ele_wrapper(self.get_query_str_by_viewid('com.taobao.trip:id/loginButton'),
+                                      click_mode="click", is_ignore_except_case=True) is not None:
+                return True
+            else:
+                self.job_scheduler_failed("search element by get_query_str_by_viewid for loginButton failed")
+        elif self.query_ele_wrapper(self.get_query_str_by_viewid('com.taobao.trip:id/update_contentDialog'),
+                                    is_ignore_except_case=True, retry_count=0) is not None:
+            if self.query_ele_wrapper(self.get_query_str_by_viewid('com.taobao.trip:id/update_button_cancel'),
+                                      click_mode="click", is_ignore_except_case=True) is not None:
+                utils_logger.log('---> 检测到更新弹框，但未搜索到取消按钮')
+                return True
+            else:
+                self.job_scheduler_failed("搜索更新弹框的'取消'按钮失败")
+        return False
+
+
+if __name__ == '__main__':
+    tasks = ['JobAppiumFeizhu']
+    while True:
+        input_info = "------------------------执行任务列表-----------------------\n"
+        for index, task_item in enumerate(tasks):
+            input_info += str(index) + "：" + task_item + "\n"
+        task_index_selected = raw_input(input_info + "请选择需运行任务对应索引(索引下标越界触发程序退出)：")
+        if task_index_selected.isdigit() is False:
+            utils_logger.log("索引值非数字，请重新输入：", task_index_selected)
+            continue
+        task_index_selected = int(task_index_selected)
+        if task_index_selected >= len(tasks) > 0:
+            utils_logger.log("[" + str(task_index_selected) + "]任务索引不存在，退出程序...")
+            break
+        task_name = tasks[task_index_selected]
+        job = eval(task_name + '()')
+        job.run_task()

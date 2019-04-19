@@ -1,0 +1,397 @@
+# coding=utf-8
+'趣头条'
+import os
+import sys
+import random
+import time
+import traceback
+
+job_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
+sys.path.append(job_root_path)
+
+from job.appium.helper.job_appium_base import AppiumBaseJob
+from job.appium.helper import utils_appium
+from config import env_job
+from config import utils_logger
+from helper import utils_common
+
+
+class JobAppiumQutoutiaoBase(AppiumBaseJob):
+    def __init__(self):
+        AppiumBaseJob.__init__(self, "com.jifen.qukan", "com.jifen.qkbase.main.MainActivity")
+
+    def except_case_in_query_ele(self):
+        if AppiumBaseJob.except_case_in_query_ele(self) is True:
+            return True
+        if self.query_ele_wrapper(self.get_query_str_by_viewid('com.jifen.qukan:id/nu'), click_mode="click",
+                                  is_ignore_except_case=True, retry_count=0) is not None:
+            return True
+        elif self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('开启锁屏阅读'), is_ignore_except_case=True,
+                                    retry_count=0) is not None:
+            utils_logger.log("---> 检测到开启锁屏的弹框，点击左上角关闭弹框")
+            if self.safe_tap_in_point([0, 0]) is False:
+                self.job_scheduler_failed('safe_tap_in_point failed')
+            else:
+                return True
+        elif self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('以后更新'), click_mode="click",
+                                    is_ignore_except_case=True, retry_count=0) is not None:
+            utils_logger.log("检测到更新弹框")
+            return True
+        elif self.query_ele_wrapper(
+                self.get_query_str_within_xpath_only_text("禁止后不再询问", view_type="android.widget.CheckBox"),
+                is_ignore_except_case=True, retry_count=0) is not None:
+            # 权限弹框
+            if self.query_ele_wrapper(
+                    self.get_query_str_within_xpath_only_text("始终允许", view_type="android.widget.Button"),
+                    click_mode="click", is_ignore_except_case=True, retry_count=0) is not None:
+                return True
+        return False
+
+    def run_task(self):
+        if AppiumBaseJob.run_task(self) is False:
+            return False
+        # 延长重试次数，避免应用启动比较耗时的情况
+        if self.wait_activity(self.driver, "com.jifen.qkbase.main.MainActivity", retry_count=50) is False:
+            self.job_scheduler_failed("未进入趣头条首页")
+            return False
+        return True
+
+
+class JobAppiumQtoutiaoYuedu(JobAppiumQutoutiaoBase):
+    '趣头条浏览文章'
+
+    def except_case_in_query_ele(self):
+        if JobAppiumQutoutiaoBase.except_case_in_query_ele(self) is True:
+            return True
+        if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('下载完成后并安装打开', is_force_match=False),
+                                  is_ignore_except_case=True) is not None:
+            utils_logger.log("--->检测到'华为、vivo、oppo等机型，请勿选择“安全安装、官方推荐”选择“继续安装、取消”，否则将无法领取金币'")
+            if self.query_ele_wrapper(
+                    '//android.widget.FrameLayout//android.widget.FrameLayout//android.widget.FrameLayout//android.widget.RelativeLayout//android.widget.RelativeLayout//android.view.View',
+                    click_mode='click', is_ignore_except_case=True) is not None:
+                return True
+            else:
+                self.job_scheduler_failed("检测到'华为、vivo、oppo等机型，请勿选择“安全安装、官方推荐”选择“继续安装、取消”，否则将无法领取金币',但是无法关闭")
+        return False
+
+    def run_task(self):
+        if JobAppiumQutoutiaoBase.run_task(self) is False:
+            return False
+        # 最多浏览15次，因为一次大约需要1分钟左右时间
+        for_each_size = int(random.randint(1, 15))
+        for index in range(for_each_size):
+            # 观测是否直接抛异常导致回到桌面
+            if utils_appium.get_cur_act(self.driver) == '.Launcher':
+                utils_logger.log("运行过程中，软件回到了桌面程序，退出浏览任务")
+                return False
+            utils_logger.log("--->开启第(", index, "/", for_each_size, ")次浏览")
+            # 循环回到首页
+            def_main_activity = 'com.jifen.qkbase.main.MainActivity'
+            try_count = 0
+            while utils_appium.get_cur_act(self.driver) != def_main_activity:
+                if try_count > 15:
+                    break
+                try:
+                    utils_logger.log("返回键返回至首页:", try_count)
+                    self.driver.keyevent(4)
+                except Exception:
+                    utils_logger.log("返回键事件响应异常")
+                try_count = try_count + 1
+            if utils_appium.get_cur_act(self.driver) == def_main_activity:
+                try:
+                    self.browser_news(def_main_activity)
+                except Exception, e:
+                    utils_logger.log("--->JobAppiumQtoutiaoYuedu.browser_news caught exception:",
+                                     traceback.format_exc())
+            else:
+                utils_logger.log("不再首页，没办法执行新闻浏览任务")
+        return True
+
+    def browser_news(self, main_activity):
+        # 需要进入app手动设置关心的栏目：最多支持7个
+        module_text = random.choice([u'推荐', u'上海', u'娱乐', u'旅行', u'历史', u'汽车', u'军事'])
+        utils_logger.log('--->module_text:', module_text)
+        if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text(module_text), click_mode="click",
+                                  retry_count=0) is None:
+            utils_logger.log('找不到' + module_text + '板块')
+            return False
+        is_view_inflated, scr_shots = self.wait_view_layout_finish(True)
+        if is_view_inflated is False:
+            self.job_scheduler_failed('页面还未绘制完成，please check')
+            return False
+        # 搜索应该阅读的文章
+        scroll_size = int(random.randint(0, 10))
+        utils_logger.log("---> 页面滚动次数：", scroll_size)
+        for index in range(scroll_size):
+            # 滑动以选择文章开启阅读任务
+            self.safe_touch_action(tab_interval=[float(random.uniform(0.65, 0.35)), 0.35])
+        news_activitys = ['.content.view.activity.NewsDetailActivity', '.content.newsdetail.news.NewsDetailActivity',
+                          '.content.newsdetail.news.NewsDetailNewActivity']
+        video_activitys = ['.content.view.activity.VideoNewsDetailActivity',
+                           '.content.newsdetail.video.VideoNewsDetailActivity',
+                           '.content.newsdetail.video.VideoNewsDetailNewActivity',
+                           '.content.shortvideo.ShortVideoDetailsActivity']
+        image_activitys = ['.imagenews.ImageNewsDetailActivity', '.content.imagenews.ImageNewsDetailActivity',
+                           '.content.imagenews.ImageNewsDetailNewActivity']
+        other_activitys = ['.content.view.activity.ImagePagersActivity', '.content.imagenews.ImagePagersActivity',
+                           'com.iclicash.advlib.ui.front.ADBrowser',
+                           '.PackageInstallerActivity', 'com.jifen.qkbase.view.activity.WebActivity', '.WebActivity',
+                           'com.jd.lib.productdetail.ProductDetailActivity',
+                           '.PackageInstallerActivity', '.open.InterfaceActivity', '.QuKanActivity',
+                           'com.jifen.qkbase.web.WebActivity', '.Launcher',
+                           '.lightbrowser.LightBrowserActivity', '.schemedispatch.BdBoxSchemeDispatchActivity']
+        # 随便点击，选择指定文章开始读取
+        for tab_index in range(10):
+            self.safe_tap_in_point([random.randint(100, 400), random.randint(200, 800)])
+            utils_logger.log("--->等待进入新闻详情界面[", tab_index, "]：", utils_appium.get_cur_act(self.driver))
+            # wait_activity有针对异常情况的处理，因此弃用'utils_appium.get_cur_act'方式
+            if self.wait_activity(driver=self.driver,
+                                  target=news_activitys + video_activitys + image_activitys + other_activitys,
+                                  retry_count=1) is True:
+                utils_logger.log("--->成功进入某个详情页面")
+                break
+        # 判断是否在详情页面
+        cur_activity = utils_appium.get_cur_act(self.driver)
+        if cur_activity == main_activity:
+            self.job_scheduler_failed('why 还在首页')
+            return False
+        # 根据页面调用指定阅读策略
+        utils_logger.log("--->cur_activity:", cur_activity)
+        if cur_activity in news_activitys:
+            # 开始模拟阅读
+            time_to_foreach = random.randint(5, 10)  # 5~10s，因为每30秒就可以获得10积分的奖励
+            period = 0.2  # 每次浏览间隔，单位：秒
+            for index in range(int(float(time_to_foreach) / period)):
+                if bool(random.getrandbits(1)) is True:
+                    tab_interval = [0.65, 0.35]
+                else:
+                    tab_interval = [0.25, 0.75]
+                utils_logger.log("--->[", time_to_foreach, "] for tab_interval[", tab_interval, "] with index:", index)
+                if self.safe_touch_action(tab_interval=tab_interval, duration=int(float(period * 1000))) is False:
+                    utils_logger.log("----> safe_touch_action caught exception")
+            return True
+        elif cur_activity in video_activitys:
+            utils_logger.log("等待视频播放完成：45")
+            time.sleep(random.randint(25, 45))  # 休眠45秒
+            return True
+        elif cur_activity in image_activitys + other_activitys:
+            utils_logger.log("进入非指定详情页面，放弃此次浏览")
+            return False
+        else:
+            self.job_scheduler_failed(message='未知页面:' + cur_activity, email_title="UnknownPage")
+            return False
+
+
+class JobAppiumQtoutiaoCoreShiduanJiangli(JobAppiumQutoutiaoBase):
+    """首页-右上角-时段奖励"""
+
+    def except_case_in_query_ele(self):
+        if JobAppiumQutoutiaoBase.except_case_in_query_ele(self) is True:
+            return True
+        # 解决意外进入"我的等级"页面
+        if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("我的等级"),
+                                  is_ignore_except_case=True) is not None:
+            # 点击返回，返回上一层
+            if self.query_ele_wrapper(
+                    "//android.widget.LinearLayout//android.widget.FrameLayout//android.widget.RelativeLayout"
+                    "//android.widget.RelativeLayout//android.widget.RelativeLayout//android.widget.ImageView",
+                    click_mode='click', is_ignore_except_case=True) is not None:
+                return True
+            else:
+                self.job_scheduler_failed("检测到'我的等级页面',但未推出")
+                return False
+        return False
+
+    def run_task(self):
+        if JobAppiumQutoutiaoBase.run_task(self) is False:
+            return False
+        # 注释:可能第一次点击会是成功签到，但是此时中间弹框会快速消失，因此再启用第二次尝试点击以检测弹框
+        btn_ele_xpath = '//android.widget.FrameLayout//android.widget.LinearLayout//android.widget.FrameLayout' \
+                        '//android.widget.LinearLayout//android.widget.FrameLayout//android.widget.RelativeLayout' \
+                        '//android.widget.FrameLayout//android.widget.LinearLayout//android.widget.RelativeLayout' \
+                        '//android.widget.RelativeLayout//android.widget.RelativeLayout//android.widget.FrameLayout' \
+                        '//android.widget.TextView '
+        # 第一次点击小时签到
+        if self.query_ele_wrapper(btn_ele_xpath, click_mode="click", time_wait_page_completely_resumed=5,
+                                  retry_count=0) is not None:
+            if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('时段奖励'), retry_count=0) is not None:
+                utils_logger.log("---> 成功弹出时段奖励弹框")
+                return True
+            else:
+                # 若第一次是成功签到，发起第二次查询是否已成功签到的检测
+                if self.query_ele_wrapper(btn_ele_xpath, click_mode="click", retry_count=0) is not None:
+                    if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('时段奖励'),
+                                              retry_count=0) is not None:
+                        utils_logger.log("---> 成功弹出时段奖励弹框")
+                        return True
+                else:
+                    self.job_scheduler_failed('第二次未搜索到右上角按钮')
+                    return False
+        else:
+            self.job_scheduler_failed('第一次未搜索到右上角按钮')
+            return False
+        return False
+
+
+class JobAppiumQtoutiaoJobCenter(JobAppiumQutoutiaoBase):
+    def run_task(self):
+        if JobAppiumQutoutiaoBase.run_task(self) is False:
+            return False
+        if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('任务', view_type='android.widget.Button'),
+                                  click_mode="click", time_wait_page_completely_resumed=5) is None:
+            self.job_scheduler_failed('找不到\"任务\"按钮')
+            return False
+        # # 每次进入'我的'页面，都会下拉刷新一次，因此point位置会变更，故而加上个time_wait_page_completely_resumed
+        # if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('任务中心'),click_mode="click",time_wait_page_completely_resumed=5) is None:
+        #     self.job_scheduler_failed('没找到任务中心')
+        #     return False
+        return True
+
+
+class JobAppiumQtoutiaoSign(JobAppiumQtoutiaoJobCenter):
+    """任务中心-签到：进入这个页面即表示领取成功"""
+
+    def run_task(self):
+        if JobAppiumQtoutiaoJobCenter.run_task(self) is False:
+            return False
+        if self.query_ele_wrapper(
+                self.get_query_str_within_xpath_only_text(text='明天签到可领', view_type='android.view.View')) is not None \
+                or self.query_ele_wrapper(
+            self.get_query_str_within_xpath_only_text(text='明天签到可领', view_type='android.view.View',
+                                                      attribute='content-desc')) is not None \
+                or self.query_ele_wrapper(
+            self.get_query_str_within_xpath_only_text(text='已签', view_type='android.view.View')) is not None \
+                or self.query_ele_wrapper(
+            self.get_query_str_within_xpath_only_text(text='已签', view_type='android.view.View',
+                                                      attribute='content-desc')) is not None:
+            utils_logger.log("---> 今日已签到")
+            return True
+        else:
+            self.job_scheduler_failed('为何发现今日未签到')
+            return False
+
+
+class JobAppiumQtoutiaoOpenBaoxiang(JobAppiumQtoutiaoJobCenter):
+    '任务中心-开宝箱分享-开宝箱'
+    '签到'
+
+    def run_task(self):
+        if JobAppiumQtoutiaoJobCenter.run_task(self) is False:
+            return False
+        # 循环滚动直至搜索到元素
+        upload_files = []
+        for index in range(10):
+            if self.query_ele_wrapper("//android.view.View[@content-desc='开宝箱分享']") is not None:
+                utils_logger.log("检测到\"开启宝箱成功\"")
+                break
+
+            utils_logger.log('未找到开宝箱的按钮')
+            utils_logger.log("---> JobAppiumQtoutiaoOpenBaoxiang swipe of index：", index)
+            self.safe_touch_action(tab_center=0.4, is_down=True, tab_interval=[0.65, 0.35])
+            # 保留每次的page_resource以及截图文件
+            upload_files.append(
+                utils_appium.write_page_resource(self.driver,
+                                                 env_job.get_out_dir() + "page_resource_while_" + str(index) + ".txt"))
+            upload_files.append(
+                utils_appium.get_screen_shots(driver=self.driver, target_device=self.target_device_name,
+                                              file_path=env_job.get_out_dir() + "screen_shot_while_" + str(
+                                                  index) + ".png"))
+            continue
+        # 检测到
+        if self.query_ele_wrapper("//android.view.View[@content-desc='开启宝箱']", click_mode="click") is not None:
+            utils_logger.log("检测到\"开启宝箱成功\"")
+        else:
+            utils_logger.log("\"开启宝箱\"正在倒计时")
+            return True
+
+        # 判断是否进入'邀请好友' - 即开宝箱页面
+        if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('邀请好友')) is None:
+            self.job_scheduler_failed('未进入\"邀请好友\"界面', upload_files=upload_files)
+            return False
+        # 拆宝箱页面
+        if self.query_ele_wrapper("//android.view.View[@content-desc='开宝箱']", click_mode="click") is not None:
+            utils_logger.log("TODO:开启宝箱后的反应")
+            # TODO:弹框中包含'恭喜获得宝箱奖励',但无法使用appium方式检测，需要使用query_point(暂时放弃，次数善用)
+            # if self.query_ele_wrapper(self)
+            # self.job_scheduler_failed('TODO:开启宝箱后的反应')
+        elif self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('明天再来')) is not None:
+            utils_logger.log("今日已没有机会")
+            return True
+        else:
+            self.job_scheduler_failed('解析异常')
+            return False
+        return False
+
+
+class JobAppiumQtoutiaoGrandTotalJiangli(JobAppiumQtoutiaoJobCenter):
+    '''
+        任务中心-累计阅读时长达到60分钟
+        由于该任务需要新闻浏览任务执行足够多次，所以让该任务稍微晚点指定
+    '''
+
+    def is_time_support(self, curent_time=None):
+        is_run_support = True if 1600 < curent_time else False
+        utils_logger.log(str(curent_time) + "---> is_run_support(" + str(self.__class__) + "):" + (
+            "True" if is_run_support else "False"))
+        return is_run_support
+
+    def run_task(self):
+        if JobAppiumQtoutiaoJobCenter.run_task(self) is False:
+            return False
+        for index in range(10):
+            utils_logger.log("---> JobAppiumQtoutiaoGrandTotalJiangli for-each:", index)
+            if self.query_ele_wrapper("//android.view.View[@content-desc='累计阅读时长达到60分钟']", click_mode="click",
+                                      rect_scale_check_element_region=[0, 1, 0, 1]) is not None:
+                utils_logger.log("检测到\"累计阅读时长达到60分钟\"")
+                break
+            self.safe_touch_action(tab_center=0.4, is_down=True, tab_interval=[0.65, 0.35])
+        if self.query_ele_wrapper("//android.view.View[@content-desc='累计阅读时长达到60分钟']") is not None:
+            if self.query_ele_wrapper("//android.view.View[@content-desc='立即阅读']") is not None:
+                utils_logger.log("阅读时间未达到60分钟")
+                return False
+            else:
+                utils_logger.log("已阅读满60分钟")
+                return True
+        else:
+            self.job_scheduler_failed('未检测到\"累计阅读时长达到60分钟\"')
+            return False
+        return False
+
+
+class JobAppiumQtoutiaoLogin(JobAppiumQutoutiaoBase):
+    def run_task(self):
+        if JobAppiumQutoutiaoBase.run_task(self) is False:
+            return False
+        if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text(text='我的')) is None:
+            self.job_scheduler_failed('未检测到\"我的\"')
+            return False
+        if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text(text='手机登录')) is None:
+            self.job_scheduler_failed('未检测到\"手机登录\"')
+            return False
+        if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text(text='密码登录')) is None:
+            self.job_scheduler_failed('未检测到\"密码登录\"')
+            return False
+        self.job_scheduler_failed('密码登录页面')
+        return True
+
+
+if __name__ == '__main__':
+    tasks = ['JobAppiumQtoutiaoCoreShiduanJiangli', 'JobAppiumQtoutiaoGrandTotalJiangli', 'JobAppiumQtoutiaoJobCenter',
+             'JobAppiumQtoutiaoLogin',
+             'JobAppiumQtoutiaoOpenBaoxiang', 'JobAppiumQtoutiaoSign', 'JobAppiumQtoutiaoYuedu',
+             'JobAppiumQutoutiaoBase']
+    while True:
+        input_info = "------------------------执行任务列表-----------------------\n"
+        for index, task_item in enumerate(tasks):
+            input_info += str(index) + "：" + task_item + "\n"
+        task_index_selected = raw_input(input_info + "请选择需运行任务对应索引(索引下标越界触发程序退出)：")
+        if task_index_selected.isdigit() is False:
+            utils_logger.log("索引值非数字，请重新输入：", task_index_selected)
+            continue
+        task_index_selected = int(task_index_selected)
+        if task_index_selected >= len(tasks) > 0:
+            utils_logger.log("[" + str(task_index_selected) + "]任务索引不存在，退出程序...")
+            break
+        task_name = tasks[task_index_selected]
+        job = eval(task_name + '()')
+        job.run_task()
