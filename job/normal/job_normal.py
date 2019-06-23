@@ -13,7 +13,7 @@ from config import conf_modify
 from config import email_send
 from config import utils_logger
 from config import env_job
-from job.appium.helper import utils_android
+from job.appium.utils import utils_android
 from helper import utils_config_parser
 
 

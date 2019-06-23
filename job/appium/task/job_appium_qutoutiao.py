@@ -9,11 +9,10 @@ import traceback
 job_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
 sys.path.append(job_root_path)
 
-from job.appium.helper.job_appium_base import AppiumBaseJob
-from job.appium.helper import utils_appium
+from job.appium.job_appium_base import AppiumBaseJob
+from job.appium.utils import utils_appium
 from config import env_job
 from config import utils_logger
-from helper import utils_common
 
 
 class JobAppiumQutoutiaoBase(AppiumBaseJob):
@@ -113,18 +112,18 @@ class JobAppiumQtoutiaoYuedu(JobAppiumQutoutiaoBase):
         utils_logger.log('--->module_text:', module_text)
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text(module_text), click_mode="click",
                                   retry_count=0) is None:
-            utils_logger.log('找不到' + module_text + '板块')
+            self.job_scheduler_failed('找不到' + module_text + '板块')
             return False
         is_view_inflated, scr_shots = self.wait_view_layout_finish(True)
         if is_view_inflated is False:
             self.job_scheduler_failed('页面还未绘制完成，please check')
             return False
         # 搜索应该阅读的文章
-        scroll_size = int(random.randint(0, 10))
+        scroll_size = int(random.randint(0, 20))
         utils_logger.log("---> 页面滚动次数：", scroll_size)
         for index in range(scroll_size):
             # 滑动以选择文章开启阅读任务
-            self.safe_touch_action(tab_interval=[float(random.uniform(0.65, 0.35)), 0.35])
+            self.safe_touch_action(tab_interval=[float(random.uniform(0.6, 0.8)), 0.2])
         news_activitys = ['.content.view.activity.NewsDetailActivity', '.content.newsdetail.news.NewsDetailActivity',
                           '.content.newsdetail.news.NewsDetailNewActivity']
         video_activitys = ['.content.view.activity.VideoNewsDetailActivity',

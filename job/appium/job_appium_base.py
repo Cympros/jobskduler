@@ -13,18 +13,15 @@ sys.setdefaultencoding('utf-8')
 
 import appium
 import time
-import json
 import traceback
 from helper import utils_common
 from config import env_job
 from config import utils_logger
-from config import conf_modify
 from helper import utils_image as image_utils
 from helper import utils_file as file_utils
 from helper import utils_config_parser
 from job.job_base import BaseJob
-from job.appium.helper import utils_appium
-from job.appium.helper import utils_android
+from job.appium.utils import utils_android, utils_appium
 from helper.x_ocr import core as ocr_utils
 from helper.x_aircv.core import Template
 

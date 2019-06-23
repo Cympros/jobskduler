@@ -3,11 +3,9 @@
 import os
 import sys
 import time
-import signal
 import random
 import threading
 import traceback
-from contextlib import contextmanager
 
 root_path = os.path.split(os.path.realpath(__file__))[0]
 sys.path.append(root_path)
@@ -20,7 +18,7 @@ from config import env_job
 from config import utils_logger
 from helper import utils_config_parser
 from helper import utils_common
-from job.appium.helper import utils_android
+from job.appium.utils import utils_android
 
 
 def run_job():

@@ -9,8 +9,8 @@ import traceback
 job_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
 sys.path.append(job_root_path)
 
-from job.appium.helper.job_appium_base import AppiumBaseJob
-from job.appium.helper import utils_appium
+from job.appium.job_appium_base import AppiumBaseJob
+from job.appium.utils import utils_appium
 from config import utils_logger
 
 
@@ -98,7 +98,7 @@ class JobAppiumTaoToutiaoYueDu(JobAppiumTaoToutiaoBase):
         module_text = random.choice([u"推荐", u'视频', u'美文', u'故事', u'育儿', u'科技'])
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text(module_text), click_mode="click",
                                   retry_count=0) is None:
-            utils_logger.log('找不到' + module_text + '板块')
+            self.job_scheduler_failed('找不到' + module_text + '板块')
             return False
         is_view_inflated, scr_shots = self.wait_view_layout_finish(True)
         if is_view_inflated is False:

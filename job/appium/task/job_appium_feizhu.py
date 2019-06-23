@@ -6,8 +6,8 @@ import sys
 job_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
 sys.path.append(job_root_path)
 
-from job.appium.helper.job_appium_base import AppiumBaseJob
-from job.appium.helper import utils_appium
+from job.appium.job_appium_base import AppiumBaseJob
+from job.appium.utils import utils_appium
 from config import conf_modify
 from config import utils_logger
 

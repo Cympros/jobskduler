@@ -1,12 +1,7 @@
 # coding=utf-8
 
 import os
-import re
 import sys
-import json
-import time
-import random
-import traceback
 
 job_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
 sys.path.append(job_root_path)
@@ -14,8 +9,7 @@ sys.path.append(job_root_path)
 from helper import utils_common
 from config import env_job
 from config import utils_logger
-from job.appium.helper.job_appium_base import AppiumBaseJob
-from job.appium.helper import utils_appium
+from job.appium.job_appium_base import AppiumBaseJob
 
 '需要重新绑定账号：13651968735'
 
