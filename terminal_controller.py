@@ -10,6 +10,7 @@ import traceback
 root_path = os.path.split(os.path.realpath(__file__))[0]
 sys.path.append(root_path)
 sys.path.append(root_path + '/job/appium/task')
+sys.path.append(root_path + '/job/normal')
 sys.path.append(root_path + '/job')
 
 from config import conf_modify
@@ -49,17 +50,17 @@ def run_job():
                 utils_common.exec_shell_cmd(cmd)
         # 检查代码是否有更新，若存在更新则结束死循环，让bash脚本重启python脚本
         # 方案：获取当前git的本地分支与远程分支下最新的commitid,若两个commitid不一致，则退出循环，触发python脚本重启
-        # TODO:分支名暂时写死
-        if utils_common.exec_shell_cmd("git fetch && git rev-parse develop") != utils_common.exec_shell_cmd(
-                "git fetch && git rev-parse origin/develop"):
-            utils_logger.log("检测到有代码更新，触发python脚本的更新操作....")
-            # TODO：记得校验"git pull"的执行结果，否则会进入死循环，始终无法执行具体任务
-            git_pull_response = utils_common.exec_shell_cmd("git pull")
-            utils_logger.log("执行结果[git pull]", git_pull_response)
-            email_send.wrapper_send_email(title="Git更新", content="git pull执行结果:\n" + git_pull_response)
-            break
-        # 休眠
-        utils_logger.log("等待下次设备自动感知(5分钟).............")
+        # # TODO:分支名暂时写死
+        # if utils_common.exec_shell_cmd("git fetch && git rev-parse develop") != utils_common.exec_shell_cmd(
+        #         "git fetch && git rev-parse origin/develop"):
+        #     utils_logger.log("检测到有代码更新，触发python脚本的更新操作....")
+        #     # TODO：记得校验"git pull"的执行结果，否则会进入死循环，始终无法执行具体任务
+        #     git_pull_response = utils_common.exec_shell_cmd("git pull")
+        #     utils_logger.log("执行结果[git pull]", git_pull_response)
+        #     email_send.wrapper_send_email(title="Git更新", content="git pull执行结果:\n" + git_pull_response)
+        #     break
+        # # 休眠
+        # utils_logger.log("等待下次设备自动感知(5分钟).............")
         time.sleep(5 * 60)
 
 
@@ -137,12 +138,12 @@ def device_thread_loop(connect_device, device_tag, device_type):
 
 # 执行具体的任务操作任务
 def exec_task(device, device_tag, device_type, job, job_config_map):
-    # 判断android设备是否在充电
-    if device_type == "android":
-        battery_status = utils_android.get_battery_status_by_device(device)
-        if battery_status is None or battery_status != "true":
-            utils_logger.log("设备不再充电，跳过该任务", device_tag)
-            return
+    # # 判断android设备是否在充电
+    # if device_type == "android":
+    #     battery_status = utils_android.get_battery_status_by_device(device)
+    #     if battery_status is None or battery_status != "true":
+    #         utils_logger.log("设备不再充电，跳过该任务", device_tag)
+    #         return
 
     job_session = device_tag + "&&" + job  # device配合job定义的job_session，用于表示每个设备上的任务
 

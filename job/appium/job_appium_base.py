@@ -150,33 +150,36 @@ class AppiumBaseJob(BaseJob):
         access_appium_port = utils_config_parser.get_value(device_conf_path,
                                                            utils_android.get_device_tag(self.target_device_name),
                                                            "appium_port")
-        if access_appium_port is None:
-            # 遍历已知设备的appium_port属性
-            all_appium_posts = []
-            for device_session in utils_config_parser.get_sessions(device_conf_path):
-                device_session_appium_port = utils_config_parser.get_value(device_conf_path, device_session,
-                                                                           "appium_port")
-                if device_session_appium_port is None:
-                    continue
-                all_appium_posts.append(device_session_appium_port)
-            if len(all_appium_posts) <= 0:
-                access_appium_port = 4723
-            else:
-                access_appium_port = int(max(all_appium_posts)) + 1
-            utils_logger.log("已知设备对应的appium服务端口:", all_appium_posts)
-            utils_logger.log("选定的appium服务端口:", access_appium_port)
-            utils_config_parser.put_value(device_conf_path, utils_android.get_device_tag(self.target_device_name),
-                                          "appium_port", access_appium_port)
+        access_appium_bp_port = utils_config_parser.get_value(device_conf_path,
+                                                              utils_android.get_device_tag(self.target_device_name),
+                                                              "appium_bp_port")
+        # if access_appium_port is None:
+        #     # 遍历已知设备的appium_port属性
+        #     all_appium_posts = []
+        #     for device_session in utils_config_parser.get_sessions(device_conf_path):
+        #         device_session_appium_port = utils_config_parser.get_value(device_conf_path, device_session,
+        #                                                                    "appium_port")
+        #         if device_session_appium_port is None:
+        #             continue
+        #         all_appium_posts.append(device_session_appium_port)
+        #     if len(all_appium_posts) <= 0:
+        #         access_appium_port = 4723
+        #     else:
+        #         access_appium_port = int(max(all_appium_posts)) + 1
+        #     utils_logger.log("已知设备对应的appium服务端口:", all_appium_posts)
+        #     utils_logger.log("选定的appium服务端口:", access_appium_port)
+        #     utils_config_parser.put_value(device_conf_path, utils_android.get_device_tag(self.target_device_name),
+        #                                   "appium_port", access_appium_port)
 
         # 实例化该应用对应的driver对象
         is_need_setting_input_manager = self.is_need_setting_input_manager()
         try:
             self.driver = utils_appium.get_driver_by_launch_app(self.target_application_id, self.launch_activity,
                                                                 self.target_device_name, is_need_setting_input_manager,
-                                                                access_appium_port)
+                                                                access_appium_port, access_appium_bp_port)
         except Exception as exception:
+            traceback.print_exc()
             except_name = exception.__class__.__name__
-            utils_logger.log("检测到异常信息：", except_name)
             if except_name == "MaxRetryError":
                 utils_common.exec_shell_cmd(
                     "ps -ef | grep appium | grep -v \"$$\" | awk  '{print \"kill -9 \" $2}' | sh")

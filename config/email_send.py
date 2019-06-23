@@ -28,6 +28,7 @@ last_email_files_md5 = None
 
 
 def wrapper_send_email(title=None, content=None, files=None):
+    return
     mail_title = title if title is not None else u'python邮件标题'
     # files组合成数组
     wrapper_files = None

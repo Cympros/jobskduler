@@ -100,7 +100,7 @@ def touch_action(driver, target_device_name, is_down=True, tab_center=0.5, tab_i
         driver.swipe(t_from, t_tab_center, t_to, t_tab_center, duration)
 
 
-def start_appium_service(appium_port, retry_count=5, interval_time=5):
+def start_appium_service(device, appium_port, access_appium_bp_port, retry_count=5, interval_time=5):
     # pass
     '启动appium服务,添加重试机制'
     utils_logger.log("---> check_appium_service_state with retry_count:    ", retry_count)
@@ -109,7 +109,10 @@ def start_appium_service(appium_port, retry_count=5, interval_time=5):
                              + str(appium_port) \
                              + "\' | grep -v \'grep\' >/dev/null && echo success"
     # 屏蔽因日志太多堵塞
-    appium_start_cmd = "nohup appium -p " + appium_port + " 1>/dev/null 2>&1 & "
+    appium_start_cmd = "nohup appium -p " + str(appium_port) \
+                       + " -bp " + str(access_appium_bp_port) \
+                       + " -U " + str(device) \
+                       + " 1>/dev/null 2>&1 & "
 
     res_apm, res_apm_error = utils_common.exec_shell_cmd(appium_state_check_cmd)
     if res_apm is not None:
@@ -119,7 +122,8 @@ def start_appium_service(appium_port, retry_count=5, interval_time=5):
         utils_common.exec_shell_cmd(appium_start_cmd)
         utils_logger.log("---> start_appium_service sleep:", interval_time)
         time.sleep(interval_time)  # 等待appium服务完全启动
-        return False if retry_count <= 0 else start_appium_service(appium_port, retry_count=retry_count - 1,
+        return False if retry_count <= 0 else start_appium_service(device, appium_port, access_appium_bp_port,
+                                                                   retry_count=retry_count - 1,
                                                                    interval_time=interval_time)
 
 
@@ -328,9 +332,10 @@ def wait_activity_with_status(driver, target, check_period=1, retry_count=10):
 
 
 def get_driver_by_launch_app(application_id, launch_activity, device_name_to_connected, is_need_setting_input_manager,
-                             appium_port=4723):
+                             appium_port, access_appium_bp_port):
     """
     启动待测试apk并返回driver对象
+    :param access_appium_bp_port:
     :param appium_port: appium服务端口
     :param application_id:
     :param launch_activity: 
@@ -352,7 +357,7 @@ def get_driver_by_launch_app(application_id, launch_activity, device_name_to_con
         return None
 
     # 判断appium服务是否启动
-    if start_appium_service(appium_port) is False:
+    if start_appium_service(device_name_to_connected, appium_port, access_appium_bp_port) is False:
         utils_logger.log("start_appium_service失败[端口信息]：" + str(appium_port))
         return None
 
@@ -360,6 +365,7 @@ def get_driver_by_launch_app(application_id, launch_activity, device_name_to_con
     desired_caps = {'platformName': 'Android',
                     'platformVersion': platform_version,
                     'deviceName': device_name_to_connected,
+                    'uuid': utils_android.get_device_tag(device_name_to_connected),
                     'noReset': True,
                     'appPackage': application_id,
                     'appActivity': launch_activity,
@@ -371,7 +377,7 @@ def get_driver_by_launch_app(application_id, launch_activity, device_name_to_con
         # 下面两项用于使键盘支持中文输入
         desired_caps['unicodeKeyboard'] = True
         desired_caps['resetKeyboard'] = True
-    utils_logger.log(desired_caps)
+    utils_logger.log('####get_driver_by_launch_app#####', desired_caps, appium_port)
     driver = appium_webdriver.Remote("http://127.0.0.1:" + str(appium_port) + '/wd/hub', desired_caps)
     # driver.implicitly_wait(10)  # 设置全局隐性等待时间，单位秒
     return driver
