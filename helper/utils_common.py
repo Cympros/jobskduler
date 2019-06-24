@@ -23,7 +23,7 @@ sys.setdefaultencoding('utf-8')
 
 root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
 sys.path.append(root_path)
-from utils import utils_logger
+from helper import utils_logger
 
 
 def get_shanghai_time(str_mode=None):

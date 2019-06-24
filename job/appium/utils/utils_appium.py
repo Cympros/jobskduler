@@ -10,9 +10,8 @@ import traceback
 job_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../')
 sys.path.append(job_root_path)
 
-from helper import utils_common
+from helper import utils_common, utils_logger
 from config import env_job
-from config import utils_logger
 import utils_android
 
 

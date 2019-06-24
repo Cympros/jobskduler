@@ -9,7 +9,7 @@ sys.path.append(job_root_path)
 from job.appium.job_appium_base import AppiumBaseJob
 from job.appium.utils import utils_appium
 from config import conf_modify
-from utils import utils_logger
+from helper import utils_logger
 
 
 class JobAppiumFeizhu(AppiumBaseJob):

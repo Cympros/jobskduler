@@ -11,8 +11,6 @@ import traceback
 root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
 sys.path.append(root_path)
 
-from utils import utils_logger
-
 
 def imread(file_path):
     return aircv.imread(file_path)

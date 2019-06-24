@@ -5,9 +5,7 @@ import sys
 root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
 sys.path.append(root_path)
 
-from config import env_job
-from utils import utils_logger
-from helper import utils_config_parser
+from helper import utils_config_parser, utils_logger
 
 # job描述相关
 # 配置文件格式变更时，务必记得更新下述job_conf_path，已使得配置项重新载入

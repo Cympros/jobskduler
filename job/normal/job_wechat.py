@@ -18,7 +18,7 @@ common_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/.
 # utils_logger.log("---> common path is: ",common_path
 sys.path.append(common_path)
 import email_send
-from utils import utils_logger
+from helper import utils_logger
 import env_job
 import utils
 

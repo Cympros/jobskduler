@@ -3,11 +3,10 @@
 import os
 import sys
 import sqlite3
+import traceback
 
 root_path = os.path.split(os.path.realpath(__file__))[0]
 sys.path.append(root_path)
-
-from utils import utils_logger
 
 
 class DataBaseOpenHelper():
@@ -22,12 +21,13 @@ class DataBaseOpenHelper():
             cusor.execute(sql)
             result = cusor.fetchall()
             conn.commit()
+            return result
         except:
-            utils_logger.log("DataBaseOpenHelper#exec_sql caught exception", sql)
+            traceback.print_exc()
+            return None
         finally:
             if conn is not None:
                 conn.close()
-        return result
 
     @staticmethod
     def dict_factory(cursor, row):

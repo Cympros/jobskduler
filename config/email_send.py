@@ -19,8 +19,7 @@ from email import encoders
 from smtplib import SMTP_SSL
 from smtplib import SMTPException
 
-from utils import utils_logger
-from helper import utils_common
+from helper import utils_common, utils_logger
 from helper import utils_file
 
 # 上次发送邮件Msg的md5标识,新增批量文件的综合标识

@@ -6,7 +6,7 @@ from PIL import Image
 
 root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
 sys.path.append(root_path)
-from utils import utils_logger
+from helper import utils_logger
 
 import utils_file as FileOperate
 from config import env_job

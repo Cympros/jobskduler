@@ -9,10 +9,9 @@ job_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '
 sys.path.append(job_root_path)
 
 from config import conf_modify
-from helper import utils_image as image_utils
+from helper import utils_image as image_utils, utils_logger
 from helper import utils_file as file_utils
 from config import env_job
-from utils import utils_logger
 from helper.x_aircv.core import Template
 from job.appium.utils import utils_appium
 

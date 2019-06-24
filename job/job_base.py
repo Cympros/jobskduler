@@ -7,17 +7,15 @@ import sys
 root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
 sys.path.append(root_path)
 
-from helper import utils_common
+from helper import utils_common, utils_logger
 from config import conf_modify
 from config import email_send
-from utils import utils_logger
 
 
 class BaseJob():
     def __init__(self):
         self.upload_files = []  # 用于存储待上传的文件列表
         self.job_session = None
-        self.xargs_dict = None
 
     def is_time_support(self, curent_time=None):
         """在curent_time时刻是否允许执行该任务"""
@@ -33,8 +31,7 @@ class BaseJob():
 
     def register_config(self, xargs_dict=None):
         utils_logger.log("***************任务配置信息[register_config]:", xargs_dict)
-        self.xargs_dict = xargs_dict
-        self.job_session = xargs_dict.get('job_session')
+        self.job_session = xargs_dict.get('taskcmd')
 
     def run_task(self):
         utils_logger.log('--->', self.__class__, '|', utils_common.get_shanghai_time('%Y-%m-%d %H:%M:%S'))

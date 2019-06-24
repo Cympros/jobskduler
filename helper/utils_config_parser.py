@@ -4,7 +4,7 @@ import sys
 
 root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
 sys.path.append(root_path)
-from utils import utils_logger
+from helper import utils_logger
 
 '''
 针对配置文件的读取修改工具类
@@ -41,12 +41,6 @@ def get_value(conf_path, session, key, default_value=None):
     if cf is not None and cf.has_section(session) and cf.has_option(session, key):
         return cf.get(session, key)
     else:
-        if not cf:
-            utils_logger.log("cf not init: ", session, key)
-        elif not cf.has_section(session):
-            utils_logger.log("no selection: ", session, key)
-        elif not cf.has_option(session, key):
-            utils_logger.log("no option: ", session, key)
         return default_value
 
 

@@ -7,7 +7,7 @@ job_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '
 sys.path.append(job_root_path)
 
 from job.appium.job_appium_base import AppiumBaseJob
-from utils import utils_logger
+from helper import utils_logger
 
 
 # apk下载链接：http://sj.qq.com/myapp/detail.htm?apkName=com.sina.weibo

@@ -9,9 +9,8 @@ from PIL import Image
 job_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../')
 sys.path.append(job_root_path)
 
-from helper import utils_image as image_utils
+from helper import utils_image as image_utils, utils_logger
 from helper import utils_common
-from utils import utils_logger
 
 
 def lock_off_screen_if_need(device):

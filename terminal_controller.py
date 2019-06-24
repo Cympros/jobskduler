@@ -16,8 +16,7 @@ sys.path.append(root_path + '/job')
 from config import conf_modify
 from config import email_send
 from config import env_job
-from utils import utils_logger
-from helper import utils_config_parser
+from helper import utils_config_parser, utils_logger
 from helper import utils_common
 from job.appium.utils import utils_android
 

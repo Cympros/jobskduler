@@ -9,7 +9,6 @@ sys.path.append(root_path)
 
 from helper import utils_image as ImageCutted
 from helper import utils_file as FileOperate
-from utils import utils_logger
 import utils
 
 
