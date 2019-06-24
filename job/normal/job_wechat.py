@@ -7,7 +7,6 @@ import os
 import sys
 import random
 import json
-import datetime
 from itchat.content import *
 
 reload(sys)
@@ -19,7 +18,7 @@ common_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/.
 # utils_logger.log("---> common path is: ",common_path
 sys.path.append(common_path)
 import email_send
-from config import utils_logger
+from utils import utils_logger
 import env_job
 import utils
 

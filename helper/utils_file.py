@@ -8,7 +8,7 @@ import utils_common
 
 root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
 sys.path.append(root_path)
-from config import utils_logger
+from utils import utils_logger
 
 
 def generate_suffix_file(raw_file_path, save_to_dir=None, suffix=None):

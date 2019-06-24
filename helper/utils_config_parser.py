@@ -4,7 +4,7 @@ import sys
 
 root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
 sys.path.append(root_path)
-from config import utils_logger
+from utils import utils_logger
 
 '''
 针对配置文件的读取修改工具类
@@ -37,10 +37,7 @@ def get_value(conf_path, session, key, default_value=None):
     :param conf_path: 配置文件地址
     :return:
     '''
-    # utils_logger.log("-----> [utils_conf.get_value] conf_path:",conf_path
-    # utils_logger.log( "---> [utils_conf.get_value]续：" ,"session:", session, ",key:", key, ",default_value:", default_value
     cf = __generate_config_parser(conf_path=conf_path)
-    # utils_logger.log("---> query:", job_tag, ",", key, ",", default_value, ",", force_reload
     if cf is not None and cf.has_section(session) and cf.has_option(session, key):
         return cf.get(session, key)
     else:
@@ -50,9 +47,6 @@ def get_value(conf_path, session, key, default_value=None):
             utils_logger.log("no selection: ", session, key)
         elif not cf.has_option(session, key):
             utils_logger.log("no option: ", session, key)
-        # 配置项反写操作(仅支持cf非空且session非空的情况)
-        if cf is not None and cf.has_section(session) and default_value is not None:
-            put_value(conf_path=conf_path, session=session, key=key, value=default_value)
         return default_value
 
 
@@ -65,8 +59,6 @@ def put_value(conf_path, session, key, value):
     :param value:
     :return:
     '''
-    # utils_logger.log("-----> [utils_conf.put_value] conf_path:",conf_path
-    # utils_logger.log( "---> [utils_conf.put_value]续：" ,"session:", session, ",key:", key, ",value:", value
     cf = __generate_config_parser(conf_path=conf_path)
     if not cf.has_section(session):
         cf.add_section(session)
@@ -93,6 +85,5 @@ def get_map_within_session(conf_path, session):
     session_map = {}
     for session_item in cf.items(session):
         if session_item is not None:
-            # utils_logger.log("[session_item]:",session_item)
             session_map[session_item[0]] = session_item[1]
     return session_map

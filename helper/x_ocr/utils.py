@@ -20,7 +20,7 @@ root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
 sys.path.append(root_path)
 
 from helper import utils_common
-from config import utils_logger
+from utils import utils_logger
 
 
 def query_all_ocrs_throw_ocr(file_img):

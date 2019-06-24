@@ -10,7 +10,7 @@ sys.path.append(job_root_path)
 
 from job.appium.job_appium_base import AppiumBaseJob
 from job.appium.utils import utils_appium
-from config import utils_logger
+from utils import utils_logger
 
 
 class JobAppiumJingdong(AppiumBaseJob):

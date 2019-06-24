@@ -8,7 +8,7 @@ sys.path.append(job_root_path)
 
 from helper import utils_common
 from config import env_job
-from config import utils_logger
+from utils import utils_logger
 from job.appium.job_appium_base import AppiumBaseJob
 
 '需要重新绑定账号：13651968735'

@@ -3,7 +3,6 @@
 import json
 import os
 import sys
-import traceback
 
 root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
 sys.path.append(root_path)
@@ -11,8 +10,7 @@ sys.path.append(root_path)
 from helper import utils_common
 from config import conf_modify
 from config import email_send
-from config import env_job
-from config import utils_logger
+from utils import utils_logger
 
 
 class BaseJob():

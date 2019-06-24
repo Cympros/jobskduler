@@ -16,7 +16,7 @@ import time
 import traceback
 from helper import utils_common
 from config import env_job
-from config import utils_logger
+from utils import utils_logger
 from helper import utils_image as image_utils
 from helper import utils_file as file_utils
 from helper import utils_config_parser

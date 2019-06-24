@@ -1,19 +1,17 @@
 # coding=utf-8
 import os
 import sys
-import shutil
-import traceback
 
 root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
 sys.path.append(root_path)
 
 from config import env_job
-from config import utils_logger
+from utils import utils_logger
 from helper import utils_config_parser
 
 # job描述相关
 # 配置文件格式变更时，务必记得更新下述job_conf_path，已使得配置项重新载入
-job_conf_path = os.path.abspath(env_job.get_out_dir() + "/conf_job.ini")
+job_conf_path = os.path.abspath(root_path + "/config/job.config")
 
 
 def query_jobs():

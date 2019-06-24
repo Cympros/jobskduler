@@ -5,15 +5,13 @@ import sys
 
 import aircv
 import traceback
-import numpy
-from six import PY3
 
 # from airtest import aircv as airtest_aircv
 
 root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
 sys.path.append(root_path)
 
-from config import utils_logger
+from utils import utils_logger
 
 
 def imread(file_path):

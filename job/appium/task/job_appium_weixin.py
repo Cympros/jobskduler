@@ -12,7 +12,7 @@ from config import conf_modify
 from helper import utils_image as image_utils
 from helper import utils_file as file_utils
 from config import env_job
-from config import utils_logger
+from utils import utils_logger
 from helper.x_aircv.core import Template
 from job.appium.utils import utils_appium
 

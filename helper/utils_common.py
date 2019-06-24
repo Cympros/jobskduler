@@ -1,12 +1,9 @@
 # coding=utf-8
 
 import shlex
-import datetime
 import subprocess
-import time
 import json
 import re
-from PIL import Image
 import imagehash
 import time
 import os
@@ -14,13 +11,7 @@ import sys
 import datetime
 import hashlib
 import pytz
-import cv2
-import aircv
-import random
 import socket
-import base64
-import requests
-import urllib
 import traceback
 
 import colorsys
@@ -32,7 +23,7 @@ sys.setdefaultencoding('utf-8')
 
 root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
 sys.path.append(root_path)
-from config import utils_logger
+from utils import utils_logger
 
 
 def get_shanghai_time(str_mode=None):
