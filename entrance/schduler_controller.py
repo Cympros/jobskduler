@@ -3,6 +3,7 @@
 import os
 import sys
 import json
+import random
 import threading
 import traceback
 
@@ -143,11 +144,21 @@ class JobSchdulerController(object):
 
 
 def device_thread_loop(*jobs):
-    print len(jobs)
-    for job_item in jobs:
+    job_list = list(jobs)
+    random.shuffle(job_list)
+    for job_item in job_list:
         if job_item['device_type'] != 'android':
             continue
-        print job_item['taskcmd']
+
+        flag = False
+        for device_connect in utils_android.get_connected_devcies():
+            print job_item, device_connect
+            if device_connect == job_item.get('device_name'):
+                flag = True
+        if flag is False:
+            utils_logger.log("device_thread_loop 设备不在线")
+            return
+
         try:
             job_path = job_item['taskcmd']
             # 实例化job类
@@ -160,7 +171,6 @@ def device_thread_loop(*jobs):
             cls_obj.register_config(job_item)
             if cls_obj.run_task() is True:
                 cls_obj.notify_job_success()
-                break
         except:
             traceback.print_stack()
 

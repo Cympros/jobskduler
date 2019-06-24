@@ -9,8 +9,9 @@ from PIL import Image
 job_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../')
 sys.path.append(job_root_path)
 
-from helper import utils_image as image_utils, utils_logger
+from helper import utils_image as image_utils
 from helper import utils_common
+from helper import utils_logger
 
 
 def lock_off_screen_if_need(device):
@@ -177,7 +178,6 @@ def get_package_name_by_apk(apk_path):
 
 
 def get_connected_devcies(target_device=None, except_emulater=False):
-    # utils_logger.log("---> get_connect_devcie_size")
     '''
         说明：获得已经连接成功的设备，若target_device设备不存在，则返回所有可用设备
         参数：except_emulater是否排除模拟器
@@ -249,7 +249,7 @@ def _check_adb_command_result(adb_cmd, retry_count=3):
     if error_adb is not None:  # 表示有异常
         if "error: device " in error_adb and " not found" in error_adb:
             # 重启adb服务
-            utils_common.exec_shell_cmd("adb kill-server && adb start-server")
+            # utils_common.exec_shell_cmd("adb kill-server && adb start-server")
             return _check_adb_command_result(adb_cmd, retry_count - 1)
     return res_adb, error_adb
 

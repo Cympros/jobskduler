@@ -52,8 +52,8 @@ class BaseJob():
         today_repeat_count_left = int(
             conf_modify.query(job_tag=self.job_session, key="today_repeat_count_left", default_value=0)) - 1
 
-        conf_modify.put(job_tag=self.job_session, key="last_success_date", value=today_date)
-        conf_modify.put(job_tag=self.job_session, key="today_repeat_count_left", value=today_repeat_count_left)
+        # conf_modify.put(job_tag=self.job_session, key="last_success_date", value=today_date)
+        # conf_modify.put(job_tag=self.job_session, key="today_repeat_count_left", value=today_repeat_count_left)
         utils_logger.log("---> After update###job_clz_path: ", self.job_session, "last_success_date: ", today_date,
                          "today_repeat_count_left: ", today_repeat_count_left)
 
