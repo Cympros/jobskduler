@@ -167,13 +167,12 @@ def device_thread_loop(*jobs):
         random.shuffle(job_list)
         for job_item in job_list:
             try:
-                if job_item['threadid'] != 'e7604cfbe2ca4adf.android.thread':
-                    # utils_logger.log(job_item)
-                    continue
+                # if job_item['threadid'] != 'e7604cfbe2ca4adf.android.thread':
+                #     # utils_logger.log(job_item)
+                #     continue
 
-                job_path = job_item['taskcmd']
                 # 实例化job类
-                mod_str, _sep, class_str = job_path.rpartition('.')
+                mod_str, _sep, class_str = job_item['taskcmd'].rpartition('.')
                 __import__(mod_str)
                 module_clz = getattr(sys.modules[mod_str], class_str)
                 cls_obj = module_clz()
