@@ -113,6 +113,7 @@ class JobSchdulerController(object):
         if whether_del_db == "y":
             if os.path.exists(self.db_path):
                 os.remove(self.db_path)
+                self.db_helper = None
 
         if self.db_helper is None:
             self.db_helper = self.get_db_helper()
@@ -159,6 +160,7 @@ class JobSchdulerController(object):
 
 def device_thread_loop(*jobs):
     job_list = list(jobs)
+    utils_logger.log("#####JobSchdulerController#device_thread_loop", job_list)
     while True:
         # 记录每轮任务的执行时间，执行过短的进行休眠操作
         foreach_start_time = utils_common.get_shanghai_time()

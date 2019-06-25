@@ -235,7 +235,7 @@ def get_start_activity_by_application_id(application_id):
 def is_device_online(device):
     """判断是否是否在线"""
     cmd = "adb " + (
-        " " if device is None else " -s " + str(device) + " ") + " shell "
+        " " if device is None else " -s " + str(device) + " ") + " shell getprop ro.build.version.release"
     check_installed_response, response_errror = _check_adb_command_result(cmd)
     if response_errror is not None and response_errror.endswith(' not found'):
         return False
