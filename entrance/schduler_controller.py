@@ -61,15 +61,19 @@ class JobSchdulerController(object):
                 connected_devices = utils_android.get_connected_devcies()
                 if connected_devices is not None:
                     for connect_device in connected_devices:
-                        self.db_helper.exec_sql(
-                            "replace into tbthreadinfo(threadid,device_name,device_type,appium_port,appium_port_bp) "
-                            "values("
-                            + "'" + utils_android.get_device_tag(connect_device) + "." + device_type + ".thread" + "',"
-                            + "'" + connect_device + "',"
-                            + "'" + device_type + "',"
-                            + str(self.search_appium_port(True)) + ","
-                            + str(self.search_appium_port(False))
-                            + ")")
+                        t_thread_id = utils_android.get_device_tag(connect_device) + "." + device_type + ".thread"
+                        appium_port = str(self.search_appium_port(True))
+                        appium_port_bp = str(self.search_appium_port(False))
+                        insert_sql = "replace into tbthreadinfo(threadid,device_name,device_type,appium_port,appium_port_bp) " \
+                                     + "values(" \
+                                     + "'" + t_thread_id + "'," \
+                                     + "'" + connect_device + "'," \
+                                     + "'" + device_type + "'," \
+                                     + appium_port + "," \
+                                     + appium_port_bp \
+                                     + ")"
+                        utils_logger.log("插入线程", insert_sql)
+                        self.db_helper.exec_sql(insert_sql)
             else:
                 self.db_helper.exec_sql(
                     "replace into tbthreadinfo(threadid,device_type) values('"
@@ -109,6 +113,8 @@ class JobSchdulerController(object):
 
     def exec_task(self):
         """执行任务"""
+        # TODO  检查并关闭appiu相关进程
+
         whether_del_db = raw_input("是否确认删除历史数据，开始新一轮(default:false)(y/n)")
         if whether_del_db == "y":
             if os.path.exists(self.db_path):
@@ -172,15 +178,21 @@ def device_thread_loop(*jobs):
                 #     continue
 
                 # 实例化job类
-                mod_str, _sep, class_str = job_item['taskcmd'].rpartition('.')
+                # utils_logger.log("############################",job_item)
+                job_path = job_item['taskcmd']
+                mod_str, _sep, class_str = job_path.rpartition('.')
                 __import__(mod_str)
                 module_clz = getattr(sys.modules[mod_str], class_str)
                 cls_obj = module_clz()
+                if cls_obj.whether_support_device_type(job_item['device_type']) is False:
+                    utils_logger.log("不支持执行该任务", mod_str)
+                    continue
+
                 cls_obj.register_config(job_item)
                 if cls_obj.run_task() is True:
                     cls_obj.notify_job_success()
             except:
-                traceback.print_stack()
+                traceback.print_exc()
         foreach_end_time = utils_common.get_shanghai_time()
         if foreach_end_time - foreach_start_time < 20:
             utils_logger.append_log("##### 任务循环过快，休眠5分钟:", foreach_end_time - foreach_start_time)

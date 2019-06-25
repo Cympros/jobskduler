@@ -25,9 +25,10 @@ class BaseJob():
         """判断当前任务对应的依赖项是否已经全部完成"""
         return None
 
-    def get_support_device_types_with_task(self):
-        """返回当前任务支持的设备类型"""
-        return None
+    def whether_support_device_type(self, device_type):
+        """任务是否支持device_type"""
+        # utils_logger.log("BaseJob#whether_support_device_type", device_type)
+        return False if device_type is None else True
 
     def register_config(self, xargs_dict=None):
         utils_logger.log("***************任务配置信息[register_config]:", xargs_dict)

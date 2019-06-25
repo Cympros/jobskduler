@@ -257,8 +257,8 @@ def _check_adb_command_result(adb_cmd, retry_count=3):
     if retry_count <= 0:
         utils_logger.log("###_check_adb_command_result###[" + str(retry_count) + "],"
                          + "adb_cmd:[" + str(adb_cmd) + "],"
-                         + "adb_cmd:[" + str(res_adb) + "],"
-                         + "adb_cmd:[" + str(error_adb) + "]")
+                         + "res_adb:[" + str(res_adb) + "],"
+                         + "error_adb:[" + str(error_adb) + "]")
         return res_adb, error_adb
     if error_adb is not None:  # 表示有异常
         if "error: device " in error_adb and " not found" in error_adb:
@@ -267,8 +267,8 @@ def _check_adb_command_result(adb_cmd, retry_count=3):
             return _check_adb_command_result(adb_cmd, retry_count - 1)
     utils_logger.log("###_check_adb_command_result###[" + str(retry_count) + "],"
                      + "adb_cmd:[" + str(adb_cmd) + "],"
-                     + "adb_cmd:[" + str(res_adb) + "],"
-                     + "adb_cmd:[" + str(error_adb) + "]")
+                     + "res_adb:[" + str(res_adb) + "],"
+                     + "error_adb:[" + str(error_adb) + "]")
     return res_adb, error_adb
 
 

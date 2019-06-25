@@ -125,6 +125,13 @@ class AppiumBaseJob(BaseJob):
     def get_support_device_types_with_task(self):
         return ['android']
 
+    def whether_support_device_type(self, device_type):
+        if BaseJob.whether_support_device_type(self, device_type) is False:
+            return False
+        if device_type != "android":
+            return False
+        return True
+
     def is_need_setting_input_manager(self):
         return False
 
