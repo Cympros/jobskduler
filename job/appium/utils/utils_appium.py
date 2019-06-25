@@ -244,22 +244,23 @@ def find_element_by_content_desc(driver, content_desc, retry_count=2, interval_t
 
 
 def find_element_by_viewid(driver, viewid, retry_count=2, interval_time=0.1):
-    '根据id寻找资源'
-    utils_logger.log("find_element_by_viewid with viewid:[" + viewid + "] with retry_count:", retry_count)
-    element = None
-    try:
-        element = driver.find_element_by_id(viewid)
-    finally:
-        if element is not None:
-            return element
-        elif retry_count <= 0:
-            utils_logger.log("find_element_by_viewid[" + viewid + "] failed with no chance")
-            return None
-        else:
-            utils_logger.log("---> find_element_by_viewid sleep:", interval_time)
-            time.sleep(interval_time)
-            return find_element_by_viewid(driver=driver, viewid=viewid, retry_count=retry_count - 1,
-                                          interval_time=interval_time)
+    return None
+    # '根据id寻找资源'
+    # utils_logger.log("find_element_by_viewid with viewid:[" + viewid + "] with retry_count:", retry_count)
+    # element = None
+    # try:
+    #     element = driver.find_element_by_id(viewid)
+    # finally:
+    #     if element is not None:
+    #         return element
+    #     elif retry_count <= 0:
+    #         utils_logger.log("find_element_by_viewid[" + viewid + "] failed with no chance")
+    #         return None
+    #     else:
+    #         utils_logger.log("---> find_element_by_viewid sleep:", interval_time)
+    #         time.sleep(interval_time)
+    #         return find_element_by_viewid(driver=driver, viewid=viewid, retry_count=retry_count - 1,
+    #                                       interval_time=interval_time)
 
 
 def find_element_by_xpath(driver, xpath, retry_count=2, interval_time=0.1):

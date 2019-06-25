@@ -131,6 +131,17 @@ class AppiumBaseJob(BaseJob):
     def run_task(self):
         if BaseJob.run_task(self) is False:
             return False
+        # # 检查设备信息
+        # if self.target_device_name is None:
+        #     devices = utils_android.get_connected_devcies(except_emulater=True)
+        #     utils_logger.log("--->启动Android设备自动搜索策略")
+        #     if devices is None or len(devices) != 1:
+        #         utils_logger.log("已连接设备数无法识别：", "None" if devices is None else len(devices))
+        #         return False
+        #     self.target_device_name = devices[0]
+        if utils_android.is_device_online(self.target_device_name) is False:
+            utils_logger.log("设备不在线")
+            return False
         # 检查应用是否安装
         check_installed_response, response_errror = utils_android.is_app_installed(self.target_device_name,
                                                                                    self.target_application_id)
@@ -138,14 +149,6 @@ class AppiumBaseJob(BaseJob):
             utils_logger.append_log("---> 当前应用未安装[", self.target_device_name, "][", self.target_application_id, "][",
                                     check_installed_response, "][", response_errror, "]")
             return False
-        # 检查设备信息
-        if self.target_device_name is None:
-            devices = utils_android.get_connected_devcies(except_emulater=True)
-            utils_logger.log("--->启动Android设备自动搜索策略")
-            if devices is None or len(devices) != 1:
-                utils_logger.log("已连接设备数无法识别：", "None" if devices is None else len(devices))
-                return False
-            self.target_device_name = devices[0]
 
         # 分配appium服务端口
         if self.appium_port is None or self.appium_port_bp is None:

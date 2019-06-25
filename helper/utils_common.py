@@ -77,7 +77,7 @@ def exec_shell_cmd(cmd_str, timeout=None, shell=True):
     if timeout is not None:
         end_time = datetime.datetime.now() + datetime.timedelta(seconds=timeout)
     # 没有指定标准输出和错误输出的管道，因此会打印到屏幕上；
-    utils_logger.log("---> exec_shell_cmd:[", cmd_str, "]")
+    # utils_logger.log("---> exec_shell_cmd:[", cmd_str, "]")
     sub = subprocess.Popen(cmdstr_list, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                            shell=shell, bufsize=4096)
 
@@ -86,20 +86,20 @@ def exec_shell_cmd(cmd_str, timeout=None, shell=True):
         # utils_logger.log("---> exec_shell_cmd sleep:",sleep_time
         time.sleep(sleep_time)
         if timeout is not None and end_time <= datetime.datetime.now():
-            utils_logger.log("exec_shell_cmd within timeout")
+            # utils_logger.log("exec_shell_cmd within timeout")
             return None, None
 
     response_error = sub.stderr.read().lstrip().rstrip()
     if response_error is not None and response_error != "":
-        utils_logger.log("exec_shell_cmd within stderr", json.dumps(response_error))
+        # utils_logger.log("exec_shell_cmd within stderr", json.dumps(response_error))
         return None, response_error
 
     response_stdout = sub.stdout.read().lstrip().rstrip()
     if response_stdout is not None and response_stdout != "":
-        utils_logger.log("---> exec_shell_cmd within stdout:", json.dumps(response_stdout))
+        # utils_logger.log("---> exec_shell_cmd within stdout:", json.dumps(response_stdout))
         return response_stdout, None
 
-    utils_logger.log("exec_shell_cmd within unknown", response_error, response_stdout)
+    # utils_logger.log("exec_shell_cmd within unknown", response_error, response_stdout)
     return None, None
 
 

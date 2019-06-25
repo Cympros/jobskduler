@@ -232,6 +232,16 @@ def get_start_activity_by_application_id(application_id):
     return launcher_activity
 
 
+def is_device_online(device):
+    """判断是否是否在线"""
+    cmd = "adb " + (
+        " " if device is None else " -s " + str(device) + " ") + " shell "
+    check_installed_response, response_errror = _check_adb_command_result(cmd)
+    if response_errror is not None and response_errror.endswith(' not found'):
+        return False
+    return True
+
+
 def is_app_installed(device, application_id):
     # "-3"参数表示仅过滤第三方应用
     cmd = "adb " + (
@@ -245,12 +255,20 @@ def _check_adb_command_result(adb_cmd, retry_count=3):
     # 用于针对adb命令的异常处理
     res_adb, error_adb = utils_common.exec_shell_cmd(adb_cmd)
     if retry_count <= 0:
+        utils_logger.log("###_check_adb_command_result###[" + str(retry_count) + "],"
+                         + "adb_cmd:[" + str(adb_cmd) + "],"
+                         + "adb_cmd:[" + str(res_adb) + "],"
+                         + "adb_cmd:[" + str(error_adb) + "]")
         return res_adb, error_adb
     if error_adb is not None:  # 表示有异常
         if "error: device " in error_adb and " not found" in error_adb:
             # 重启adb服务
             # utils_common.exec_shell_cmd("adb kill-server && adb start-server")
             return _check_adb_command_result(adb_cmd, retry_count - 1)
+    utils_logger.log("###_check_adb_command_result###[" + str(retry_count) + "],"
+                     + "adb_cmd:[" + str(adb_cmd) + "],"
+                     + "adb_cmd:[" + str(res_adb) + "],"
+                     + "adb_cmd:[" + str(error_adb) + "]")
     return res_adb, error_adb
 
 
