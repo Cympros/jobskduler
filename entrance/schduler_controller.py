@@ -129,12 +129,6 @@ class JobSchdulerController(object):
         utils_common.exec_shell_cmd(
             '''ps -ef | grep "appium" | grep -v -E "grep|$$" | awk  '{print "kill -9 " $2}' | sh''')
 
-        whether_del_db = raw_input("是否确认删除历史数据，开始新一轮(default:false)(y/n)")
-        if whether_del_db == "y":
-            if os.path.exists(self.db_path):
-                os.remove(self.db_path)
-                self.db_helper = None
-
         if self.db_helper is None:
             self.db_helper = self.get_db_helper()
         self.add_task()  # 重新导入任务
@@ -164,6 +158,10 @@ class JobSchdulerController(object):
                 device_thread.start()
 
                 thread_maps[thread_name] = device_thread
+
+    def clear(self):
+        if os.path.exists(self.db_path):
+            os.remove(self.db_path)
 
     def exec_single_task(self):
         job_path = 'job_normal.JobCheckerAllTaskRunState'
@@ -226,8 +224,7 @@ def device_thread_loop(*jobs):
 
 
 if __name__ == '__main__':
-    controller = JobSchdulerController()
-    tasks = ['exec_task', 'del_task', 'exec_single_task', 'check_env_dependence']
+    tasks = ['exec_task', 'exec_single_task', 'clear', 'check_env_dependence']
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):
@@ -241,6 +238,7 @@ if __name__ == '__main__':
             utils_logger.log("[" + str(task_index_selected) + "]任务索引不存在，退出程序...")
             break
         func_name = tasks[task_index_selected]
+        controller = JobSchdulerController()
         if hasattr(controller, func_name):
             func = getattr(controller, func_name)
             func()
