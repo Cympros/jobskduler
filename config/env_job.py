@@ -8,6 +8,10 @@ def get_module_root_path():
     return module_root_dir
 
 
+def get_yaml_path():
+    return get_out_dir() + "/schduler.yaml"
+
+
 def get_out_dir():
     '临时文件的存放跟目录'
     outer_dir = get_module_root_path() + "/out/"

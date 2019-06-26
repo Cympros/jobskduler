@@ -9,6 +9,9 @@ import traceback
 root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
 sys.path.append(root_path)
 
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
 from email.mime.text import MIMEText
 from email.header import Header
 from email.utils import parseaddr, formataddr
@@ -19,8 +22,9 @@ from email import encoders
 from smtplib import SMTP_SSL
 from smtplib import SMTPException
 
-from helper import utils_common, utils_logger
+from helper import utils_common, utils_logger, utils_yaml
 from helper import utils_file
+from config import env_job
 
 # 上次发送邮件Msg的md5标识,新增批量文件的综合标识
 last_email_files_md5 = None
@@ -51,18 +55,27 @@ def wrapper_send_email(title=None, content=None, files=None):
             utils_logger.log("---> ", this_email_file_md5, " vs ", last_email_files_md5)
     last_email_files_md5 = this_email_file_md5
 
-    raise Exception("请根据个人情况修改下方包含'***'部分内容.....")
-    # # 发送邮件
-    # receiver_user = '<****邮件接收地址>'  # 邮件接收地址
-    # utils_logger.append_log("---> start to wrapper_send_email[" + receiver_user + "][" + mail_title + "]:",
-    #                         wrapper_files)
-    # email_state = send_smtp_email('smtp.163.com', '<***发送者163邮箱地址>', '<****发送方邮箱密码>',
-    #                               receiver_user, mail_title, mail_content, wrapper_files)
-    # if email_state is False:
-    #     utils_logger.append_log("---------------------wrapper_send_email caught exceptiion---------------------------")
+    # 发送邮件
+    receiver_user = utils_yaml.load_yaml(env_job.get_yaml_path())['email_receiver']  # 邮件接收地址
+    utils_logger.append_log("---> start to wrapper_send_email[" + receiver_user + "][" + mail_title + "]:",
+                            wrapper_files)
+    for sender in utils_yaml.load_yaml(env_job.get_yaml_path()).get('sender_list'):
+        sender_host = sender['email_sender_host']
+        email_sender_user = sender['email_sender_user']
+        email_sender_pwd = sender['email_sender_pwd']
+        if receiver_user == "" or sender_host == "" or email_sender_user == "" or email_sender_pwd == "":
+            utils_logger.log("#wrapper_send_email# 参数配置错误", receiver_user, email_sender_user, email_sender_pwd,
+                             sender_host)
+            continue
+        email_state = send_smtp_email(sender_host, email_sender_user, email_sender_pwd,
+                                      receiver_user, mail_title, mail_content, wrapper_files)
+        if email_state is False:
+            utils_logger.append_log(
+                "-------wrapper_send_email caught exceptiion-------")
 
 
 def send_smtp_email(smtp_host, send_user, send_password, receiver_user, title, content, files, retry_count=3):
+    utils_logger.log("#send_smtp_email# ", smtp_host, send_user, send_password)
     try:
         # 构造邮件
         msg = MIMEMultipart()

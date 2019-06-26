@@ -14,12 +14,13 @@ sys.path.append(root_path + '/job/appium/task')
 sys.path.append(root_path + '/job/normal')
 sys.path.append(root_path + '/job')
 
-from config.dbhelper import DataBaseOpenHelper
+from helper.dbhelper import DataBaseOpenHelper
 from config import env_job
 from config import conf_modify
 from helper import utils_logger
 from job.appium.utils import utils_android
 from helper import utils_common
+from helper import utils_config_parser
 
 
 class JobSchdulerController(object):
@@ -81,7 +82,7 @@ class JobSchdulerController(object):
                     + "','" + device_type + "')")
 
         # 插入tbtask
-        for task_item in conf_modify.query_jobs():
+        for task_item in utils_config_parser.get_sessions(os.path.abspath(root_path + "/config/job.config")):
             self.db_helper.exec_sql("insert or replace into tbtask(taskcmd,taskname,runnable,dailycount) values ('"
                                     + task_item + "','"
                                     + conf_modify.query(task_item, 'job_name').replace("'", "*") + "','"
