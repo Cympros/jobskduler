@@ -61,13 +61,14 @@ elif [[ "$(expr substr $(uname -s) 1 10)"=="MINGW32_NT" ]];then
 fi
 
 # 解决npm安装速度太慢:使用cnpm
-sudo npm install -g cnpm --registry=https://registry.npm.taobao.org
+install_if_not_exist "appium" "sudo npm install -g cnpm --registry=https://registry.npm.taobao.org"
 #安装appium：指定appium版本，经过验证可使用,使用'appium -v'验证版本
 install_if_not_exist "appium" "sudo cnpm install -g appium@1.8.1"
 ## 调用'appium-doctor --android'检查appium环境
-sudo cnpm install appium-doctor -g
+install_if_not_exist "appium-doctor" "sudo cnpm install appium-doctor -g"
 # 安装uiautomator2
-sudo cnpm install appium-uiautomator2-driver
+install_if_not_exist "npm list -g | grep 'appium-uiautomator2-driver'"  "sudo cnpm install appium-uiautomator2-driver -g"
 
 # 开始检测appium-android依赖环境
+echo "开始检测appium依赖环境"
 appium-doctor --android
