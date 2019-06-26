@@ -34,7 +34,7 @@ def log(*log_infos):
     wrapper_log = ""
     for log_item in log_infos:
         wrapper_log += str(log_item) + " "
-        log_preffix = "[" + str(threading.currentThread().getName()) + "] "
+        log_preffix = "[" + str(os.getpid()) + ":" + str(threading.currentThread().getName()) + "] "
     logger.warning(log_preffix + wrapper_log)
 
 
@@ -43,5 +43,5 @@ def append_log(*log_infos):
     for log_item in log_infos:
         wrapper_log += str(log_item) + " "
     log(wrapper_log)
-    log_preffix = "[" + str(threading.currentThread().getName()) + "] "
+    log_preffix = "[" + str(os.getpid()) + ":" + str(threading.currentThread().getName()) + "] "
     append_logger.warning(log_preffix + wrapper_log)

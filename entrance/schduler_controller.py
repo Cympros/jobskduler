@@ -52,7 +52,6 @@ class JobSchdulerController(object):
 
     def add_task(self):
         """添加任务"""
-
         # 插入设备信息
         if self.db_helper is None:
             self.db_helper = self.get_db_helper()
@@ -160,24 +159,25 @@ class JobSchdulerController(object):
                 thread_maps[thread_name] = device_thread
 
     def clear(self):
+        utils_logger.log("#####JobSchdulerController#clear ")
         if os.path.exists(self.db_path):
             os.remove(self.db_path)
 
     def exec_single_task(self):
         job_path = 'job_normal.JobCheckerAllTaskRunState'
         mod_str, _sep, class_str = job_path.rpartition('.')
-        print "##################", "\"" + mod_str + "\"", root_path
+        # print "##################", "\"" + mod_str + "\"", root_path
         __import__(mod_str)
-        print "##################", "\"" + mod_str + "\"", root_path
+        # print "##################", "\"" + mod_str + "\"", root_path
         module_clz = getattr(sys.modules[mod_str], class_str)
         cls_obj = module_clz()
         if cls_obj.run_task() is True:
             cls_obj.notify_job_success()
-        print "##################", "\"" + mod_str + "\"", root_path
+        # print "##################", "\"" + mod_str + "\"", root_path
 
     def check_env_dependence(self):
         utils_logger.log("#####JobSchdulerController#check_env_dependence 检查环境依赖")
-        p = subprocess.Popen(["bash", os.path.abspath(root_path + "/entrance/schduler_doctor.sh")])
+        p = subprocess.Popen(["bash", os.path.abspath(root_path + "/config/schduler_doctor.sh")])
         p.communicate()  # 这一步表示等待Popen执行完成
         if p.returncode != 0:
             utils_logger.log("#check_env_dependence# Non zero exit code executing")
@@ -223,22 +223,13 @@ def device_thread_loop(*jobs):
             time.sleep(5 * 60)
 
 
+def runner():
+    utils_logger.log("[" + str(os.getpid()) + "]enter...")
+    JobSchdulerController().exec_task()
+    utils_logger.log("[" + str(os.getpid()) + "]runner.")
+
+
 if __name__ == '__main__':
-    tasks = ['exec_task', 'exec_single_task', 'clear', 'check_env_dependence']
-    while True:
-        input_info = "------------------------执行任务列表-----------------------\n"
-        for index, task_item in enumerate(tasks):
-            input_info += str(index) + "：" + task_item + "\n"
-        task_index_selected = raw_input(input_info + "请选择需运行任务对应索引(索引下标越界触发程序退出)：")
-        if task_index_selected.isdigit() is False:
-            utils_logger.log("索引值非数字，请重新输入：", task_index_selected)
-            continue
-        task_index_selected = int(task_index_selected)
-        if task_index_selected >= len(tasks) > 0:
-            utils_logger.log("[" + str(task_index_selected) + "]任务索引不存在，退出程序...")
-            break
-        func_name = tasks[task_index_selected]
-        controller = JobSchdulerController()
-        if hasattr(controller, func_name):
-            func = getattr(controller, func_name)
-            func()
+    from helper.autoreload import run_with_reloader
+
+    run_with_reloader(runner)

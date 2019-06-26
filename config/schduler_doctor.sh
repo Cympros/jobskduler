@@ -33,6 +33,9 @@ git config --global credential.helper store
 # 参考文档:https://stackoverflow.com/questions/5626960/python-print-statement-with-utf-8-and-nohup
 export PYTHONIOENCODING=utf-8
 
+# 关闭brew更新
+export HOMEBREW_NO_AUTO_UPDATE=true
+
 echo -e "确认使用以下python环境吗(yes or no)?  ["`which python`"]"
 read use_pathon_path
 if [[ ${use_pathon_path} == "yes" ]]; then
@@ -46,6 +49,7 @@ fi
 if [[ "$(uname)" == "Darwin" ]];then
     echo '---> Environment with Mac-OSX'
     install_if_not_exist 'brew' '/usr/bin/ruby -e \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)\"'
+    install_if_not_exist 'timeout' 'brew install coreutils && sudo ln -s /usr/local/bin/gtimeout /usr/local/bin/timeout'
 elif [[ "$(expr substr $(uname -s) 1 5)"=="Linux" ]];then
     echo '---> Environment with Linux'
     install_if_not_exist "virtualenv" "sudo apt-get install virtualenv"

@@ -55,11 +55,15 @@ def wrapper_send_email(title=None, content=None, files=None):
             utils_logger.log("---> ", this_email_file_md5, " vs ", last_email_files_md5)
     last_email_files_md5 = this_email_file_md5
 
+    yaml_loader = utils_yaml.load_yaml(env_job.get_yaml_path())
+    if yaml_loader is None:
+        utils_logger.log("wrapper_send_email 邮件发送失败，未读取到配置")
+        return
     # 发送邮件
-    receiver_user = utils_yaml.load_yaml(env_job.get_yaml_path())['email_receiver']  # 邮件接收地址
+    receiver_user = yaml_loader.get('email_receiver')  # 邮件接收地址
     utils_logger.append_log("---> start to wrapper_send_email[" + receiver_user + "][" + mail_title + "]:",
                             wrapper_files)
-    for sender in utils_yaml.load_yaml(env_job.get_yaml_path()).get('sender_list'):
+    for sender in yaml_loader.get('sender_list'):
         sender_host = sender['email_sender_host']
         email_sender_user = sender['email_sender_user']
         email_sender_pwd = sender['email_sender_pwd']

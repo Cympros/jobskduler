@@ -15,24 +15,6 @@ from job.appium.utils import utils_android
 from helper import utils_config_parser, utils_logger, utils_common
 from job.normal.job_pc_base import PcBaseJob
 
-
-class JobCheckCodeUpdate(PcBaseJob):
-    "检查代码是否更新"
-
-    def __init__(self):
-        PcBaseJob.__init__(self)
-
-    def run_task(self):
-        res, error = utils_common.exec_shell_cmd("timeout 15 git pull")
-        utils_logger.log("JobCheckCodeUpdate#run_task", "res:[" + str(res) + "]", "error:[" + str(error) + "]")
-        if res.find('Already up to date.') != -1:
-            # 代码已经是最新
-            pass
-        else:
-            self.job_scheduler_failed("错误日志：" + str(res) + "," + str(error))
-            utils_logger.log("JobCheckCodeUpdate#run_task 检测到代码需要更新")
-
-
 class JobBrowserDeviceTimelyInfo(PcBaseJob):
     """即时浏览设备信息"""
 
@@ -65,22 +47,22 @@ class JobCheckerAllTaskRunState(PcBaseJob):
         retry_over_task = ""  # 重试次数操作次数的任务
         other_task = ""  # 其他任务
 
-        all_job = conf_modify.query_jobs()
+        all_job = utils_config_parser.get_sessions(env_job.get_job_config_path())
         all_job.sort()
         for job in all_job:  # 包含设备相关的job描述
             # 今日还剩余多少次没有执行完成
-            job_path = conf_modify.query(job, "job_path")
-            is_need_run = conf_modify.query(job, 'runnable')
-            is_device_type_support = conf_modify.query(job, 'is_device_type_support')
-            is_retry_count_over = conf_modify.query(job, "is_retry_count_over")
-            daily_repeat_count = int(conf_modify.query(job, "daily_repeat_count", 0))
-            today_repeat_count_left = int(conf_modify.query(job, "today_repeat_count_left", daily_repeat_count))
-            today_total_run_number = int(conf_modify.query(job, "today_total_run_number", 0))
+            job_path = utils_config_parser.get_value(env_job.get_job_config_path(),job, "job_path")
+            is_need_run = utils_config_parser.get_value(env_job.get_job_config_path(),job, 'runnable')
+            is_device_type_support = utils_config_parser.get_value(env_job.get_job_config_path(),job, 'is_device_type_support')
+            is_retry_count_over = utils_config_parser.get_value(env_job.get_job_config_path(),job, "is_retry_count_over")
+            daily_repeat_count = int(utils_config_parser.get_value(env_job.get_job_config_path(),job, "daily_repeat_count", 0))
+            today_repeat_count_left = int(utils_config_parser.get_value(env_job.get_job_config_path(),job, "today_repeat_count_left", daily_repeat_count))
+            today_total_run_number = int(utils_config_parser.get_value(env_job.get_job_config_path(),job, "today_total_run_number", 0))
 
             output_info = "剩余执行次数：" + str(today_repeat_count_left) + "/" + str(daily_repeat_count) \
                           + "，执行成功率：" + str(daily_repeat_count - today_repeat_count_left) + "/" + str(
                 today_total_run_number) \
-                          + "，[" + conf_modify.query(job, 'job_name') + "]：" + job \
+                          + "，[" + utils_config_parser.get_value(env_job.get_job_config_path(),job, 'job_name') + "]：" + job \
                           + "\n"
             """
             未完成任务拆分
@@ -94,7 +76,8 @@ class JobCheckerAllTaskRunState(PcBaseJob):
                     # 不可执行任务屏蔽设备，仅收集任务相关信息
                     if job_path not in unrunnable_task_list:
                         unrunnable_task_list.append(job_path)
-                        unrunnable_task += "[" + conf_modify.query(job, 'job_name') + "]：" + job_path + "\n"
+                        unrunnable_task += "[" + str(utils_config_parser.get_value(env_job.get_job_config_path(),job, 'job_name')) \
+                                           + "]：" + str(job_path) + "\n"
                 elif is_device_type_support is not None and is_device_type_support != 'true':
                     device_type_not_matched_task += output_info
                 elif is_retry_count_over is not None and is_retry_count_over == "true":
