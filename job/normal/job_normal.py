@@ -123,10 +123,6 @@ class JobCheckerAllTaskRunState(Base):
             "True" if is_run_support else "False"))
         return is_run_support
 
-    def get_support_device_types_with_task(self):
-        return ['pc']
-
-
 class JobResetRunRetryModel(Base):
     """用于解决超过重试次数的任务"""
 

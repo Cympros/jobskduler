@@ -3,12 +3,12 @@
 import json
 import os
 import sys
+import threading
 
 root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
 sys.path.append(root_path)
 
 from helper import utils_common, utils_logger
-from config import conf_modify
 from config import email_send
 
 
@@ -27,7 +27,6 @@ class BaseJob():
 
     def whether_support_device_type(self, device_type):
         """任务是否支持device_type"""
-        # utils_logger.log("BaseJob#whether_support_device_type", device_type)
         return False if device_type is None else True
 
     def register_config(self, xargs_dict=None):
@@ -44,19 +43,7 @@ class BaseJob():
 
     def notify_job_success(self):
         """更新任务状态"""
-        if self.job_session is None:
-            utils_logger.log("---> notify_job_success： not support job_session for none")
-            return
-        utils_logger.log("---> update_task_state in class of BaseJob with session:[" + self.job_session + "]")
-        # 更新该任务对应的today_repeat_count_left以及last_success_date
-        today_date = int(utils_common.get_shanghai_time("%Y%m%d"))
-        today_repeat_count_left = int(
-            conf_modify.query(job_tag=self.job_session, key="today_repeat_count_left", default_value=0)) - 1
-
-        # conf_modify.put(job_tag=self.job_session, key="last_success_date", value=today_date)
-        # conf_modify.put(job_tag=self.job_session, key="today_repeat_count_left", value=today_repeat_count_left)
-        utils_logger.log("---> After update###job_clz_path: ", self.job_session, "last_success_date: ", today_date,
-                         "today_repeat_count_left: ", today_repeat_count_left)
+        pass
 
     def job_scheduler_failed(self, message="none message", email_title=u'异常信息', upload_files=None, exception_info=None):
         """
@@ -68,6 +55,7 @@ class BaseJob():
         utils_logger.log("---> job_scheduler_failed in BaseJob with upload_files:", list(set(self.upload_files)))
         error = {'message': message,
                  'task_name': self.job_session if self.job_session is not None else "None",
+                 'threadid': str(threading.currentThread().getName()),
                  }
 
         send_content = json.dumps(error, encoding='utf-8', ensure_ascii=False)

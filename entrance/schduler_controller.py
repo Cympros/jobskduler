@@ -7,6 +7,7 @@ import time
 import random
 import threading
 import traceback
+import subprocess
 
 root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../')
 sys.path.append(root_path)
@@ -16,11 +17,11 @@ sys.path.append(root_path + '/job')
 
 from helper.dbhelper import DataBaseOpenHelper
 from config import env_job
-from config import conf_modify
 from helper import utils_logger
 from job.appium.utils import utils_android
 from helper import utils_common
 from helper import utils_config_parser
+from config import email_send
 
 
 class JobSchdulerController(object):
@@ -166,6 +167,14 @@ class JobSchdulerController(object):
             cls_obj.notify_job_success()
         print "##################", "\"" + mod_str + "\"", root_path
 
+    def check_env_dependence(self):
+        utils_logger.log("#####JobSchdulerController#check_env_dependence 检查环境依赖")
+        p = subprocess.Popen(["bash", os.path.abspath(root_path + "/entrance/schduler_doctor.sh")])
+        p.communicate()  # 这一步表示等待Popen执行完成
+        if p.returncode != 0:
+            utils_logger.log("#check_env_dependence# Non zero exit code executing")
+        return p.stdout
+
 
 def device_thread_loop(*jobs):
     job_list = list(jobs)
@@ -194,8 +203,12 @@ def device_thread_loop(*jobs):
                 cls_obj.register_config(job_item)
                 if cls_obj.run_task() is True:
                     cls_obj.notify_job_success()
-            except:
-                traceback.print_exc()
+                # 环境清理
+                cls_obj.release_after_task()
+            except Exception as exception:
+                utils_logger.log(traceback.format_exc())
+                email_send.wrapper_send_email(title=u'异常信息[' + exception.__class__.__name__ + "]",
+                                              content="反射调用脚本错误:" + job_path + "\n" + traceback.format_exc())
         foreach_end_time = utils_common.get_shanghai_time()
         if foreach_end_time - foreach_start_time < 20:
             utils_logger.append_log("##### 任务循环过快，休眠5分钟:", foreach_end_time - foreach_start_time)
@@ -204,7 +217,7 @@ def device_thread_loop(*jobs):
 
 if __name__ == '__main__':
     controller = JobSchdulerController()
-    tasks = ['exec_task', 'del_task', 'exec_single_task']
+    tasks = ['exec_task', 'del_task', 'exec_single_task', 'check_env_dependence']
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):

@@ -125,9 +125,6 @@ class AppiumBaseJob(BaseJob):
         self.appium_port = xargs_dict.get('appium_port')
         self.appium_port_bp = xargs_dict.get('appium_port_bp')
 
-    def get_support_device_types_with_task(self):
-        return ['android']
-
     def whether_support_device_type(self, device_type):
         if BaseJob.whether_support_device_type(self, device_type) is False:
             return False
@@ -168,10 +165,10 @@ class AppiumBaseJob(BaseJob):
             return False
 
         # 实例化该应用对应的driver对象
-        is_need_setting_input_manager = self.is_need_setting_input_manager()
         try:
             self.driver = utils_appium.get_driver_by_launch_app(self.target_application_id, self.launch_activity,
-                                                                self.target_device_name, is_need_setting_input_manager,
+                                                                self.target_device_name,
+                                                                self.is_need_setting_input_manager(),
                                                                 self.appium_port, self.appium_port_bp)
         except Exception as exception:
             traceback.print_exc()
