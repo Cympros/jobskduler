@@ -35,6 +35,9 @@ class AppiumBaseJob(BaseJob):
         BaseJob.__init__(self)
         self.driver = None
         self.target_device_name = None
+        self.appium_port = 4723
+        self.appium_port_bp = None
+
         self.target_application_id = target_application_id
         self.launch_activity = launch_activity
         self.upload_files = []  # 待上传至远端的文件列表
@@ -138,6 +141,11 @@ class AppiumBaseJob(BaseJob):
     def run_task(self):
         if BaseJob.run_task(self) is False:
             return False
+        if self.target_device_name is not None:  # 未指定设备，则采用默认设备，那么appium端口也无须校验
+            # 分配appium服务端口
+            if self.appium_port is None or self.appium_port_bp is None:
+                self.job_scheduler_failed("未指定appium服务端口")
+                return False
         # 检查设备在线状态
         if self.target_device_name is not None:
             device_status = utils_android.get_device_statue(self.target_device_name)
@@ -148,17 +156,15 @@ class AppiumBaseJob(BaseJob):
                     utils_common.exec_shell_cmd("adb connect " + self.target_device_name)
                 utils_logger.log("[" + self.target_device_name + "]设备不在线", device_status)
                 return False
+        else:
+            if len(utils_android.get_connected_devcies()) > 0:
+                self.target_device_name = utils_android.get_connected_devcies()[0]
         # 检查应用是否安装
         check_installed_response, response_errror = utils_android.is_app_installed(self.target_device_name,
                                                                                    self.target_application_id)
         if response_errror is None and check_installed_response is None:
             utils_logger.append_log("---> 当前应用未安装[", self.target_device_name, "][", self.target_application_id, "][",
                                     check_installed_response, "][", response_errror, "]")
-            return False
-
-        # 分配appium服务端口
-        if self.appium_port is None or self.appium_port_bp is None:
-            self.job_scheduler_failed("未指定appium服务端口")
             return False
 
         # 实例化该应用对应的driver对象

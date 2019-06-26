@@ -92,7 +92,6 @@ def get_deivce_android_version(device=None):
     #       + device_name \
     #       + " shell cat /system/build.prop | grep ro.build.version.release | awk -F '=' '{print $2}' "
     response, response_error = _check_adb_command_result(cmd)
-
     return None if response is None else response.replace("\n", "")  # 删除换行符
 
 
