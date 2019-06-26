@@ -8,8 +8,9 @@ sys.path.append(job_root_path)
 
 from job.appium.job_appium_base import AppiumBaseJob
 from job.appium.utils import utils_appium
-from config import conf_modify
 from helper import utils_logger
+from helper import utils_yaml
+from config import env_job
 
 
 class JobAppiumFeizhu(AppiumBaseJob):
@@ -63,8 +64,8 @@ class JobAppiumFeizhu(AppiumBaseJob):
         cur_act = utils_appium.get_cur_act(self.driver)
         if cur_act == 'com.ali.user.mobile.login.ui.UserLoginActivity':
             # 校验账号密码
-            account = conf_modify.query("", "feizu_account")
-            pwd = conf_modify.query("", "feizu_password")
+            account = utils_yaml.load_yaml(env_job.get_yaml_path()).get('feizu_account')
+            pwd = utils_yaml.load_yaml(env_job.get_yaml_path()).get('feizu_password')
             if account is None or pwd is None:
                 self.self.job_scheduler_failed("请设置飞猪账号&密钥")
                 return False

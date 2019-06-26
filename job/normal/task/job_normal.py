@@ -3,20 +3,37 @@
 # 用于在指定时刻检查指定任务是否执行完成
 import os
 import sys
+import time
 import collections as clc
-from job_base import BaseJob as Base
 
 root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
 sys.path.append(root_path)
 
-from config import conf_modify
 from config import email_send
 from config import env_job
 from job.appium.utils import utils_android
-from helper import utils_config_parser, utils_logger
+from helper import utils_config_parser, utils_logger, utils_common
+from job.normal.job_pc_base import PcBaseJob
 
 
-class JobBrowserDeviceTimelyInfo(Base):
+class JobCheckCodeUpdate(PcBaseJob):
+    "检查代码是否更新"
+
+    def __init__(self):
+        PcBaseJob.__init__(self)
+
+    def run_task(self):
+        res, error = utils_common.exec_shell_cmd("timeout 15 git pull")
+        utils_logger.log("JobCheckCodeUpdate#run_task", "res:[" + str(res) + "]", "error:[" + str(error) + "]")
+        if res.find('Already up to date.') != -1:
+            # 代码已经是最新
+            pass
+        else:
+            self.job_scheduler_failed("错误日志：" + str(res) + "," + str(error))
+            utils_logger.log("JobCheckCodeUpdate#run_task 检测到代码需要更新")
+
+
+class JobBrowserDeviceTimelyInfo(PcBaseJob):
     """即时浏览设备信息"""
 
     def run_task(self):
@@ -32,7 +49,7 @@ class JobBrowserDeviceTimelyInfo(Base):
         utils_logger.log(connected_device_info)
 
 
-class JobCheckerAllTaskRunState(Base):
+class JobCheckerAllTaskRunState(PcBaseJob):
     '检查所有task的执行状态'
 
     def run_task(self):
@@ -123,7 +140,8 @@ class JobCheckerAllTaskRunState(Base):
             "True" if is_run_support else "False"))
         return is_run_support
 
-class JobResetRunRetryModel(Base):
+
+class JobResetRunRetryModel(PcBaseJob):
     """用于解决超过重试次数的任务"""
 
     def run_task(self):
@@ -162,7 +180,7 @@ class JobResetRunRetryModel(Base):
             utils_logger.log("-----------------------------------------------\n")
 
 
-class JobClearUnUseDevice(Base):
+class JobClearUnUseDevice(PcBaseJob):
     def run_task(self):
         """以设备为维度，清空不再使用的设备下对应的所有任务"""
         device_dict = clc.defaultdict(list)

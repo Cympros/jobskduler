@@ -51,7 +51,8 @@ class BaseJob():
             spot_desc_file指当前错误页面
         """
         # TODO:检查业务层调用一次job_scheduler_failed，这里为什么同一个文件会被添加多次？  ：暂时使用强制去重
-        self.upload_files.extend(upload_files)
+        if upload_files is not None:
+            self.upload_files.extend(upload_files)
         utils_logger.log("---> job_scheduler_failed in BaseJob with upload_files:", list(set(self.upload_files)))
         error = {'message': message,
                  'task_name': self.job_session if self.job_session is not None else "None",

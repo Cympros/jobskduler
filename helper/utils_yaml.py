@@ -20,6 +20,8 @@ def load_yaml(yaml_path):
 if __name__ == '__main__':
     yaml_path = env_job.get_out_dir() + "schduler.yaml"
     project = {
+        'feizu_account': "",
+        'feizu_password': "",
         'email_receiver': "",
         'sender_list': [
             {'email_sender_host': '',

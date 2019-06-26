@@ -2,10 +2,16 @@
 
 import os
 
+root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
+
 
 def get_module_root_path():
     module_root_dir = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + "/../")
     return module_root_dir
+
+
+def get_job_config_path():
+    return os.path.abspath(root_path + "/data/job.config")
 
 
 def get_yaml_path():

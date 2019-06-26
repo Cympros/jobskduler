@@ -12,7 +12,7 @@ import subprocess
 root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../')
 sys.path.append(root_path)
 sys.path.append(root_path + '/job/appium/task')
-sys.path.append(root_path + '/job/normal')
+sys.path.append(root_path + '/job/normal/task')
 sys.path.append(root_path + '/job')
 
 from helper.dbhelper import DataBaseOpenHelper
@@ -52,11 +52,12 @@ class JobSchdulerController(object):
 
     def add_task(self):
         """添加任务"""
-        utils_logger.log("##########JobSchdulerController#add_task")
+
         # 插入设备信息
         if self.db_helper is None:
             self.db_helper = self.get_db_helper()
 
+        utils_logger.log("##########JobSchdulerController#add_task [tbthreadinfo]开始插入线程信息")
         for device_type in ['android', 'pc']:
             if device_type == "android":
                 # 插入所有android设备
@@ -83,12 +84,21 @@ class JobSchdulerController(object):
                     + "','" + device_type + "')")
 
         # 插入tbtask
-        for task_item in utils_config_parser.get_sessions(os.path.abspath(root_path + "/config/job.config")):
-            self.db_helper.exec_sql("insert or replace into tbtask(taskcmd,taskname,runnable,dailycount) values ('"
-                                    + task_item + "','"
-                                    + conf_modify.query(task_item, 'job_name').replace("'", "*") + "','"
-                                    + conf_modify.query(task_item, "runnable", "true") + "','"
-                                    + conf_modify.query(task_item, "daily_repeat_count", '1') + "')")
+        utils_logger.log("##########JobSchdulerController#add_task [tbtask]开始插入task信息")
+        for task_item in utils_config_parser.get_sessions(env_job.get_job_config_path()):
+            runnable = utils_config_parser.get_value(env_job.get_job_config_path(), task_item, "runnable", "true")
+            if runnable != 'true':
+                self.db_helper.exec_sql("delete from tbjob where taskcmd='" + task_item + "'")
+            else:
+                taskname = utils_config_parser.get_value(env_job.get_job_config_path(), task_item, 'job_name') \
+                    .replace("'", "*")
+                daily_count = utils_config_parser.get_value(env_job.get_job_config_path(), task_item,
+                                                            "daily_repeat_count", '1')
+                self.db_helper.exec_sql("insert or replace into tbtask(taskcmd,taskname,runnable,dailycount) values ('"
+                                        + task_item + "','"
+                                        + taskname + "','"
+                                        + runnable + "','"
+                                        + daily_count + "')")
         # 插入job
         for threadid_item in self.db_helper.exec_sql('select threadid from tbthreadinfo'):
             for taskcmd_item in self.db_helper.exec_sql("select taskcmd from tbtask where runnable='true'"):
@@ -197,7 +207,7 @@ def device_thread_loop(*jobs):
                 module_clz = getattr(sys.modules[mod_str], class_str)
                 cls_obj = module_clz()
                 if cls_obj.whether_support_device_type(job_item['device_type']) is False:
-                    utils_logger.log("不支持执行该任务", mod_str)
+                    utils_logger.log("不支持执行该任务", job_path)
                     continue
 
                 cls_obj.register_config(job_item)
