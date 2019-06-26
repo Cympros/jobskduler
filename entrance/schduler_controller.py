@@ -113,7 +113,9 @@ class JobSchdulerController(object):
 
     def exec_task(self):
         """执行任务"""
-        # TODO  检查并关闭appiu相关进程
+        # 关闭appium进程
+        utils_common.exec_shell_cmd(
+            '''ps -ef | grep "appium" | grep -v -E "grep|$$" | awk  '{print "kill -9 " $2}' | sh''')
 
         whether_del_db = raw_input("是否确认删除历史数据，开始新一轮(default:false)(y/n)")
         if whether_del_db == "y":

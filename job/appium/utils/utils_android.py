@@ -183,20 +183,19 @@ def get_connected_devcies(target_device=None, except_emulater=False):
         参数：except_emulater是否排除模拟器
             
     '''
-    cmd = "adb devices"
-    device_infos, device_infos_errror = _check_adb_command_result(cmd)
+    device_infos, device_infos_errror = _check_adb_command_result("adb devices")
     if device_infos is None:
         return None
     contected_devices = []
     for device_info in device_infos.split("\n"):
         trim_device_info = device_info.lstrip().rstrip()
         if trim_device_info != "" and trim_device_info != "List of devices attached":
-            utils_logger.log("get_connected_devcies 解析的android设备:" + device_info)
+            # utils_logger.log("get_connected_devcies 解析的android设备:" + device_info)
             split_array = trim_device_info.split('\t')
             # utils_logger.log("--->[split_array]:",split_array)
             trim_device_info = split_array[0]
             if split_array[1] != "device":
-                utils_logger.log("--->[设备状态" + split_array[1] + "]:", trim_device_info)
+                # utils_logger.log("--->[设备状态" + split_array[1] + "]:", trim_device_info)
                 utils_common.exec_shell_cmd("adb -s " + trim_device_info + " disconnect")
                 continue
             if except_emulater and trim_device_info.startswith('emulator-'):
@@ -232,14 +231,21 @@ def get_start_activity_by_application_id(application_id):
     return launcher_activity
 
 
-def is_device_online(device):
-    """判断是否是否在线"""
-    cmd = "adb " + (
-        " " if device is None else " -s " + str(device) + " ") + " shell getprop ro.build.version.release"
-    check_installed_response, response_errror = _check_adb_command_result(cmd)
-    if response_errror is not None and response_errror.endswith(' not found'):
-        return False
-    return True
+def get_device_statue(device):
+    """读取设备在线状态"""
+    if device is None:
+        return None
+    device_infos, device_infos_errror = _check_adb_command_result("adb devices")
+    if device_infos is None:
+        return None
+    for device_info in device_infos.split("\n"):
+        trim_device_info = device_info.lstrip().rstrip()
+        if trim_device_info != "" and trim_device_info != "List of devices attached":
+            split_array = trim_device_info.split('\t')
+            trim_device_info = split_array[0]
+            if trim_device_info == device:
+                return split_array[1]
+    return None
 
 
 def is_app_installed(device, application_id):

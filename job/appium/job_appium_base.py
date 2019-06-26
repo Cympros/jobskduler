@@ -138,17 +138,16 @@ class AppiumBaseJob(BaseJob):
     def run_task(self):
         if BaseJob.run_task(self) is False:
             return False
-        # # 检查设备信息
-        # if self.target_device_name is None:
-        #     devices = utils_android.get_connected_devcies(except_emulater=True)
-        #     utils_logger.log("--->启动Android设备自动搜索策略")
-        #     if devices is None or len(devices) != 1:
-        #         utils_logger.log("已连接设备数无法识别：", "None" if devices is None else len(devices))
-        #         return False
-        #     self.target_device_name = devices[0]
-        if utils_android.is_device_online(self.target_device_name) is False:
-            utils_logger.log("设备不在线")
-            return False
+        # 检查设备在线状态
+        if self.target_device_name is not None:
+            device_status = utils_android.get_device_statue(self.target_device_name)
+            if device_status != "device":
+                # 尝试重连
+                if self.target_device_name.endswith(":5555") is True:
+                    utils_common.exec_shell_cmd("adb -s " + self.target_device_name + " disconnect")
+                    utils_common.exec_shell_cmd("adb connect " + self.target_device_name)
+                utils_logger.log("[" + self.target_device_name + "]设备不在线", device_status)
+                return False
         # 检查应用是否安装
         check_installed_response, response_errror = utils_android.is_app_installed(self.target_device_name,
                                                                                    self.target_application_id)
