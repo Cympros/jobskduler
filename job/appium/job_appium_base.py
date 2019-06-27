@@ -279,28 +279,31 @@ class AppiumBaseJob(BaseJob):
         utils_logger.log("---> except_case_in_query_ele in AppiumBaseJob")
         '查询element的时候朋友的异常处理，True表示得以正常处理'
         # xpath模糊匹配速度太慢
-        # if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('中配置权限',is_force_match=False),retry_count=0,is_ignore_except_case=True) is not None:
-        #     if self.query_ele_wrapper(self.get_query_str_by_viewid('com.huawei.systemmanager:id/btn_allow') ,click_mode="click",is_ignore_except_case=True,retry_count=0) is not None\
-        #             or self.query_ele_wrapper(self.get_query_str_by_viewid('com.android.packageinstaller:id/permission_allow_button'),click_mode="click",is_ignore_except_case=True,retry_count=0) is not None:
-        #         return True
-        #     else:
-        #         self.job_scheduler_failed('关闭权限弹框失败')
-        #         return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('无响应', is_force_match=False),
                                   is_ignore_except_case=True, retry_count=0) is not None:
             # 检测到无响应
             if self.query_ele_wrapper(
                     self.get_query_str_within_xpath_only_text('等待', view_type='android.widget.Button'),
-                    click_mode='click', is_ignore_except_case=True) is not None:
+                    click_mode='click', is_ignore_except_case=True, retry_count=0) is not None:
                 return True
             else:
                 self.job_scheduler_failed("检测到'无响应，但是无法关闭'")
-        # elif self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('平板仍存有残留目录和文件',is_force_match=False),is_ignore_except_case=True,retry_count=0) is not None:
-        #     # 监测到删除应用历史残留文件
-        #     if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('立即删除',view_type='android.widget.Button'),click_mode='click',is_ignore_except_case=True) is not None:
-        #         return True
-        #     else:
-        #         utils_logger.log("监测到删除应用的历史残留数据弹框，但没办法关闭")
+        elif self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('打印纸未准备好', is_force_match=False),
+                                    is_ignore_except_case=True, retry_count=0) is not None:
+            if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('知道了'),
+                                      click_mode='click', is_ignore_except_case=True, retry_count=0) is not None:
+                return True
+            else:
+                self.job_scheduler_failed("检测到'打印纸未准备好，请检查！'文案，但无法关闭")
+        elif self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('平板仍存有残留目录和文件', is_force_match=False),
+                                    is_ignore_except_case=True, retry_count=0) is not None:
+            # 监测到删除应用历史残留文件
+            if self.query_ele_wrapper(
+                    self.get_query_str_within_xpath_only_text('立即删除', view_type='android.widget.Button'),
+                    click_mode='click', is_ignore_except_case=True, retry_count=0) is not None:
+                return True
+            else:
+                utils_logger.log("监测到删除应用的历史残留数据弹框，但没办法关闭")
         return False
 
     def get_path_in_appium_img_dir(self, file_name):

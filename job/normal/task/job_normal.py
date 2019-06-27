@@ -15,6 +15,7 @@ from job.appium.utils import utils_android
 from helper import utils_config_parser, utils_logger, utils_common
 from job.normal.job_pc_base import PcBaseJob
 
+
 class JobBrowserDeviceTimelyInfo(PcBaseJob):
     """即时浏览设备信息"""
 
@@ -51,18 +52,25 @@ class JobCheckerAllTaskRunState(PcBaseJob):
         all_job.sort()
         for job in all_job:  # 包含设备相关的job描述
             # 今日还剩余多少次没有执行完成
-            job_path = utils_config_parser.get_value(env_job.get_job_config_path(),job, "job_path")
-            is_need_run = utils_config_parser.get_value(env_job.get_job_config_path(),job, 'runnable')
-            is_device_type_support = utils_config_parser.get_value(env_job.get_job_config_path(),job, 'is_device_type_support')
-            is_retry_count_over = utils_config_parser.get_value(env_job.get_job_config_path(),job, "is_retry_count_over")
-            daily_repeat_count = int(utils_config_parser.get_value(env_job.get_job_config_path(),job, "daily_repeat_count", 0))
-            today_repeat_count_left = int(utils_config_parser.get_value(env_job.get_job_config_path(),job, "today_repeat_count_left", daily_repeat_count))
-            today_total_run_number = int(utils_config_parser.get_value(env_job.get_job_config_path(),job, "today_total_run_number", 0))
+            job_path = utils_config_parser.get_value(env_job.get_job_config_path(), job, "job_path")
+            is_need_run = utils_config_parser.get_value(env_job.get_job_config_path(), job, 'runnable')
+            is_device_type_support = utils_config_parser.get_value(env_job.get_job_config_path(), job,
+                                                                   'is_device_type_support')
+            is_retry_count_over = utils_config_parser.get_value(env_job.get_job_config_path(), job,
+                                                                "is_retry_count_over")
+            daily_repeat_count = int(
+                utils_config_parser.get_value(env_job.get_job_config_path(), job, "daily_repeat_count", 0))
+            today_repeat_count_left = int(
+                utils_config_parser.get_value(env_job.get_job_config_path(), job, "today_repeat_count_left",
+                                              daily_repeat_count))
+            today_total_run_number = int(
+                utils_config_parser.get_value(env_job.get_job_config_path(), job, "today_total_run_number", 0))
 
             output_info = "剩余执行次数：" + str(today_repeat_count_left) + "/" + str(daily_repeat_count) \
                           + "，执行成功率：" + str(daily_repeat_count - today_repeat_count_left) + "/" + str(
                 today_total_run_number) \
-                          + "，[" + utils_config_parser.get_value(env_job.get_job_config_path(),job, 'job_name') + "]：" + job \
+                          + "，[" + utils_config_parser.get_value(env_job.get_job_config_path(), job,
+                                                                 'job_name') + "]：" + job \
                           + "\n"
             """
             未完成任务拆分
@@ -76,7 +84,8 @@ class JobCheckerAllTaskRunState(PcBaseJob):
                     # 不可执行任务屏蔽设备，仅收集任务相关信息
                     if job_path not in unrunnable_task_list:
                         unrunnable_task_list.append(job_path)
-                        unrunnable_task += "[" + str(utils_config_parser.get_value(env_job.get_job_config_path(),job, 'job_name')) \
+                        unrunnable_task += "[" + str(
+                            utils_config_parser.get_value(env_job.get_job_config_path(), job, 'job_name')) \
                                            + "]：" + str(job_path) + "\n"
                 elif is_device_type_support is not None and is_device_type_support != 'true':
                     device_type_not_matched_task += output_info
