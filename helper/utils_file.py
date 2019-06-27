@@ -6,8 +6,10 @@ import sys
 import time
 import utils_common
 
-root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
+root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../')
+print root_path
 sys.path.append(root_path)
+
 from helper import utils_logger
 
 
@@ -50,6 +52,12 @@ def get_file_name_by_file_path(file_path):
     if file_path is None or os.path.exists(file_path) is False:
         return None
     return os.path.basename(file_path)
+
+
+def write_file(file_path, message):
+    """写入文件"""
+    with open(file_path, "w") as text_file:
+        text_file.write(message)
 
 
 if __name__ == "__main__":

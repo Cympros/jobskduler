@@ -1,8 +1,13 @@
 # coding=utf-8
 
 import os
+import sys
+import zipfile
 
-root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
+root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../')
+sys.path.append(root_path)
+
+from helper import utils_common, utils_file, utils_logger
 
 
 def get_module_root_path():
@@ -30,14 +35,16 @@ def get_out_dir():
     return outer_dir
 
 
-def get_log_file():
-    """返回日志文件存储路径"""
-    return get_out_dir() + 'logger.log.txt'
-
-
-def get_append_log_file():
-    """返回日志文件存储路径"""
-    return get_out_dir() + 'append_logger.log.txt'
+def zip_msg_within_files(message, files=None):
+    new_zip = zipfile.ZipFile(get_out_dir() + "/" + str(utils_common.get_shanghai_time("%Y%m%d%H%M%S"))
+                              + ".zip", 'w')
+    if message is not None:
+        message_path = os.path.abspath(get_out_dir() + "/message.txt")
+        utils_file.write_file(message_path, message)
+        new_zip.write(message_path, utils_file.get_file_name_by_file_path(message_path), zipfile.ZIP_DEFLATED)
+    if files is not None:
+        for file_path_item in files:
+            new_zip.write(file_path_item, utils_file.get_file_name_by_file_path(file_path_item), zipfile.ZIP_DEFLATED)
 
 
 def get_appium_img_dir():
@@ -49,4 +56,4 @@ def get_appium_img_dir():
 
 
 if __name__ == "__main__":
-    get_out_dir()
+    zip_msg_within_files("&&&&", [utils_logger.get_log_file()])

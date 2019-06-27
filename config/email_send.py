@@ -26,9 +26,6 @@ from helper import utils_common, utils_logger, utils_yaml
 from helper import utils_file
 from config import env_job
 
-# 上次发送邮件Msg的md5标识,新增批量文件的综合标识
-last_email_files_md5 = None
-
 
 def wrapper_send_email(title=None, content=None, files=None):
     mail_title = title if title is not None else u'python邮件标题'
@@ -45,15 +42,6 @@ def wrapper_send_email(title=None, content=None, files=None):
                    + "Git_Desc:   " + json.dumps(utils_common.exec_shell_cmd("git branch -vv | grep '*'"),
                                                  ensure_ascii=False, ) + "\n\n" \
                    + "Content:    \n" + (content if content is not None else '来自python登录qq邮箱的测试邮件')
-    # 校验重复发送:保存当前文件集的md5标识
-    global last_email_files_md5
-    this_email_file_md5 = get_files_md5(wrapper_files)
-    if last_email_files_md5 is not None:
-        if last_email_files_md5 == this_email_file_md5:  # check msg的md5标识，以检测是否需要重复发送
-            return
-        else:
-            utils_logger.log("---> ", this_email_file_md5, " vs ", last_email_files_md5)
-    last_email_files_md5 = this_email_file_md5
 
     yaml_loader = utils_yaml.load_yaml(env_job.get_yaml_path())
     if yaml_loader is None:
@@ -116,23 +104,6 @@ def login_if_possiable(smtp_host, user, password):
     except:
         utils_logger.append_log("login_if_possiable:", traceback.format_exc())
     return smtp
-
-
-# 构造file集合的md5标识，该方法是针对邮件去重增加的算法
-def get_files_md5(files):
-    if files is None:
-        return None
-    file_md5s = []
-    for file_item in files:
-        file_itme_md5 = utils_common.get_file_md5(file_item)
-        if file_itme_md5 is None:
-            continue
-        file_md5s.append(file_itme_md5)
-    file_md5s.sort()  # 针对存放md5标识的数组先排序
-    # 对md5的数组进行md5标识
-    files_hash = hashlib.md5()
-    files_hash.update(" ".join(file_md5s))  # 数组先转成string再获取md5标识
-    return files_hash.hexdigest()
 
 
 # 格式化邮件地址
