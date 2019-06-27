@@ -94,9 +94,7 @@ def send_smtp_email(smtp_host, send_user, send_password, receiver_user, title, c
                     continue
                 msg.attach(mime)  # 添加到MIMEMultipart
         # ssl登录
-        smtp = SMTP_SSL(smtp_host)
-        smtp.ehlo(smtp_host)
-        smtp.login(send_user, send_password)
+        smtp = login_if_possiable(smtp_host, send_user, send_password)
         # 发送邮件
         utils_logger.append_log("---> send_smtp_email base on [" + send_user + "]" + str(retry_count) + "] ...")
         smtp.sendmail(send_user, receiver_user, msg.as_string())
@@ -108,6 +106,16 @@ def send_smtp_email(smtp_host, send_user, send_password, receiver_user, title, c
                                    retry_count - 1)
         else:
             return False
+
+
+def login_if_possiable(smtp_host, user, password):
+    smtp = SMTP_SSL(smtp_host)
+    try:
+        smtp.ehlo(smtp_host)
+        smtp.login(user, password)
+    except:
+        utils_logger.append_log("login_if_possiable:", traceback.format_exc())
+    return smtp
 
 
 # 构造file集合的md5标识，该方法是针对邮件去重增加的算法
