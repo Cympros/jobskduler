@@ -40,7 +40,9 @@ from config import env_job
 
 def is_code_update():
     """代码是否有更新"""
-    res, error = utils_common.exec_shell_cmd("timeout 15 git pull")
+    command = "timeout 15 git pull"
+    res, error = utils_common.exec_shell_cmd(command)
+    utils_logger.log("is_code_update [" + command + "]", "res:[" + str(res) + "]", "error:[" + str(error) + "]")
     if res is not None:
         if res.find('Already up to date.') != -1:
             # 代码已经是最新
@@ -49,7 +51,6 @@ def is_code_update():
             utils_logger.log("JobCheckCodeUpdate#run_task 检测到代码需要更新")
             return 1
     else:
-        utils_logger.log("JobCheckCodeUpdate#run_task 检测到异常", "res:[" + str(res) + "]", "error:[" + str(error) + "]")
         return 1
 
 

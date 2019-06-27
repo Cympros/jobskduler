@@ -49,7 +49,7 @@ def wrapper_send_email(title=None, content=None, files=None):
         return
     # 发送邮件
     receiver_user = yaml_loader.get('email_receiver')  # 邮件接收地址
-    utils_logger.append_log("---> start to wrapper_send_email[" + receiver_user + "][" + mail_title + "]:",
+    utils_logger.log("---> start to wrapper_send_email[" + receiver_user + "][" + mail_title + "]:",
                             wrapper_files)
     for sender in yaml_loader.get('sender_list'):
         sender_host = sender['email_sender_host']
@@ -62,7 +62,7 @@ def wrapper_send_email(title=None, content=None, files=None):
         email_state = send_smtp_email(sender_host, email_sender_user, email_sender_pwd,
                                       receiver_user, mail_title, mail_content, wrapper_files)
         if email_state is False:
-            utils_logger.append_log(
+            utils_logger.log(
                 "-------wrapper_send_email caught exceptiion-------")
 
 
@@ -84,11 +84,11 @@ def send_smtp_email(smtp_host, send_user, send_password, receiver_user, title, c
         # ssl登录
         smtp = login_if_possiable(smtp_host, send_user, send_password)
         # 发送邮件
-        utils_logger.append_log("---> send_smtp_email base on [" + send_user + "]" + str(retry_count) + "] ...")
+        utils_logger.log("---> send_smtp_email base on [" + send_user + "]" + str(retry_count) + "] ...")
         smtp.sendmail(send_user, receiver_user, msg.as_string())
         return True
     except SMTPException:
-        utils_logger.append_log("send_smtp_email重试索引[" + str(retry_count) + "]:", traceback.format_exc())
+        utils_logger.log("send_smtp_email重试索引[" + str(retry_count) + "]:", traceback.format_exc())
         if retry_count > 0:
             return send_smtp_email(smtp_host, send_user, send_password, receiver_user, title, content, files,
                                    retry_count - 1)
@@ -102,7 +102,7 @@ def login_if_possiable(smtp_host, user, password):
         smtp.ehlo(smtp_host)
         smtp.login(user, password)
     except:
-        utils_logger.append_log("login_if_possiable:", traceback.format_exc())
+        utils_logger.log("login_if_possiable:", traceback.format_exc())
     return smtp
 
 

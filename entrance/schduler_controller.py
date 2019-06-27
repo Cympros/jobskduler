@@ -219,7 +219,7 @@ def device_thread_loop(*jobs):
                                               content="反射调用脚本错误:" + job_path + "\n" + traceback.format_exc())
         foreach_end_time = utils_common.get_shanghai_time()
         if foreach_end_time - foreach_start_time < 20:
-            utils_logger.append_log("##### 任务循环过快，休眠5分钟:", foreach_end_time - foreach_start_time)
+            utils_logger.log("##### 任务循环过快，休眠5分钟:", foreach_end_time - foreach_start_time)
             time.sleep(5 * 60)
 
 

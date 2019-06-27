@@ -119,7 +119,7 @@ def get_battery_status_by_device(device):
     response, response_error = _check_adb_command_result(cmd)
     battery_status = (None if response is None else response)
     if battery_status is None or battery_status != "true":
-        utils_logger.append_log("---> 设备不在线：[", device, "][", response, "][", response_error, "]")
+        utils_logger.log("---> 设备不在线：[", device, "][", response, "][", response_error, "]")
     return battery_status
 
 
