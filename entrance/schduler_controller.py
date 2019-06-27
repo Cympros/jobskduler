@@ -27,7 +27,7 @@ from config import email_send
 class JobSchdulerController(object):
 
     def __init__(self):
-        self.db_path = os.path.abspath(env_job.get_out_dir() + "/schduler.db")
+        self.db_path = env_job.get_db_path()
         self.db_helper = None
 
     def get_db_helper(self):

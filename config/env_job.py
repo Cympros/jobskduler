@@ -10,6 +10,10 @@ def get_module_root_path():
     return module_root_dir
 
 
+def get_db_path():
+    return os.path.abspath(get_out_dir() + "/schduler.db")
+
+
 def get_job_config_path():
     return os.path.abspath(root_path + "/data/job.config")
 
