@@ -63,7 +63,10 @@ class JobSchdulerController(object):
                 connected_devices = utils_android.get_connected_devcies()
                 if connected_devices is not None:
                     for connect_device in connected_devices:
-                        t_thread_id = utils_android.get_device_tag(connect_device) + "." + device_type + ".thread"
+                        device_tag = utils_android.get_device_tag(connect_device)
+                        if device_tag is None:
+                            continue
+                        t_thread_id = device_tag + "." + device_type + ".thread"
                         appium_port = str(self.search_appium_port(True))
                         appium_port_bp = str(self.search_appium_port(False))
                         insert_sql = "replace into tbthreadinfo(threadid,device_name,device_type,appium_port,appium_port_bp) " \
@@ -215,8 +218,8 @@ def device_thread_loop(*jobs):
                 cls_obj.release_after_task()
             except Exception as exception:
                 utils_logger.log(traceback.format_exc())
-                email_send.wrapper_send_email(title=u'异常信息[' + exception.__class__.__name__ + "]",
-                                              content="反射调用脚本错误:" + job_path + "\n" + traceback.format_exc())
+                env_job.zip_msg_within_files(u'异常信息[' + exception.__class__.__name__ + "]",
+                                             "反射调用脚本错误:" + job_path + "\n" + traceback.format_exc())
         foreach_end_time = utils_common.get_shanghai_time()
         if foreach_end_time - foreach_start_time < 20:
             utils_logger.log("##### 任务循环过快，休眠5分钟:", foreach_end_time - foreach_start_time)

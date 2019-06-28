@@ -107,7 +107,7 @@ class AppiumBaseJob(BaseJob):
                 'raw_message': message
                 }
         # 截取日志并上传
-        default_log_file_path = env_job.get_log_file()
+        default_log_file_path = utils_logger.get_log_file()
         self.upload_files.append(default_log_file_path)
         self.upload_files.append(default_log_file_path + ".1")
 
@@ -161,7 +161,7 @@ class AppiumBaseJob(BaseJob):
                                                                                    self.target_application_id)
         if response_errror is None and check_installed_response is None:
             utils_logger.log("---> 当前应用未安装[", self.target_device_name, "][", self.target_application_id, "][",
-                                    check_installed_response, "][", response_errror, "]")
+                             check_installed_response, "][", response_errror, "]")
             return False
 
         # 实例化该应用对应的driver对象

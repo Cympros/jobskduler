@@ -35,15 +35,20 @@ def get_out_dir():
     return outer_dir
 
 
-def zip_msg_within_files(message, files=None):
-    new_zip = zipfile.ZipFile(get_out_dir() + "/" + str(utils_common.get_shanghai_time("%Y%m%d%H%M%S"))
-                              + ".zip", 'w')
+def zip_msg_within_files(file_name, message, files=None):
+    log_zip_dir = get_out_dir() + "/log_zip/"
+    if os.path.exists(log_zip_dir) is False:
+        os.mkdir(log_zip_dir)
+    new_zip = zipfile.ZipFile(log_zip_dir + ("" if file_name is None else file_name)
+                              + utils_common.get_shanghai_time("%Y%m%d%H%M%S") + ".zip", 'w')
     if message is not None:
         message_path = os.path.abspath(get_out_dir() + "/message.txt")
         utils_file.write_file(message_path, message)
         new_zip.write(message_path, utils_file.get_file_name_by_file_path(message_path), zipfile.ZIP_DEFLATED)
     if files is not None:
         for file_path_item in files:
+            if os.path.exists(file_path_item) is False:
+                continue
             new_zip.write(file_path_item, utils_file.get_file_name_by_file_path(file_path_item), zipfile.ZIP_DEFLATED)
 
 

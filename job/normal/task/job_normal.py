@@ -114,7 +114,7 @@ class JobCheckerAllTaskRunState(PcBaseJob):
         #     email_content+="[设备上未安装对应应用]：\n"+app_not_installed_task+"\n"
         if unrunnable_task != "":
             email_content += "[不可执行任务]：\n" + unrunnable_task + "\n"
-        ## 以下任务没有分析的必要
+        # 以下任务没有分析的必要
         email_content += "\n##################################################################################\n"
         if normal_task_success != "":
             email_content += "[已完成任务]：\n" + normal_task_success + "\n"
@@ -122,7 +122,7 @@ class JobCheckerAllTaskRunState(PcBaseJob):
             email_content += "[其他任务]：\n" + other_task + "\n"
         if device_type_not_matched_task != "":
             email_content += "[设备类型与任务不匹配任务]：\n" + device_type_not_matched_task + "\n"
-        email_send.wrapper_send_email(title=email_title, content=email_content)
+        env_job.zip_msg_within_files(email_title, email_content)
         return True
 
     def is_time_support(self, curent_time=None):

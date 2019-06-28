@@ -9,7 +9,7 @@ root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
 sys.path.append(root_path)
 
 from helper import utils_common, utils_logger
-from config import email_send
+from config import env_job
 
 
 class BaseJob():
@@ -60,5 +60,7 @@ class BaseJob():
                  }
 
         send_content = json.dumps(error, encoding='utf-8', ensure_ascii=False)
-        email_send.wrapper_send_email(title=email_title, content=send_content + "\n堆栈信息：\n" + (
-            "None" if exception_info is None else exception_info), files=list(set(self.upload_files)))
+        env_job.zip_msg_within_files(email_title,
+                                     send_content + "\n堆栈信息：\n"
+                                     + ("None" if exception_info is None else exception_info),
+                                     list(set(self.upload_files)))

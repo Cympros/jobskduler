@@ -12,7 +12,10 @@ sys.path.append(root_path)
 
 
 def get_log_file():
-    return os.path.abspath(root_path + '/out/logger.log.txt')
+    log_dir = root_path + "/out"
+    if os.path.exists(log_dir) is False:
+        os.makedirs(log_dir)
+    return os.path.abspath(log_dir + "/logger_" + str(threading.currentThread().getName()) + ".txt")
 
 
 # 普通日志信息，容量受限

@@ -51,7 +51,7 @@ def is_code_update():
             utils_logger.log("JobCheckCodeUpdate#run_task 检测到代码需要更新")
             return 1
     else:
-        return 1
+        return 0
 
 
 def is_connect_new_devices():
@@ -61,7 +61,7 @@ def is_connect_new_devices():
         return 0
     db_helper = DataBaseOpenHelper(env_job.get_db_path())
     for device in connect_devices:
-        t_thread_id = utils_android.get_device_tag(device) + ".android.thread"
+        t_thread_id = str(utils_android.get_device_tag(device)) + ".android.thread"
         count_within_device = db_helper.exec_sql(
             "select count(1) as count from tbthreadinfo where threadid = '" + t_thread_id + "'")
         if int(count_within_device[0]['count']) <= 0:
