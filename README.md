@@ -76,3 +76,8 @@ uiautomatorviewer   //命令行输入该命令即启用Andorid自带View视图�
 5.直接api访问执行京东签到领京豆任务：sign_url = 'https://api.m.jd.com/client.action?functionId=signBeanStart'   
 6.airtest macaca      
 7.http://ai.baidu.com/docs#/OCR-API/0d9adafa  
+8.self.dos.excute_cmd('taskkill -F -PID node.exe')使用
+9.参数补全："appium -p "+4723 + "-bp "+4900 +" --no-reset --session-override -log D:/log/myd.log"
+10.thread被打断后自动重启
+11.基于'netstat -ano | findstr '+str(port_num)判断appium服务端口是否被占用
+12.appium:appWaitActivity配置的使用
