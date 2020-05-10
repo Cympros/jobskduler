@@ -8,17 +8,17 @@ import random
 project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
 sys.path.append(project_root_path)
 
-from tasks.appium.task_appium_base import AppiumBaseTask
+from tasks.appium.task_appium_base import BasicAppiumTask
 from tasks.appium import utils_appium
 # from helper import utils_logger
 
 
-class TaskAppiumJingdong(AppiumBaseTask):
+class TaskAppiumJingdong(BasicAppiumTask):
     def __init__(self):
-        AppiumBaseTask.__init__(self, "com.jingdong.app.mall", "com.jingdong.app.mall.main.MainActivity")
+        BasicAppiumTask.__init__(self, "com.jingdong.app.mall", "com.jingdong.app.mall.main.MainActivity")
 
     def except_case_in_query_ele(self):
-        if AppiumBaseTask.except_case_in_query_ele(self) is True:
+        if BasicAppiumTask.except_case_in_query_ele(self) is True:
             return True
         # 关闭全屏模式下左右可滑动的
         if self.query_ele_wrapper(self.get_query_str_by_viewid('com.jingdong.app.mall:id/c5w'), click_mode='click',
@@ -30,7 +30,7 @@ class TaskAppiumJingdong(AppiumBaseTask):
         return False
 
     def run_task(self):
-        return AppiumBaseTask.run_task(self)
+        return BasicAppiumTask.run_task(self)
 
 
 # 领京豆页面
@@ -327,10 +327,10 @@ class TaskAppiumJDSignDoubleSign(TaskAppiumJDEarnJingDou):
 
 
 if __name__ == '__main__':
-    tasks = ['TaskAppiumJDEarnJingDou', 'TaskAppiumJDEnterShopGotJD', 'TaskAppiumJdSignAdditional',
-             'TaskAppiumJDSignDoubleSign', 'TaskAppiumJDSignNormal',
-             'TaskAppiumJDUserMeiriFuli', 'TaskAppiumJDUserMeiriFuliAddition', 'TaskAppiumJDVoucherCenter',
-             'TaskAppiumJDZhuanFuli', 'TaskAppiumJingdong']
+    import inspect
+
+    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
+             if not left.startswith('Basic')]
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):

@@ -9,17 +9,17 @@ import traceback
 project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
 sys.path.append(project_root_path)
 
-from tasks.appium.task_appium_base import AppiumBaseTask
+from tasks.appium.task_appium_base import BasicAppiumTask
 from tasks.appium import utils_appium
 # from helper import utils_logger
 
 
-class TaskAppiumTaoToutiaoBase(AppiumBaseTask):
+class TaskAppiumTaoToutiaoBase(BasicAppiumTask):
     def __init__(self):
-        AppiumBaseTask.__init__(self, 'com.ly.taotoutiao', 'com.ly.taotoutiao.view.activity.WelComeActivity')
+        BasicAppiumTask.__init__(self, 'com.ly.taotoutiao', 'com.ly.taotoutiao.view.activity.WelComeActivity')
 
     def except_case_in_query_ele(self):
-        if AppiumBaseTask.except_case_in_query_ele(self) is True:
+        if BasicAppiumTask.except_case_in_query_ele(self) is True:
             return True
         if self.query_ele_wrapper(self.get_query_str_by_viewid("com.ly.taotoutiao:id/img_hd_close"),
                                   is_ignore_except_case=True, click_mode='click') is not None:
@@ -27,7 +27,7 @@ class TaskAppiumTaoToutiaoBase(AppiumBaseTask):
         return False
 
     def run_task(self):
-        if AppiumBaseTask.run_task(self) is False:
+        if BasicAppiumTask.run_task(self) is False:
             return False
         if self.wait_activity(self.driver, ".view.activity.MainActivity") is False:
             self.task_scheduler_failed("未进入淘头条首页")
@@ -168,7 +168,10 @@ class TaskAppiumTaoToutiaoYueDu(TaskAppiumTaoToutiaoBase):
 
 
 if __name__ == '__main__':
-    tasks = ['TaskAppiumTaoToutiaoBase', 'TaskAppiumTaotoutiaoCoreShiduanJiangli', 'TaskAppiumTaoToutiaoYueDu']
+    import inspect
+
+    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
+             if not left.startswith('Basic')]
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):

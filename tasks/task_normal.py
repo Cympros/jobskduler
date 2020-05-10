@@ -13,10 +13,10 @@ from config import email_send
 from config import envs
 from tasks.appium.utils import utils_android
 from helper import utils_config_parser, utils_logger, utils_common
-from tasks.task_pc_base import PcBaseTask
+from tasks.task_pc_base import BasicPCTask
 
 
-class TaskBrowserDeviceTimelyInfo(PcBaseTask):
+class TaskBrowserDeviceTimelyInfo(BasicPCTask):
     """即时浏览设备信息"""
 
     def run_task(self):
@@ -25,14 +25,15 @@ class TaskBrowserDeviceTimelyInfo(PcBaseTask):
         device_conf_path = os.path.abspath(envs.get_out_dir() + "/conf_device.ini")
         connected_android_devices = utils_android.get_connected_devcies()
         for device_tag in utils_config_parser.get_sessions(device_conf_path):
-            device_item_info_map = utils_config_parser.get_map_within_session(device_conf_path, device_tag)
+            device_item_info_map = utils_config_parser.get_map_within_session(device_conf_path,
+                                                                              device_tag)
             connected_device_info += "[" + device_tag + "]:\n"
             for key, value in device_item_info_map.iteritems():
                 connected_device_info += "    " + key + ":" + value + "\n"
         utils_logger.log(connected_device_info)
 
 
-class TaskCheckerAllTaskRunState(PcBaseTask):
+class TaskCheckerAllTaskRunState(BasicPCTask):
     '检查所有task的执行状态'
 
     def run_task(self):
@@ -52,24 +53,33 @@ class TaskCheckerAllTaskRunState(PcBaseTask):
         task_sessions.sort()
         for task in task_sessions:  # 包含设备相关的task描述
             # 今日还剩余多少次没有执行完成
-            task_path = utils_config_parser.get_value(envs.get_project_config_path(), task, "task_path")
-            is_need_run = utils_config_parser.get_value(envs.get_project_config_path(), task, 'runnable')
-            is_device_type_support = utils_config_parser.get_value(envs.get_project_config_path(), task,
+            task_path = utils_config_parser.get_value(envs.get_project_config_path(), task,
+                                                      "task_path")
+            is_need_run = utils_config_parser.get_value(envs.get_project_config_path(), task,
+                                                        'runnable')
+            is_device_type_support = utils_config_parser.get_value(envs.get_project_config_path(),
+                                                                   task,
                                                                    'is_device_type_support')
-            is_retry_count_over = utils_config_parser.get_value(envs.get_project_config_path(), task,
+            is_retry_count_over = utils_config_parser.get_value(envs.get_project_config_path(),
+                                                                task,
                                                                 "is_retry_count_over")
             daily_repeat_count = int(
-                utils_config_parser.get_value(envs.get_project_config_path(), task, "daily_repeat_count", 0))
+                utils_config_parser.get_value(envs.get_project_config_path(), task,
+                                              "daily_repeat_count", 0))
             today_repeat_count_left = int(
-                utils_config_parser.get_value(envs.get_project_config_path(), task, "today_repeat_count_left",
+                utils_config_parser.get_value(envs.get_project_config_path(), task,
+                                              "today_repeat_count_left",
                                               daily_repeat_count))
             today_total_run_number = int(
-                utils_config_parser.get_value(envs.get_project_config_path(), task, "today_total_run_number", 0))
+                utils_config_parser.get_value(envs.get_project_config_path(), task,
+                                              "today_total_run_number", 0))
 
             output_info = "剩余执行次数：" + str(today_repeat_count_left) + "/" + str(daily_repeat_count) \
-                          + "，执行成功率：" + str(daily_repeat_count - today_repeat_count_left) + "/" + str(
+                          + "，执行成功率：" + str(
+                daily_repeat_count - today_repeat_count_left) + "/" + str(
                 today_total_run_number) \
-                          + "，[" + utils_config_parser.get_value(envs.get_project_config_path(), task,
+                          + "，[" + utils_config_parser.get_value(envs.get_project_config_path(),
+                                                                 task,
                                                                  'task_name') + "]：" + task \
                           + "\n"
             """
@@ -85,7 +95,8 @@ class TaskCheckerAllTaskRunState(PcBaseTask):
                     if task_path not in unrunnable_task_list:
                         unrunnable_task_list.append(task_path)
                         unrunnable_task += "[" + str(
-                            utils_config_parser.get_value(envs.get_project_config_path(), task, 'task_name')) \
+                            utils_config_parser.get_value(envs.get_project_config_path(), task,
+                                                          'task_name')) \
                                            + "]：" + str(task_path) + "\n"
                 elif is_device_type_support is not None and is_device_type_support != 'true':
                     device_type_not_matched_task += output_info
@@ -133,7 +144,7 @@ class TaskCheckerAllTaskRunState(PcBaseTask):
         return is_run_support
 
 
-class TaskResetRunRetryModel(PcBaseTask):
+class TaskResetRunRetryModel(BasicPCTask):
     """用于解决超过重试次数的任务"""
 
     def run_task(self):
@@ -143,7 +154,8 @@ class TaskResetRunRetryModel(PcBaseTask):
             retry_over_tasks = []
             task_sessions.sort()
             for task_session in task_sessions:  # 包含设备相关的task描述
-                is_retry_count_over = conf_modify.query(task_session, "is_retry_count_over", "false")
+                is_retry_count_over = conf_modify.query(task_session, "is_retry_count_over",
+                                                        "false")
                 # print task_session,is_retry_count_over
                 if is_retry_count_over == "true":
                     retry_over_tasks.append(task_session)
@@ -159,10 +171,13 @@ class TaskResetRunRetryModel(PcBaseTask):
             if retry_over_index >= len(tasks) > 0:
                 utils_logger.log("[" + str(retry_over_index) + "]任务索引不存在，退出程序...")
                 break
-            utils_logger.log("start to reset state for retry_over：", retry_over_tasks[retry_over_index])
+            utils_logger.log("start to reset state for retry_over：",
+                             retry_over_tasks[retry_over_index])
             # reset
-            daily_repeat_count = conf_modify.query(retry_over_tasks[retry_over_index], "daily_repeat_count")
-            today_repeat_count_left = conf_modify.query(retry_over_tasks[retry_over_index], "today_repeat_count_left")
+            daily_repeat_count = conf_modify.query(retry_over_tasks[retry_over_index],
+                                                   "daily_repeat_count")
+            today_repeat_count_left = conf_modify.query(retry_over_tasks[retry_over_index],
+                                                        "today_repeat_count_left")
             if daily_repeat_count is not None and today_repeat_count_left is not None:
                 conf_modify.put(retry_over_tasks[retry_over_index], "today_total_run_number",
                                 int(daily_repeat_count) - int(today_repeat_count_left))
@@ -172,7 +187,7 @@ class TaskResetRunRetryModel(PcBaseTask):
             utils_logger.log("-----------------------------------------------\n")
 
 
-class TaskClearUnUseDevice(PcBaseTask):
+class TaskClearUnUseDevice(BasicPCTask):
     def run_task(self):
         """以设备为维度，清空不再使用的设备下对应的所有任务"""
         device_dict = clc.defaultdict(list)
@@ -199,7 +214,8 @@ class TaskClearUnUseDevice(PcBaseTask):
                 break
             # 查看设备信息
             config_map = utils_config_parser.get_map_within_session(device_conf_path,
-                                                                    device_list[device_index_selected])
+                                                                    device_list[
+                                                                        device_index_selected])
             is_confirm_delete = input("确认删除该设备下对应的所有任务吗？(y/n)\n" + str(config_map) + "\n")
             if is_confirm_delete != "y":
                 continue
@@ -212,7 +228,10 @@ class TaskClearUnUseDevice(PcBaseTask):
 
 
 if __name__ == "__main__":
-    tasks = ['TaskCheckerAllTaskRunState', 'TaskBrowserDeviceTimelyInfo', 'JobClearUnUseDevice', 'JobResetRunRetryModel']
+    import inspect
+
+    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
+             if not left.startswith('Basic')]
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):

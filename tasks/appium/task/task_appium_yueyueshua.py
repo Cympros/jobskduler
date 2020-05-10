@@ -6,13 +6,13 @@ import sys
 project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
 sys.path.append(project_root_path)
 
-from tasks.appium.task_appium_base import AppiumBaseTask
+from tasks.appium.task_appium_base import BasicAppiumTask
 # from helper import utils_logger
 
 
-class TaskAppiumYueyueShuaBase(AppiumBaseTask):
+class TaskAppiumYueyueShuaBase(BasicAppiumTask):
     def __init__(self):
-        AppiumBaseTask.__init__(self, "com.weifu.yys", "com.weifu.yys.YStartActivity")
+        BasicAppiumTask.__init__(self, "com.weifu.yys", "com.weifu.yys.YStartActivity")
 
 
 class TaskAppiumYueyueshuaSign(TaskAppiumYueyueShuaBase):
@@ -45,7 +45,10 @@ class TaskAppiumYueyueshuaSign(TaskAppiumYueyueShuaBase):
 
 
 if __name__ == '__main__':
-    tasks = ['TaskAppiumYueyueShuaBase', 'TaskAppiumYueyueshuaSign']
+    import inspect
+
+    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
+             if not left.startswith('Basic')]
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):

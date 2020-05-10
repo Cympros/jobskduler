@@ -9,7 +9,7 @@ sys.path.append(project_root_path)
 from tasks.task_base import BaseTask
 
 
-class PcBaseTask(BaseTask):
+class BasicPCTask(BaseTask):
 
     def __init__(self):
         BaseTask.__init__(self)

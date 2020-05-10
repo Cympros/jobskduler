@@ -6,17 +6,17 @@ import sys
 project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
 sys.path.append(project_root_path)
 
-from tasks.appium.task_appium_base import AppiumBaseTask
+from tasks.appium.task_appium_base import BasicAppiumTask
 # from helper import utils_logger
 
 
-class TaskAppiumJDJRSignBase(AppiumBaseTask):
+class TaskAppiumJDJRSignBase(BasicAppiumTask):
     '''
         用于进入京东金融的首页
     "'''
 
     def __init__(self):
-        AppiumBaseTask.__init__(self, "com.jd.jrapp", "com.jd.jrapp.WelcomeActivity")
+        BasicAppiumTask.__init__(self, "com.jd.jrapp", "com.jd.jrapp.WelcomeActivity")
 
     def __deal_within_login(self):
         '处理在登录界面的情况'
@@ -54,7 +54,7 @@ class TaskAppiumJDJRSignBase(AppiumBaseTask):
         return False
 
     def except_case_in_query_ele(self):
-        if AppiumBaseTask.except_case_in_query_ele(self) is True:
+        if BasicAppiumTask.except_case_in_query_ele(self) is True:
             return True
         if self.wait_activity(self.driver, ['.ver2.account.security.GestureLockActivity',
                                             '.bm.zhyy.account.security.GestureLockActivity'],
@@ -90,7 +90,7 @@ class TaskAppiumJDJRSignBase(AppiumBaseTask):
         return False
 
     def run_task(self):
-        if AppiumBaseTask.run_task(self) is False:
+        if BasicAppiumTask.run_task(self) is False:
             return False
         search_fliter = ['.ver2.main.MainActivity', '.ver2.account.security.GestureLockActivity',
                          '.bm.zhyy.account.security.GestureLockActivity']
@@ -283,7 +283,10 @@ class TaskAppiumJDJRDailyClockOn(TaskAppiumJDJRSignBase):
 
 
 if __name__ == '__main__':
-    tasks = ['TaskAppiumJDJRDailyClockOn', 'TaskAppiumJDJRQuanyiCenter', 'TaskAppiumJDJRSign']
+    import inspect
+
+    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
+             if not left.startswith('Basic')]
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):

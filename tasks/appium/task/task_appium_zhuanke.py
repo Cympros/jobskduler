@@ -8,20 +8,20 @@ sys.path.append(project_root_path)
 
 # from helper import utils_common, utils_logger
 # from helper import envs
-from tasks.appium.task_appium_base import AppiumBaseTask
+from tasks.appium.task_appium_base import BasicAppiumTask
 
 '需要重新绑定账号：13651968735'
 
 
-class TaskAppiumZhuankeBase(AppiumBaseTask):
+class TaskAppiumZhuankeBase(BasicAppiumTask):
     def __init__(self):
-        AppiumBaseTask.__init__(self)
+        BasicAppiumTask.__init__(self)
 
     def run_task(self):
-        return AppiumBaseTask.run_task(self)
+        return BasicAppiumTask.run_task(self)
 
     def except_case_in_query_ele(self):
-        if AppiumBaseTask.except_case_in_query_ele(self) is True:
+        if BasicAppiumTask.except_case_in_query_ele(self) is True:
             return True
         # self.query_ele_wrapper(self.get_query_str_by_viewid('cn.zhuanke.zhuankeAPP:id/dialog_title'),is_ignore_except_case=True,retry_count=0) is not None 
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("新版本升级"),
@@ -283,7 +283,10 @@ class TaskAppiumZhuankeTrial(TaskAppiumZhuankeBase):
 
 
 if __name__ == "__main__":
-    tasks = ['TaskAppiumZhuankeBase', 'TaskAppiumZhuankeSign', 'TaskAppiumZhuankeTrial']
+    import inspect
+
+    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
+             if not left.startswith('Basic')]
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):

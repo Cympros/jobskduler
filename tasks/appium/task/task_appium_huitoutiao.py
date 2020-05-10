@@ -9,17 +9,17 @@ import traceback
 project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
 sys.path.append(project_root_path)
 
-from tasks.appium.task_appium_base import AppiumBaseTask
+from tasks.appium.task_appium_base import BasicAppiumTask
 from tasks.appium import utils_appium
 # from helper import utils_logger
 
 
-class TaskAppiumHuiToutiaoBase(AppiumBaseTask):
+class TaskAppiumHuiToutiaoBase(BasicAppiumTask):
     def __init__(self):
-        AppiumBaseTask.__init__(self, 'com.cashtoutiao', 'com.cashtoutiao.common.ui.SplashActivity')
+        BasicAppiumTask.__init__(self, 'com.cashtoutiao', 'com.cashtoutiao.common.ui.SplashActivity')
 
     def except_case_in_query_ele(self):
-        if AppiumBaseTask.except_case_in_query_ele(self) is True:
+        if BasicAppiumTask.except_case_in_query_ele(self) is True:
             return True
         if self.query_ele_wrapper(
                 "//android.widget.LinearLayout//android.widget.FrameLayout//android.widget.RelativeLayout"
@@ -47,7 +47,7 @@ class TaskAppiumHuiToutiaoBase(AppiumBaseTask):
         return False
 
     def run_task(self):
-        if AppiumBaseTask.run_task(self) is False:
+        if BasicAppiumTask.run_task(self) is False:
             return False
         if self.wait_activity(self.driver, "com.cashtoutiao.account.ui.main.MainTabActivity") is False:
             self.task_scheduler_failed("未进入惠头条首页")
@@ -178,7 +178,10 @@ class TaskAppiumHuiToutiaoYueDu(TaskAppiumHuiToutiaoBase):
 
 
 if __name__ == '__main__':
-    tasks = ['TaskAppiumHuiToutiaoBase', 'TaskAppiumHuiToutiaoYueDu', 'TaskAppiumHuitoutiaoCoreShiduanJiangli']
+    import inspect
+
+    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
+             if not left.startswith('Basic')]
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):

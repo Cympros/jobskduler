@@ -9,18 +9,18 @@ import traceback
 project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
 sys.path.append(project_root_path)
 
-from tasks.appium.task_appium_base import AppiumBaseTask
+from tasks.appium.task_appium_base import BasicAppiumTask
 from tasks.appium import utils_appium
 # from helper import envs
 # from helper import utils_logger
 
 
-class TaskAppiumQutoutiaoBase(AppiumBaseTask):
+class TaskAppiumQutoutiaoBase(BasicAppiumTask):
     def __init__(self):
-        AppiumBaseTask.__init__(self, "com.jifen.qukan", "com.jifen.qkbase.main.MainActivity")
+        BasicAppiumTask.__init__(self, "com.jifen.qukan", "com.jifen.qkbase.main.MainActivity")
 
     def except_case_in_query_ele(self):
-        if AppiumBaseTask.except_case_in_query_ele(self) is True:
+        if BasicAppiumTask.except_case_in_query_ele(self) is True:
             return True
         if self.query_ele_wrapper(self.get_query_str_by_viewid('com.jifen.qukan:id/nu'), click_mode="click",
                                   is_ignore_except_case=True, retry_count=0) is not None:
@@ -47,7 +47,7 @@ class TaskAppiumQutoutiaoBase(AppiumBaseTask):
         return False
 
     def run_task(self):
-        if AppiumBaseTask.run_task(self) is False:
+        if BasicAppiumTask.run_task(self) is False:
             return False
         # 延长重试次数，避免应用启动比较耗时的情况
         if self.wait_activity(self.driver, "com.jifen.qkbase.main.MainActivity", retry_count=50) is False:
@@ -375,10 +375,10 @@ class TaskAppiumQtoutiaoLogin(TaskAppiumQutoutiaoBase):
 
 
 if __name__ == '__main__':
-    tasks = ['TaskAppiumQtoutiaoCoreShiduanJiangli', 'TaskAppiumQtoutiaoGrandTotalJiangli', 'TaskAppiumQtoutiaoTaskCenter',
-             'TaskAppiumQtoutiaoLogin',
-             'TaskAppiumQtoutiaoOpenBaoxiang', 'TaskAppiumQtoutiaoSign', 'TaskAppiumQtoutiaoYuedu',
-             'TaskAppiumQutoutiaoBase']
+    import inspect
+
+    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
+             if not left.startswith('Basic')]
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):

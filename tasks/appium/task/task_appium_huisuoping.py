@@ -6,16 +6,16 @@ import sys
 project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
 sys.path.append(project_root_path)
 
-from tasks.appium.task_appium_base import AppiumBaseTask
+from tasks.appium.task_appium_base import BasicAppiumTask
 # from helper import utils_logger
 
 
-class TaskAppiumHSPBase(AppiumBaseTask):
+class TaskAppiumHSPBase(BasicAppiumTask):
     def __init__(self):
-        AppiumBaseTask.__init__(self)
+        BasicAppiumTask.__init__(self)
 
     def except_case_in_query_ele(self):
-        if AppiumBaseTask.except_case_in_query_ele(self) is True:
+        if BasicAppiumTask.except_case_in_query_ele(self) is True:
             return True
         elif self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("友情提醒"), is_ignore_except_case=True,
                                     retry_count=0) is not None:
@@ -39,10 +39,10 @@ class TaskAppiumHSPBase(AppiumBaseTask):
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('网络出错了，请待会再试吧', is_force_match=False),
                                   is_ignore_except_case=True, retry_count=0) is not None:
             utils_logger.log("TaskAppiumHSPBase.task_scheduler_failed:网络出错，调整邮件提醒类别")
-            AppiumBaseTask.task_scheduler_failed(self, email_title='网络异常', message=message, is_page_source=is_page_source,
+            BasicAppiumTask.task_scheduler_failed(self, email_title='网络异常', message=message, is_page_source=is_page_source,
                                                is_scr_shot=is_scr_shot)
         else:
-            AppiumBaseTask.task_scheduler_failed(self, email_title=email_title, message=message,
+            BasicAppiumTask.task_scheduler_failed(self, email_title=email_title, message=message,
                                                is_page_source=is_page_source, is_scr_shot=is_scr_shot)
 
 
@@ -229,8 +229,10 @@ class TaskAppiumHSPLuckyPan(TaskAppiumHSPMoreMakeMoneyBase):
 
 
 if __name__ == "__main__":
-    tasks = ['TaskAppiumActiveRedPkg', 'TaskAppiumDailySign', 'TaskAppiumHSPDailyClockOn', 'TaskAppiumHSPHourCredit',
-             'TaskAppiumHSPLuckyPan', 'TaskAppiumHSPMoreMakeMoneyBase']
+    import inspect
+
+    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
+             if not left.startswith('Basic')]
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):

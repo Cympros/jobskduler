@@ -250,8 +250,9 @@ class WechatKeepAliveChecker(TaskWechat):
     '用来检测wechat是否在线的模块'
 
     def __init__(self):
-        TaskWechat.__init__(self, send_message="hell world," + str(utils.get_shanghai_time('%Y%m%d %H:%M:%S')),
-                           is_need_listen_callback=False)
+        TaskWechat.__init__(self, send_message="hell world," + str(
+            utils.get_shanghai_time('%Y%m%d %H:%M:%S')),
+                            is_need_listen_callback=False)
 
     def get_target_user(self):
         friendslist = itchat.search_friends(u'Jimmie')
@@ -263,8 +264,10 @@ class WechatKeepAliveChecker(TaskWechat):
 
 
 if __name__ == "__main__":
-    tasks = ['WechatCreditcardRepayState', 'WechatZhaoshangCreditcardSign', 'WechatKeepAliveChecker',
-             'WechatSqjyxzsSign']
+    import inspect
+
+    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
+             if not left.startswith('Basic')]
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):

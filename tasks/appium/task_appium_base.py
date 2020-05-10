@@ -32,7 +32,7 @@ PATH = lambda p: os.path.abspath(
 )
 
 
-class AppiumBaseTask(BaseTask):
+class BasicAppiumTask(BaseTask):
     def __init__(self, target_application_id=None, launch_activity=None):
         BaseTask.__init__(self)
         self.driver = None
@@ -54,7 +54,7 @@ class AppiumBaseTask(BaseTask):
         :param is_ignore_except_case: 
         :return: boolean
         """
-        utils_logger.log("AppiumBaseTask wait_activity")
+        utils_logger.log("BasicAppiumTask wait_activity")
         # query_activity_status: true or false
         # 第一次搜索时retry_count设置为1次(即一秒)，以避免wait_activity_with_status的重试时间内权限弹框被系统倒计时逻辑关闭
         if utils_appium.wait_activity_with_status(driver=driver, target=target,
@@ -109,7 +109,7 @@ class AppiumBaseTask(BaseTask):
         if message is not None:
             utils_logger.log("message:", message)
         if self.upload_files is not None and len(self.upload_files) > 0:
-            utils_logger.log("task_scheduler_failed in AppiumBaseTask with upload_files:",
+            utils_logger.log("task_scheduler_failed in BasicAppiumTask with upload_files:",
                              list(set(self.upload_files)))
         msgs = {'device_name': self.target_device_name,
                 'device_version': utils_android.get_deivce_android_version(
@@ -313,7 +313,7 @@ class AppiumBaseTask(BaseTask):
             return utils_appium.find_element_by_xpath(driver=self.driver, xpath=query_str)
 
     def except_case_in_query_ele(self):
-        utils_logger.log("except_case_in_query_ele in AppiumBaseTask")
+        utils_logger.log("except_case_in_query_ele in BasicAppiumTask")
         '查询element的时候朋友的异常处理，True表示得以正常处理'
         # xpath模糊匹配速度太慢
         if self.query_ele_wrapper(
