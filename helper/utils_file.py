@@ -20,7 +20,7 @@ def generate_suffix_file(raw_file_path, save_to_dir=None, suffix=None):
     :return: 
     """
     if os.path.exists(raw_file_path) is False:
-        utils_logger.log("--->[generate_suffix_file] 源文件不能存，不支持创建新的后缀文件", raw_file_path)
+        utils_logger.log("[generate_suffix_file] 源文件不能存，不支持创建新的后缀文件", raw_file_path)
         raise Exception("not support generate_suffix_file with not exist")
     if os.path.isfile(raw_file_path) is False:
         raise Exception("not support generate_suffix_file with check file type")

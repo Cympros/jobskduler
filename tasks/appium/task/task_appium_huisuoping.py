@@ -27,7 +27,7 @@ class TaskAppiumHSPBase(AppiumBaseTask):
                 return False
         elif self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('立即更新'), is_ignore_except_case=True,
                                     retry_count=0) is not None:
-            utils_logger.log("---> 检测到版本更新")
+            utils_logger.log("检测到版本更新")
             if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('以后再说'), click_mode='click',
                                       is_ignore_except_case=True, retry_count=0) is not None:
                 return True
@@ -38,7 +38,7 @@ class TaskAppiumHSPBase(AppiumBaseTask):
     def task_scheduler_failed(self, message, email_title=u'异常信息', is_page_source=True, is_scr_shot=True):
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('网络出错了，请待会再试吧', is_force_match=False),
                                   is_ignore_except_case=True, retry_count=0) is not None:
-            utils_logger.log("--->TaskAppiumHSPBase.task_scheduler_failed:网络出错，调整邮件提醒类别")
+            utils_logger.log("TaskAppiumHSPBase.task_scheduler_failed:网络出错，调整邮件提醒类别")
             AppiumBaseTask.task_scheduler_failed(self, email_title='网络异常', message=message, is_page_source=is_page_source,
                                                is_scr_shot=is_scr_shot)
         else:
@@ -65,7 +65,7 @@ class TaskAppiumHSPHourCredit(TaskAppiumHSPBase):
                                           click_mode="click") is not None:
             return True
         elif self.query_ele_wrapper(self.get_query_str_by_viewid('com.huaqian:id/redbag_count_down')) is not None:
-            utils_logger.log("---> TaskAppiumHSPHourCredit : still in count_down")
+            utils_logger.log("TaskAppiumHSPHourCredit : still in count_down")
             return True
         else:
             self.task_scheduler_failed("query failed for viewid of com.huaqian:id/hour_credit")
@@ -84,7 +84,7 @@ class TaskAppiumDailySign(TaskAppiumHSPBase):
                 return True
             else:
                 # 这里没必要通知，直接忽略该异常
-                utils_logger.log("--->task_scheduler_failed:'您已签到并领取\d+金币 not matched'")
+                utils_logger.log("task_scheduler_failed:'您已签到并领取\d+金币 not matched'")
                 # self.task_scheduler_failed('您已签到并领取\d+金币 not matched')
                 return False
         # elif self.query_ele_wrapper(self.get_query_str_within_xpath_only_text(text='签到中心'),click_mode="click") is not None\
@@ -196,7 +196,7 @@ class TaskAppiumActiveRedPkg(TaskAppiumHSPMoreMakeMoneyBase):
                 elif self.query_ele_wrapper(self.get_query_str_by_viewid('com.huaqian:id/image_red_msg'),
                                             retry_count=0) is not None:
                     # 提示无活跃值用于抽奖:无活跃值时点击财神爷无反应
-                    utils_logger.log("---> 提示：无活跃值用于抽奖")
+                    utils_logger.log("提示：无活跃值用于抽奖")
                     return True
                 else:
                     self.task_scheduler_failed('why not found image_open_icon/image_red_msg')

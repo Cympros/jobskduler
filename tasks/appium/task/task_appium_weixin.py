@@ -35,7 +35,7 @@ class TaskAppiumWeixinExit(AppiumBaseTask):
         if AppiumBaseTask.run_task(self) is False:
             return False
         if self.wait_activity(self.driver, '.plugin.account.ui.LoginPasswordUI') is True:
-            utils_logger.log("---> 是登录页面")
+            utils_logger.log("是登录页面")
             return True
         elif self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('我'), click_mode="click") is not None:
             if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('设置'), click_mode='click') is not None:
@@ -47,7 +47,7 @@ class TaskAppiumWeixinExit(AppiumBaseTask):
                         if self.query_ele_wrapper(
                                 self.get_query_str_within_xpath_only_text('退出', view_type='android.widget.Button'),
                                 click_mode='click') is not None:
-                            utils_logger.log("---> 点击退出退出账号")
+                            utils_logger.log("点击退出退出账号")
                             time.sleep(10)
                             return False
                         else:
@@ -91,7 +91,7 @@ class TaskAppiumWeixinBase(AppiumBaseTask):
                 if self.query_ele_wrapper(
                         self.get_query_str_within_xpath_only_text('登录', view_type='android.widget.Button'),
                         click_mode="click", is_ignore_except_case=True) is not None:
-                    utils_logger.log("---> wait login success")
+                    utils_logger.log("wait login success")
                     time.sleep(10)  # 等待登录完成
                     return True
                 else:
@@ -169,7 +169,7 @@ class TaskAppiumJimmieJDCaiYunlianlianfan(TaskAppiumWeixinBase):
             return False
         # TODO：以下仅做测试使用
         if self.query_only_point_within_text('占位符') is not None:
-            utils_logger.log("---> 模拟使用占位符")
+            utils_logger.log("模拟使用占位符")
         else:
             self.task_scheduler_failed('财运连连翻 failed')
         return False
@@ -193,9 +193,9 @@ class TaskAppiumJimmieJDJingdouleyuan(TaskAppiumWeixinBase):
             self.task_scheduler_failed('这里可以免费领京豆')
             return False
         if self.query_only_point_within_text('^签到领京豆$', is_auto_click=True) is not None:
-            utils_logger.log("---> 领取京豆")
+            utils_logger.log("领取京豆")
             if self.query_point_size_within_text('^知道了$|^京豆稍后会发放到您的账号$') > 0:
-                utils_logger.log("---> 签到成功")
+                utils_logger.log("签到成功")
                 return True
             else:
                 self.task_scheduler_failed("解析'我知道了'失败")
@@ -225,13 +225,13 @@ class TaskAppiumJimmieJDPeiyuchang(TaskAppiumWeixinBase):
             return False
         is_view_layout_finished, file_screen_shot = self.wait_view_layout_finish(True)
         if is_view_layout_finished is False:
-            utils_logger.log("---> 在指定时限页面还未绘制完成")
+            utils_logger.log("在指定时限页面还未绘制完成")
             self.task_scheduler_failed('在指定时限页面还未绘制完成')
             return False
 
         event_position = self.query_only_point_within_text('^(收获京豆|分享加速|培育京豆)$')
         if event_position is None:
-            utils_logger.log("---> 未找到指定操作控件")
+            utils_logger.log("未找到指定操作控件")
             self.task_scheduler_failed('未找到指定操作控件')
             return False
         # 构造比对子类
@@ -261,42 +261,42 @@ class TaskAppiumJimmieJDPeiyuchang(TaskAppiumWeixinBase):
             #     for match_result_item in finish_matchs:
             #         int_x=int(match_result_item['result'][0])
             #         int_y=int(match_result_item['result'][1])
-            #         utils_logger.log("--->check 按钮范围:",int_x,",",int_y,",600>int_x>0:",(600>int_x>0),",92*1024>100*int_y>1024*81:",(92*1024>100*int_y>1024*81)
+            #         utils_logger.log("check 按钮范围:",int_x,",",int_y,",600>int_x>0:",(600>int_x>0),",92*1024>100*int_y>1024*81:",(92*1024>100*int_y>1024*81)
             #         is_edge_ok=(600>int_x>0 and 92*1024>100*int_y>1024*81)
             #         if is_edge_ok is False:
-            #             utils_logger.log("---> 当前按钮不在范围内，忽略"
+            #             utils_logger.log("当前按钮不在范围内，忽略"
             #             continue
-            #         utils_logger.log("---> 选中指定item：",match_result_item
+            #         utils_logger.log("选中指定item：",match_result_item
             #         if self.safe_tap_in_point(match_result_item['result']) is False:
             #             self.task_scheduler_failed("选中'收获京豆'item失败")
             #             return False
-            #         utils_logger.log("---> 收获该item",event_position
+            #         utils_logger.log("收获该item",event_position
             #         if self.safe_tap_in_point(event_position) is False:
             #             self.task_scheduler_failed("收获京豆失败")
             #             return False
-            #         utils_logger.log("---> 收获的同时再次点击以开启培养操作,延时操作------------ing..."
+            #         utils_logger.log("收获的同时再次点击以开启培养操作,延时操作------------ing..."
             #         time.sleep(2)
             #         if self.safe_tap_in_point(event_position) is False:
             #             self.task_scheduler_failed("再次培育京豆失败")
             #             return False
-            #         utils_logger.log("---> 收获的同时再次点击以开启培养操作,延时操作------------end"
+            #         utils_logger.log("收获的同时再次点击以开启培养操作,延时操作------------end"
             # # 培养京豆
             # waiting_matchs=Template(image_path_waiting).results_within_match_in(parent_template)
             # if waiting_matchs is not None:
             #     for match_result_item in waiting_matchs:
             #         int_x=int(match_result_item['result'][0])
             #         int_y=int(match_result_item['result'][1])
-            #         utils_logger.log("--->check 按钮范围:",int_x,",",int_y,",600>int_x>0:",(600>int_x>0),",92*1024>100*int_y>1024*81:",(92*1024>100*int_y>1024*81)
+            #         utils_logger.log("check 按钮范围:",int_x,",",int_y,",600>int_x>0:",(600>int_x>0),",92*1024>100*int_y>1024*81:",(92*1024>100*int_y>1024*81)
             #         is_edge_ok=(600>int_x>0 and 92*1024>100*int_y>1024*81)
             #         if is_edge_ok is False:
-            #             utils_logger.log("---> 当前按钮不在范围内，认为是有其他元素,触摸以关闭弹窗"
+            #             utils_logger.log("当前按钮不在范围内，认为是有其他元素,触摸以关闭弹窗"
             #             continue
-            #         utils_logger.log("---> 选中指定item：",match_result_item
+            #         utils_logger.log("选中指定item：",match_result_item
             #         if self.safe_tap_in_point(match_result_item['result']) is False:
             #             self.task_scheduler_failed("无法选中'培育京豆'item")
             #             return False
             #         if self.query_only_point_within_text("^培育京豆$",is_auto_click=True,retry_count=0) is not None:
-            #             utils_logger.log("---> 检测到'培育京豆'按钮，需要培育该item",event_position
+            #             utils_logger.log("检测到'培育京豆'按钮，需要培育该item",event_position
             # 基于文字'待收获'进行
             shouhuola_point_result = self._query_points_with_text_by_ocr('^收获啦$')
             if shouhuola_point_result is not None:
@@ -304,16 +304,16 @@ class TaskAppiumJimmieJDPeiyuchang(TaskAppiumWeixinBase):
                     if self.safe_tap_in_point(single_point['avaiable_point']) is False:
                         self.task_scheduler_failed("选择'收获啦'失败")
                         continue
-                    utils_logger.log("---> 收获该item", event_position)
+                    utils_logger.log("收获该item", event_position)
                     if self.safe_tap_in_point(event_position) is False:
                         self.task_scheduler_failed("收获京豆失败")
                         continue
-                    utils_logger.log("---> 收获的同时再次点击以开启培养操作,延时操作------------ing...")
+                    utils_logger.log("收获的同时再次点击以开启培养操作,延时操作------------ing...")
                     time.sleep(2)
                     if self.safe_tap_in_point(event_position) is False:
                         self.task_scheduler_failed("再次培育京豆失败")
                         continue
-                    utils_logger.log("---> 收获的同时再次点击以开启培养操作,延时操作------------end")
+                    utils_logger.log("收获的同时再次点击以开启培养操作,延时操作------------end")
             # 滑动控件
             if bool(random.getrandbits(1)) is True:
                 tab_interval = [0.3, 0.7]
@@ -346,10 +346,10 @@ class TaskAppiumShenqianxiaozhushou(TaskAppiumWeixinBase):
             ele_edit.send_keys(u"签到")
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('发送', view_type='android.widget.Button'),
                                   click_mode='click') is not None:
-            utils_logger.log("--->点击发送按钮")
+            utils_logger.log("点击发送按钮")
             return True
         else:
-            utils_logger.log("---> 找不到发送的按钮")
+            utils_logger.log("找不到发送的按钮")
             self.task_scheduler_failed('找不到发送的按钮')
             return False
         return False
@@ -388,7 +388,7 @@ class TaskAppiumZhaohangXinyongkaSign(TaskAppiumWeixinBase):
         # return utils.is_img_similary(screen_shop_first,screen_shop_second,90)
 
         # 等待10秒
-        utils_logger.log("--->TaskAppiumZhaohangXinyongkaSign sleep:", 10)
+        utils_logger.log("TaskAppiumZhaohangXinyongkaSign sleep:", 10)
         time.sleep(10)
         return True
 
@@ -405,7 +405,7 @@ class TaskAppiumWaziDashangchengBase(TaskAppiumWeixinBase):
 
     def notify_task_success(self):
         AppiumBaseTask.notify_task_success(self)
-        utils_logger.log("--->更新上次check时间")
+        utils_logger.log("更新上次check时间")
         if self.task_session is not None:
             conf_modify.put(task_tag=self.task_session, key="last_check_task_state_time",
                             value=utils.get_shanghai_time('%Y%m%d%H%M'))
@@ -424,7 +424,7 @@ class TaskAppiumWaziDashangchengBase(TaskAppiumWeixinBase):
             self.task_scheduler_failed("not found \"" + self.mode + "\"")
             return False
         if self.query_point_size_within_text('^您在领取冷却中$') > 0:
-            utils_logger.log("--->检测到任务冷却中")
+            utils_logger.log("检测到任务冷却中")
             if self.task_session is not None:
                 # TODO：检测到任务冷却中，因此强制把今日所有的该任务都清空(这种方式不够友好)
                 conf_modify.put(task_tag=self.task_session, key="today_repeat_count_left", value=0)
@@ -465,7 +465,7 @@ class TaskAppiumJDJRQuanyiCenter(TaskAppiumWeixinBase):
                                   is_ignore_except_case=True) is not None \
                 and self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('申请获取以下权限:', is_force_match=False),
                                            is_ignore_except_case=True) is not None:
-            utils_logger.log("--->检测到京东授权弹窗信息")
+            utils_logger.log("检测到京东授权弹窗信息")
             # 检测到需要京东授权登录窗口校验
             if self.query_ele_wrapper(
                     self.get_query_str_within_xpath_only_text('允许', view_type='android.widget.Button'),
@@ -496,15 +496,15 @@ class TaskAppiumJDJRQuanyiCenter(TaskAppiumWeixinBase):
             return False
         # 解析去赚京豆页面
         for try_index in range(5):
-            utils_logger.log("---> 开始检测'立即领取' or '去赚京豆' with index:", try_index)
+            utils_logger.log("开始检测'立即领取' or '去赚京豆' with index:", try_index)
             if self.query_ele_wrapper(self.get_query_str_by_desc('立即领取'), click_mode="click") is not None \
                     or self.query_only_point_within_text('^立即领取$', is_auto_click=True) is not None:
                 if self.query_point_size_within_text('^恭喜你获得京豆$') > 0:
                     return True
                 elif self.query_only_point_within_text('^去京东金融APP领取$', is_auto_click=True) is not None:
-                    utils_logger.log("--->打开金融app领取(休眠10s)")
+                    utils_logger.log("打开金融app领取(休眠10s)")
                     if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('即将离开微信，打开其它应用')) is not None:
-                        utils_logger.log("--->通过微信开启另外的应用")
+                        utils_logger.log("通过微信开启另外的应用")
                         if self.query_ele_wrapper(
                                 self.get_query_str_within_xpath_only_text('允许', view_type='android.widget.Button'),
                                 click_mode='click') is not None:

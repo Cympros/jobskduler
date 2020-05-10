@@ -23,7 +23,7 @@ def get_rect_formated(raw_file_path, cutted_scale=[0, 1, 0, 1]):
     image_resorce = Image.open(raw_file_path)
     image_width = int(image_resorce.size[0])  # 图片宽度
     image_height = int(image_resorce.size[1])  # 图片高度
-    utils_logger.log("--->[cutted_image_with_scale] image_width:", image_width, ",image_height:", image_height,
+    utils_logger.log("[cutted_image_with_scale] image_width:", image_width, ",image_height:", image_height,
                      ",cutted_rect:", cutted_scale)
     # crop参数以(left, top, right, bottom)方式组织，因此需要从cutted_rect转换
     rect_formted = (int(float(image_width) * cutted_scale[0]), int(float(image_height) * cutted_scale[2]),
@@ -50,14 +50,14 @@ def cutted_image(raw_file_path, cutted_save_file_path=None, rect_formted=None):
         raise Exception("请先设置裁剪区域")
     if cutted_save_file_path is None:
         cutted_save_file_path = FileOperate.generate_suffix_file(raw_file_path=raw_file_path, suffix='cutted')
-    utils_logger.log("--->[cutted_image] rect_formted(left,top,right,bottom):", rect_formted)
+    utils_logger.log("[cutted_image] rect_formted(left,top,right,bottom):", rect_formted)
     Image.open(raw_file_path) \
         .crop((rect_formted)) \
         .save(cutted_save_file_path)
     if not os.path.exists(cutted_save_file_path):
         utils_logger.log("截图失败")
         return None
-    utils_logger.log("--->[cutted_image] cutted_image.截图保存路径：", os.path.abspath(cutted_save_file_path))
+    utils_logger.log("[cutted_image] cutted_image.截图保存路径：", os.path.abspath(cutted_save_file_path))
     return cutted_save_file_path
 
 
@@ -73,7 +73,7 @@ def get_color_if_img_solid(raw_image):
     image = raw_image.convert('RGBA')
     image_colors = image.getcolors(image.size[0] * image.size[1])
     if len(image_colors) == 1:
-        utils_logger.log("---> 是纯色图片:颜色唯一")
+        utils_logger.log("是纯色图片:颜色唯一")
         return True, image_colors[0][1]
     else:
         max_color_count = 0
@@ -83,9 +83,9 @@ def get_color_if_img_solid(raw_image):
                 max_color_count = count
                 max_rgba = (r, g, b, a)
         if 1000 * max_color_count / (image.size[0] * image.size[1]) > 999:
-            utils_logger.log("---> 第一梯队颜色值比例超过99.9%，可认为是纯色图片")
+            utils_logger.log("第一梯队颜色值比例超过99.9%，可认为是纯色图片")
             return True, max_rgba
-    # utils_logger.log("---> not 纯色图片"
+    # utils_logger.log("not 纯色图片"
     return False, None
 
 

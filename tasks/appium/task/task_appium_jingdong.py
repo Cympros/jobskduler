@@ -25,7 +25,7 @@ class TaskAppiumJingdong(AppiumBaseTask):
                                   rect_scale_check_element_region=[0.7, 1, 0, 0.3], is_ignore_except_case=True,
                                   retry_count=0) is not None:
             # if self.query_ele_wrapper('//android.widget.FrameLayout//android.widget.FrameLayout//android.widget.ImageView',click_mode='click',rect_scale_check_element_region=[0.7,1,0,0.3],is_ignore_except_case=True) is not None:
-            utils_logger.log("--->关闭全屏弹框")
+            utils_logger.log("关闭全屏弹框")
             return True
         return False
 
@@ -52,7 +52,7 @@ class TaskAppiumJDEarnJingDou(TaskAppiumJingdong):
         "从'主页'进入领京豆页面"
         utils_logger.log('---> __enter_earn_jd_pg_within_main')
         if self.query_ele_wrapper(self.get_query_str_by_desc('首页'), click_mode="click") is None:
-            utils_logger.log("---> get_query_str_by_desc('首页') failed")
+            utils_logger.log("get_query_str_by_desc('首页') failed")
             return False
         # '领劵'与'领京豆'位置可能变更，因此添加延时
         if self.query_ele_wrapper("//android.widget.TextView[@text='领京豆']", click_mode="click",
@@ -73,7 +73,7 @@ class TaskAppiumJDEarnJingDou(TaskAppiumJingdong):
             if self.wait_activity(driver=self.driver, target=['com.jd.lib.enjoybuy.EnjoyBuyMainActivity',
                                                               'com.jingdong.common.jdreactFramework.activities.JDReactNativeCommonActivity',
                                                               '.WebActivity']) is True:
-                utils_logger.log("--->校验页面是在领京豆页面")
+                utils_logger.log("校验页面是在领京豆页面")
                 return True
             else:
                 self.task_scheduler_failed("not in 领京豆页面 by check activity")
@@ -108,7 +108,7 @@ class TaskAppiumJDSignNormal(TaskAppiumJDEarnJingDou):
 class TaskAppiumJdSignAdditional(TaskAppiumJDSignNormal):
     def run_task(self):
         if TaskAppiumJDSignNormal.run_task(self) is False:
-            utils_logger.log("---> run_task for TaskAppiumJdSignAdditional failed")
+            utils_logger.log("run_task for TaskAppiumJdSignAdditional failed")
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('今日已翻1张牌')) \
                 or self.query_ele_wrapper(
@@ -156,7 +156,7 @@ class TaskAppiumJDEnterShopGotJD(TaskAppiumJDEarnJingDou):
                 # 此时'去完成'已没有，但是'进店逛逛'可以找到，说明今日份已全部领取完
                 return True
             elif self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('即将开始')) is not None:
-                utils_logger.log("--->活动还未开始")
+                utils_logger.log("活动还未开始")
                 # 此时不发送邮件说明
                 return False
             else:
@@ -189,18 +189,18 @@ class TaskAppiumJDZhuanFuli(TaskAppiumJDEarnJingDou):
             # 判断剩余次数是否大于0
             find_words = only_point['words']
             find_all_result = re.findall(r"^您还有(\d)次抽奖机会(!$|$)|^今日还可以抽(\d)次哦$|^可以抽(\d)次哦$", str(find_words))
-            utils_logger.log("---> ##############################[find_all_result]:", find_words, find_all_result)
+            utils_logger.log("##############################[find_all_result]:", find_words, find_all_result)
             if find_all_result is not None and len(find_all_result) > 0:
                 value_a = [chance for chance in find_all_result[0] if chance != ""]
-                utils_logger.log("---> #####################[value_a]:", find_words, value_a)
+                utils_logger.log("#####################[value_a]:", find_words, value_a)
                 if len(value_a) == 1:
                     if int(value_a[0]) <= 0:
-                        utils_logger.log("---> 检测剩余次数不足，认为今日任务已完成")
+                        utils_logger.log("检测剩余次数不足，认为今日任务已完成")
                         return True
 
         # 如果检测不到'您还有 0 次抽奖机会'可能是该部分内容根本就没有展示，因此不管三七二十一，抽奖了再说
         if self.query_only_point_within_text(r'^抽奖$|^GO$', is_auto_click=True) is not None:
-            utils_logger.log("---> 等待抽奖完成")
+            utils_logger.log("等待抽奖完成")
             time.sleep(8)  # 等待抽奖完成
         else:
             self.task_scheduler_failed('未找到\'开始抽奖\'按钮')
@@ -266,11 +266,11 @@ class TaskAppiumJDVoucherCenter(TaskAppiumJingdong):
             # 检查标题是否是"领京豆"
             if utils_appium.get_cur_act(driver=self.driver, delay_time=3).startswith(
                     'com.jd.lib.coupon.lib.CouponCenterActivity'):
-                # utils_logger.log("---> 成功进入标题'领券中心'界面"
+                # utils_logger.log("成功进入标题'领券中心'界面"
                 if self.query_ele_wrapper(
                         "//android.widget.TextView[@text='等待开抢' and @resource-id='com.jd.lib.coupon:id/sign_get_button']") is not None:
                     # 3天签到已满足，不用点击
-                    utils_logger.log("---> 三天签到已满足，今日不用再签到")
+                    utils_logger.log("三天签到已满足，今日不用再签到")
                     return True
                 elif self.query_ele_wrapper(self.get_query_str_by_viewid('com.jd.lib.coupon:id/sign_get_button'),
                                             click_mode="click") is not None:
@@ -302,7 +302,7 @@ class TaskAppiumJDSignDoubleSign(TaskAppiumJDEarnJingDou):
         if self.query_only_match_part_with_click('jingdong_double_sign_enterence.png',
                                                  part_rect_scale=[0.82, 0.98, 0.47, 0.568], is_auto_click=True) is None \
                 and self.query_only_point_within_text(r'^双签京豆$', is_auto_click=True, retry_count=0) is None:
-            utils_logger.log("---> 找不到领取双签入口")
+            utils_logger.log("找不到领取双签入口")
             self.task_scheduler_failed('找不到领取双签入口')
             return False
 
@@ -319,7 +319,7 @@ class TaskAppiumJDSignDoubleSign(TaskAppiumJDEarnJingDou):
             return False
         elif self.query_ele_wrapper(self.get_query_str_by_desc('去签到')) is not None \
                 or self.query_point_size_within_text('^去签到$') > 0:
-            utils_logger.log("---> 双签条件还没有满足")
+            utils_logger.log("双签条件还没有满足")
             return False
         else:
             self.task_scheduler_failed("双签操作失败")

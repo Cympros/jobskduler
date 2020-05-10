@@ -29,13 +29,13 @@ def find_templates(imread_parent, imread_child):
 
 def find_only_sift(imred_parent, imread_child, threshold=None, rgb=None):
     """基于特征值单个搜索"""
-    utils_logger.log("--->find_only_sift")
+    utils_logger.log("find_only_sift")
     try:
         match_result = aircv.find_sift(imred_parent, imread_child)
         if match_result is not None:
             return match_result
     except Exception:
-        utils_logger.log("--->[find_only_sift] faile with caught exception")
+        utils_logger.log("[find_only_sift] faile with caught exception")
         utils_logger.log(traceback.print_exc())
     return None
 
@@ -43,7 +43,7 @@ def find_only_sift(imred_parent, imread_child, threshold=None, rgb=None):
 def find_sifts(imread_parent, imread_child, threshold=None, rgb=None):
     """基于特征值批量搜索"""
     # TODO:Assertion failed: (queries.cols == veclen()), function knnSearch, file /Users/travis/build/skvark/opencv-python/opencv/modules/flann/include/opencv2/flann/nn_index.h, line 70.
-    # utils_logger.log("--->_find_sifts"
+    # utils_logger.log("_find_sifts"
     # try:
     #     match_results=aircv.find_all_sift(imread_parent, imread_child, maxcnt = 20)
     #     if match_results is not None:
@@ -54,9 +54,9 @@ def find_sifts(imread_parent, imread_child, threshold=None, rgb=None):
 
 
 def find_sift_in_predict_area(imread_parent, imread_child):
-    utils_logger.log("--->find_sift_in_predict_area")
+    utils_logger.log("find_sift_in_predict_area")
     # image_wh, screen_resolution = airtest_aircv.get_resolution(imread_child), airtest_aircv.get_resolution(imread_parent)
-    # utils_logger.log("--->**************",image_wh,screen_resolution
+    # utils_logger.log("**************",image_wh,screen_resolution
     return None
     # if not self.record_pos:
     #     return None

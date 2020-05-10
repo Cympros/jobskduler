@@ -49,7 +49,7 @@ def wrapper_send_email(title=None, content=None, files=None):
         return
     # 发送邮件
     receiver_user = yaml_loader.get('email_receiver')  # 邮件接收地址
-    utils_logger.log("---> start to wrapper_send_email[" + receiver_user + "][" + mail_title + "]:",
+    utils_logger.log("start to wrapper_send_email[" + receiver_user + "][" + mail_title + "]:",
                             wrapper_files)
     for sender in yaml_loader.get('sender_list'):
         sender_host = sender['email_sender_host']
@@ -84,7 +84,7 @@ def send_smtp_email(smtp_host, send_user, send_password, receiver_user, title, c
         # ssl登录
         smtp = login_if_possiable(smtp_host, send_user, send_password)
         # 发送邮件
-        utils_logger.log("---> send_smtp_email base on [" + send_user + "]" + str(retry_count) + "] ...")
+        utils_logger.log("send_smtp_email base on [" + send_user + "]" + str(retry_count) + "] ...")
         smtp.sendmail(send_user, receiver_user, msg.as_string())
         return True
     except SMTPException:

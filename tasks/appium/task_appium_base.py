@@ -17,7 +17,7 @@ except:
 import time
 import traceback
 from helper import envs
-# from helper import utils_common
+from helper import utils_common
 from helper import utils_logger
 # from helper import utils_image as image_utils
 # from helper import utils_file as file_utils
@@ -54,7 +54,7 @@ class AppiumBaseTask(BaseTask):
         :param is_ignore_except_case: 
         :return: boolean
         """
-        utils_logger.log("---> AppiumBaseTask wait_activity")
+        utils_logger.log("AppiumBaseTask wait_activity")
         # query_activity_status: true or false
         # 第一次搜索时retry_count设置为1次(即一秒)，以避免wait_activity_with_status的重试时间内权限弹框被系统倒计时逻辑关闭
         if utils_appium.wait_activity_with_status(driver=driver, target=target,
@@ -75,9 +75,11 @@ class AppiumBaseTask(BaseTask):
 
     def write_page_resource_into_file(self, suffix="normal"):
         """将pageresource写入文件"""
-        utils_logger.log("--->[write_page_resource_into_file] page_resource write to file ")
+        if self.driver is None:
+            return
         pgres = utils_appium.get_pg_source(self.driver)
         if pgres is not None:
+            utils_logger.log(">> page_resource write to file ")
             file_page_resource = envs.get_out_dir() + "page_resource_" + suffix + ".txt"
             # 删除历史文件
             if os.path.exists(file_page_resource) is True:
@@ -89,12 +91,14 @@ class AppiumBaseTask(BaseTask):
 
     def write_screen_shot_into_file(self, suffix="normal"):
         """将截图文件写入待上传列表"""
-        utils_logger.log("--->[write_screen_shot_into_file] screen shot write to file ")
+        if self.driver is None:
+            return
         scr_file_path = os.path.abspath(envs.get_out_dir() + "/screen_shot_" + suffix + ".png")
         scr_path = utils_appium.get_screen_shots(driver=self.driver,
                                                  target_device=self.target_device_name,
                                                  file_path=scr_file_path)
         if scr_path is not None:
+            utils_logger.log("screen shot write to file ")
             self.upload_files.append(scr_path)
 
     def task_scheduler_failed(self, message, email_title=u'异常信息', is_page_source=True,
@@ -102,9 +106,11 @@ class AppiumBaseTask(BaseTask):
                               exception_info=None):
         'upload_files：可以允许自定义添加待上传的文件'
         self.upload_files.extend(upload_files)
-        utils_logger.log("---> task_scheduler_failed in AppiumBaseTask with message:", message)
-        utils_logger.log("---> task_scheduler_failed in AppiumBaseTask with upload_files:",
-                         list(set(self.upload_files)))
+        if message is not None:
+            utils_logger.log("message:", message)
+        if self.upload_files is not None and len(self.upload_files) > 0:
+            utils_logger.log("task_scheduler_failed in AppiumBaseTask with upload_files:",
+                             list(set(self.upload_files)))
         msgs = {'device_name': self.target_device_name,
                 'device_version': utils_android.get_deivce_android_version(
                     device=self.target_device_name),
@@ -115,9 +121,10 @@ class AppiumBaseTask(BaseTask):
                 'app_version': utils_android.get_app_version_by_applicaionid(
                     self.target_device_name,
                     self.target_application_id),
-                'current_activity': utils_appium.get_cur_act(self.driver),
-                'raw_message': message
+                'raw_message': message,
                 }
+        if self.driver is not None:
+            msgs['current_activity'] = utils_appium.get_cur_act(self.driver)
         # 截取日志并上传
         default_log_file_path = utils_logger.get_log_file()
         self.upload_files.append(default_log_file_path)
@@ -167,16 +174,22 @@ class AppiumBaseTask(BaseTask):
                 utils_logger.log("[" + self.target_device_name + "]设备不在线", device_status)
                 return False
         else:
-            if utils_android.get_connected_devcies() is not None and len(utils_android.get_connected_devcies()) > 0:
-                self.target_device_name = utils_android.get_connected_devcies()[0]
+            connected_devcies = utils_android.get_connected_devcies()
+            if connected_devcies is not None and len(connected_devcies) > 0:
+                self.target_device_name = connected_devcies[0]
+        # 检查是否设备已连接
+        if self.target_device_name is None:
+            self.task_scheduler_failed("未连接设备")
+            return False
         # 检查应用是否安装
         check_installed_response, response_errror = utils_android.is_app_installed(
             self.target_device_name,
             self.target_application_id)
         if response_errror is None and check_installed_response is None:
-            utils_logger.log("---> 当前应用未安装[", self.target_device_name, "][",
-                             self.target_application_id, "][",
-                             check_installed_response, "][", response_errror, "]")
+            utils_logger.log("当前应用未安装", "device_name:<" + str(self.target_device_name) + ">",
+                             "包名<" + str(self.target_application_id) + ">",
+                             "ResumedAct<" + utils_android.get_top_focuse_activity(
+                                 self.target_device_name) + ">")
             return False
 
         # 实例化该应用对应的driver对象
@@ -214,7 +227,7 @@ class AppiumBaseTask(BaseTask):
 
     def release_after_task(self):
         BaseTask.release_after_task(self)
-        utils_logger.log("---> task_appium_base 释放资源")
+        utils_logger.log("task_appium_base 释放资源")
         if self.driver is not None:
             try:
                 self.driver.quit()
@@ -258,7 +271,7 @@ class AppiumBaseTask(BaseTask):
                                              hash_rule=compare_rule) is True:
             return True
         else:
-            utils_logger.log("---> is_in_target_page sleep:", interval_time)
+            utils_logger.log("is_in_target_page sleep:", interval_time)
             time.sleep(interval_time)
             return self.is_in_target_page(target_page_file=target_page_file,
                                           compare_rule=compare_rule,
@@ -300,7 +313,7 @@ class AppiumBaseTask(BaseTask):
             return utils_appium.find_element_by_xpath(driver=self.driver, xpath=query_str)
 
     def except_case_in_query_ele(self):
-        utils_logger.log("---> except_case_in_query_ele in AppiumBaseTask")
+        utils_logger.log("except_case_in_query_ele in AppiumBaseTask")
         '查询element的时候朋友的异常处理，True表示得以正常处理'
         # xpath模糊匹配速度太慢
         if self.query_ele_wrapper(
@@ -357,12 +370,12 @@ class AppiumBaseTask(BaseTask):
         # TODO:添加element限制区域
         'query_ele_wrapper包装器'
         if query_str is None:
-            utils_logger.log("---> query_ele_wrapper failed with no query_str:")
+            utils_logger.log("query_ele_wrapper failed with no query_str:")
             return None
         # 屏蔽有时候页面还没有延迟刷新的问题
         if time_wait_page_completely_resumed > 0:
             # 该方法仅第一次执行是会被调用,递归中不执行
-            utils_logger.log("---> query_ele_wrapper for sleep-time_wait_page_completely_resumed:",
+            utils_logger.log("query_ele_wrapper for sleep-time_wait_page_completely_resumed:",
                              time_wait_page_completely_resumed)
             time.sleep(time_wait_page_completely_resumed)
         query_res = self.__query_element(query_str=query_str)
@@ -378,7 +391,7 @@ class AppiumBaseTask(BaseTask):
                         try:
                             del self.upload_files[:]
                             if click_mode == 'position' and query_ele_location is not None:
-                                utils_logger.log("--->[query_ele_wrapper] 基于坐标响应单击事件")
+                                utils_logger.log("[query_ele_wrapper] 基于坐标响应单击事件")
                                 if self.safe_tap_in_point(
                                         point=(
                                                 query_ele_location['x'],
@@ -387,20 +400,20 @@ class AppiumBaseTask(BaseTask):
                                     return None
                             elif click_mode == 'click':
                                 # 只有当click_mode是"position"且坐标可用时使用tab方式，其他默认使用element.click()方式
-                                utils_logger.log("--->[query_ele_wrapper] 基于element.click()响应单击事件")
+                                utils_logger.log("[query_ele_wrapper] 基于element.click()响应单击事件")
                                 query_res.click()
                             else:
                                 raise Exception(
                                     '[query_ele_wrapper]unknown click_mode:' + click_mode)
-                            utils_logger.log("--->[query_ele_wrapper] click for element:[",
+                            utils_logger.log("[query_ele_wrapper] click for element:[",
                                              query_res,
                                              "] with location:", query_ele_location)
                             return query_res
                         except Exception as e:
-                            utils_logger.log("---> try to click failed ", e.message)
+                            utils_logger.log("try to click failed ", e.message)
                             utils_logger.log(traceback.format_exc())
                     else:
-                        utils_logger.log("---> [query_ele_wrapper] location:", query_ele_location)
+                        utils_logger.log("[query_ele_wrapper] location:", query_ele_location)
                         return query_res
                 else:
                     utils_logger.log(
@@ -443,7 +456,7 @@ class AppiumBaseTask(BaseTask):
                                                      is_ignore_except_case=is_ignore_except_case,
                                                      is_check_view_inflated=is_check_view_inflated)
         if points is None:
-            utils_logger.log("--->未找到可用元素")
+            utils_logger.log("未找到可用元素")
             return 0
         return len(points)
 
@@ -455,14 +468,14 @@ class AppiumBaseTask(BaseTask):
         file_screen_shot = utils_appium.get_screen_shots(driver=self.driver,
                                                          target_device=self.target_device_name)
         if is_check_view_inflated is False:
-            utils_logger.log("--->[wait_view_layout_finish] 不需要检查当前页面是否加载完")
+            utils_logger.log("[wait_view_layout_finish] 不需要检查当前页面是否加载完")
             return True, file_screen_shot
         # 使用图片空白区域识别页面是否加载完成
         is_view_layout_finished = False
         for check_index in range(20):  # 最多重试20次，每次时间间隔为1秒
             # 基于图片识别纯色图片范围判断页面是否加载完成
             if file_screen_shot is None or utils_android.is_page_loging(file_screen_shot) is True:
-                utils_logger.log("--->[wait_view_layout_finish] sleep util is_page_loging true:",
+                utils_logger.log("[wait_view_layout_finish] sleep util is_page_loging true:",
                                  check_index)
                 time.sleep(1)
                 file_screen_shot = utils_appium.get_screen_shots(driver=self.driver,
@@ -483,7 +496,7 @@ class AppiumBaseTask(BaseTask):
         :return:
         """
         try:
-            utils_logger.log("--->safe_touch_action with retry_count:", retry_count)
+            utils_logger.log("safe_touch_action with retry_count:", retry_count)
             utils_appium.touch_action(driver=self.driver,
                                       target_device_name=self.target_device_name, is_down=is_down,
                                       tab_center=tab_center, tab_interval=tab_interval,
@@ -503,7 +516,7 @@ class AppiumBaseTask(BaseTask):
     def safe_tap_in_point(self, point, retry_count=3):
         """tap_in_point安全模式"""
         try:
-            utils_logger.log("--->safe_tap_in_point with retry_count:", retry_count)
+            utils_logger.log("safe_tap_in_point with retry_count:", retry_count)
             utils_appium.tap_in_point(self.driver, point)
             return True
         except:
@@ -532,7 +545,7 @@ class AppiumBaseTask(BaseTask):
         is_view_layout_finished, file_screen_shot = self.wait_view_layout_finish(
             is_check_view_inflated)
         if is_view_layout_finished is False:
-            utils_logger.log("--->[_query_points_with_text_by_ocr] 页面在指定时间并没有加载完成")
+            utils_logger.log("[_query_points_with_text_by_ocr] 页面在指定时间并没有加载完成")
             self.task_scheduler_failed(
                 "[_query_points_with_text_by_ocr] '" + search_text + "' 页面在指定时间并没有加载完成")
             return None
@@ -625,18 +638,18 @@ class AppiumBaseTask(BaseTask):
                                                      is_ignore_except_case=is_ignore_except_case,
                                                      is_check_view_inflated=is_check_view_inflated)
         if points is None or len(points) == 0:
-            utils_logger.log("--->未找到可用元素")
+            utils_logger.log("未找到可用元素")
             return None
         else:
             if len(points) > 1:
-                utils_logger.log("---> 查询元素不唯一，请检查页面元素")
+                utils_logger.log("查询元素不唯一，请检查页面元素")
                 self.task_scheduler_failed(
                     ("query_only_point_within_text[" + search_text + "]元素不唯一: ").joins(points))
                 return None
             else:
                 single_point = points[0]
                 if is_auto_click is True:
-                    utils_logger.log("---> auto query_only_point_within_text for " + search_text)
+                    utils_logger.log("auto query_only_point_within_text for " + search_text)
                     del self.upload_files[:]
                     if is_output_event_tract is True:
                         self.write_screen_shot_into_file(suffix='ocr_start')
@@ -654,11 +667,11 @@ class AppiumBaseTask(BaseTask):
         if os.path.exists(part_pic_path) is False:
             part_pic_path = os.path.abspath(
                 project_root_path + "/tasks/appium/img/" + part_pic_path)
-        utils_logger.log("---> query_point_throw_part_pic:", part_pic_path)
+        utils_logger.log("query_point_throw_part_pic:", part_pic_path)
         # 检测页面是否加载完成
         is_view_layout_finished, file_screen_shot = self.wait_view_layout_finish()
         if is_view_layout_finished is False:
-            utils_logger.log("--->[query_point_throw_part_pic] 页面在指定时间并没有加载完成")
+            utils_logger.log("[query_point_throw_part_pic] 页面在指定时间并没有加载完成")
             self.task_scheduler_failed(
                 "[query_point_throw_part_pic] '" + part_pic_path + "' 页面在指定时间并没有加载完成")
             return None
@@ -667,7 +680,7 @@ class AppiumBaseTask(BaseTask):
                 "[query_point_throw_part_pic] '" + part_pic_path + "' failed because no file_screen_shot")
             return None
         # 裁剪获得比对的资源图片
-        utils_logger.log("--->[query_point_throw_part_pic] 格式化资源文件")
+        utils_logger.log("[query_point_throw_part_pic] 格式化资源文件")
         cutted_file_path = image_utils.cutted_image_with_scale(raw_file_path=part_pic_path,
                                                                cutted_rect_scale=part_rect_scale,
                                                                cutted_save_file_path=file_utils.generate_suffix_file(
@@ -676,7 +689,7 @@ class AppiumBaseTask(BaseTask):
                                                                    suffix="cutted"))
         child_template = Template(cutted_file_path)
         # cutted_file_path与当前截图比对:其中根据check_rect_scale裁剪截图
-        utils_logger.log("--->[query_point_throw_part_pic] 格式化截图")
+        utils_logger.log("[query_point_throw_part_pic] 格式化截图")
         parent_template = Template(image_utils.cutted_image_with_scale(file_screen_shot))
         return child_template.find_all_matchs(parent_template)
 
@@ -694,7 +707,7 @@ class AppiumBaseTask(BaseTask):
                 results_mathched_within_check_region) > 0:
             if is_auto_click:
                 click_match_point = results_mathched_within_check_region[0]['result']
-                utils_logger.log("--->[query_only_match_part_with_click] 检索到需要自动点击:",
+                utils_logger.log("[query_only_match_part_with_click] 检索到需要自动点击:",
                                  click_match_point)
                 del self.upload_files[:]
                 # self.write_page_resource_into_file(suffix='aircv_start')
@@ -723,15 +736,15 @@ class AppiumBaseTask(BaseTask):
         if query_matchs is not None:
             for match_item in query_matchs:
                 # 这里检查每个子图的位置是否合法
-                utils_logger.log("--->[query_matchs_within_check_region] start to check region:",
+                utils_logger.log("[query_matchs_within_check_region] start to check region:",
                                  match_item)
                 checked_region_matchs.append(match_item)
         # 重试机制
         if checked_region_matchs is None or len(checked_region_matchs) == 0:
             if retry_count <= 0:
-                utils_logger.log("--->[query_matchs_within_check_region] failed with no chance")
+                utils_logger.log("[query_matchs_within_check_region] failed with no chance")
                 return None
-            utils_logger.log("--->[query_matchs_within_check_region] 未找到相应元素，启动重试：", retry_count)
+            utils_logger.log("[query_matchs_within_check_region] 未找到相应元素，启动重试：", retry_count)
             if is_ignore_except_case is False and self.except_case_in_query_ele() is True:
                 return self.query_matchs_within_check_region(part_pic_path=part_pic_path,
                                                              part_rect_scale=part_rect_scale,
@@ -745,5 +758,5 @@ class AppiumBaseTask(BaseTask):
                                                              is_ignore_except_case=is_ignore_except_case,
                                                              retry_count=retry_count - 1)
         else:
-            utils_logger.log("--->query_matchs_within_check_region:", checked_region_matchs)
+            utils_logger.log("query_matchs_within_check_region:", checked_region_matchs)
             return checked_region_matchs

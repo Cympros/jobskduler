@@ -87,7 +87,7 @@ class TaskAppiumHuiToutiaoYueDu(TaskAppiumHuiToutiaoBase):
             if utils_appium.get_cur_act(self.driver) == '.Launcher':
                 utils_logger.log("运行过程中，软件回到了桌面程序，退出浏览任务")
                 return False
-            utils_logger.log("--->开启第(", index, "/", for_each_size, ")次浏览")
+            utils_logger.log("开启第(", index, "/", for_each_size, ")次浏览")
             # 循环回到首页
             def_main_activity = '.account.ui.main.MainTabActivity'
             try_count = 0
@@ -104,7 +104,7 @@ class TaskAppiumHuiToutiaoYueDu(TaskAppiumHuiToutiaoBase):
                 try:
                     self.browser_news(def_main_activity)
                 except Exception as e:
-                    utils_logger.log("--->TaskAppiumHuiToutiaoYueDu.browser_news caught exception:",
+                    utils_logger.log("TaskAppiumHuiToutiaoYueDu.browser_news caught exception:",
                                      traceback.format_exc())
             else:
                 utils_logger.log("不再首页，没办法执行新闻浏览任务")
@@ -122,7 +122,7 @@ class TaskAppiumHuiToutiaoYueDu(TaskAppiumHuiToutiaoBase):
             return False
         # 搜索应该阅读的文章
         scroll_size = int(random.randint(0, 10))
-        utils_logger.log("---> 页面滚动次数：", scroll_size)
+        utils_logger.log("页面滚动次数：", scroll_size)
         for index in range(scroll_size):
             # 滑动以选择文章开启阅读任务
             self.safe_touch_action(tab_interval=[float(random.uniform(0.65, 0.35)), 0.35])
@@ -139,11 +139,11 @@ class TaskAppiumHuiToutiaoYueDu(TaskAppiumHuiToutiaoBase):
                            'com.jingdong.common.babel.view.activity.BabelActivity', '.accounts.SyncSettingsActivity']
         for tab_index in range(10):
             self.safe_tap_in_point([random.randint(100, 400), random.randint(200, 800)])
-            utils_logger.log("--->等待进入新闻详情界面[", tab_index, "]：", utils_appium.get_cur_act(self.driver))
+            utils_logger.log("等待进入新闻详情界面[", tab_index, "]：", utils_appium.get_cur_act(self.driver))
             # wait_activity有针对异常情况的处理，因此弃用'utils_appium.get_cur_act'方式
             if self.wait_activity(driver=self.driver, target=news_activitys + video_activitys + other_activitys,
                                   retry_count=1) is True:
-                utils_logger.log("--->成功进入某个详情页面")
+                utils_logger.log("成功进入某个详情页面")
                 break
         # 判断是否在详情页面
         cur_activity = utils_appium.get_cur_act(self.driver)
@@ -151,7 +151,7 @@ class TaskAppiumHuiToutiaoYueDu(TaskAppiumHuiToutiaoBase):
             self.task_scheduler_failed('why 还在首页')
             return False
         # 根据页面调用指定阅读策略
-        utils_logger.log("--->cur_activity:", cur_activity)
+        utils_logger.log("cur_activity:", cur_activity)
         if cur_activity in news_activitys:
             # 开始模拟阅读
             time_to_foreach = random.randint(5, 10)  # 5~10s，因为每30秒就可以获得10积分的奖励
@@ -161,7 +161,7 @@ class TaskAppiumHuiToutiaoYueDu(TaskAppiumHuiToutiaoBase):
                     tab_interval = [0.65, 0.35]
                 else:
                     tab_interval = [0.25, 0.75]
-                utils_logger.log("--->[", time_to_foreach, "] for tab_interval[", tab_interval, "] with index:", index)
+                utils_logger.log("[", time_to_foreach, "] for tab_interval[", tab_interval, "] with index:", index)
                 if self.safe_touch_action(tab_interval=tab_interval, duration=int(float(period * 1000))) is False:
                     utils_logger.log("----> safe_touch_action caught exception")
             return True

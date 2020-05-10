@@ -21,19 +21,19 @@ class Template(object):
 
     def find_all_matchs(self, template_parent):
         """搜索所有的匹配元素"""
-        utils_logger.log("--->[find_all_matchs] starting...")
+        utils_logger.log("[find_all_matchs] starting...")
         parent_imread = template_parent.imread()
         cur_imread = self.imread()
         rets = []
         for method in ['sift', 'tpl']:
-            utils_logger.log("--->[find_all_matchs] ", method)
+            utils_logger.log("[find_all_matchs] ", method)
             part_rets = None
             if method == "tpl":
                 part_rets = self.find_templates_wrapper(parent_imread, cur_imread)
             elif method == "sift":
                 part_rets = self.find_sifts_wrapper(parent_imread, cur_imread)
             else:
-                utils_logger.log("--->找不到该适配模式", method)
+                utils_logger.log("找不到该适配模式", method)
                 continue
             if part_rets is not None:
                 rets.extend(part_rets)
@@ -49,7 +49,7 @@ class Template(object):
         # 搜索cur_imread在parent_imread中的位置
         match_results = None
         for method in ['sift', 'tpl']:
-            utils_logger.log("--->[Template]_cv_match:", method)
+            utils_logger.log("[Template]_cv_match:", method)
             if method == "tpl":
                 match_results = self.find_templates_wrapper(parent_imread, cur_imread)
             elif method == "sift":
@@ -58,12 +58,12 @@ class Template(object):
                 utils_logger.log("找不到该适配模式")
             # 检测搜索到的坐标是否合适
             if match_results is not None:
-                utils_logger.log("---> ret is not None,break", match_results)
+                utils_logger.log("ret is not None,break", match_results)
                 break
         if match_results is None or len(match_results) == 0:
             utils_logger.log("none match result")
             return None
-        utils_logger.log("--->results_within_match_in:", match_results)
+        utils_logger.log("results_within_match_in:", match_results)
         return match_results
 
     def find_templates_wrapper(self, imread_parent, imread_child, threshold=None, rgb=None):
@@ -92,7 +92,7 @@ class Template(object):
         return None
 
     def imread(self):
-        utils_logger.log("---> _imread:", self.file_path)
+        utils_logger.log("_imread:", self.file_path)
         return aircv_utils.imread(self.file_path)
 
 
@@ -104,4 +104,4 @@ if __name__ == '__main__':
                                             cutted_rect_scale=[0.33, 0.66, 0.4, 0.6]))
     parent_template = Template(file)  # 这里的parenr_template一般使用截图文件
     query_results = child_template.results_within_match_in(parent_template)
-    utils_logger.log("--->result for test:", query_results)
+    utils_logger.log("result for test:", query_results)

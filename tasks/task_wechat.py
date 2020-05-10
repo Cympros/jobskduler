@@ -56,7 +56,7 @@ class TaskWechat(Base):
 
     # 处理收到的消息
     def deal_reply_msg(self, msg):
-        utils_logger.log("---> deal_reply_msg in thread")
+        utils_logger.log("deal_reply_msg in thread")
 
     # 所有消息的回调都会走这里
     def whole_reply(self, msg):
@@ -68,10 +68,10 @@ class TaskWechat(Base):
             return
         global wechat_core
         if wechat_core is None:
-            utils_logger.log("---> wechatjob not defined")
+            utils_logger.log("wechatjob not defined")
             return
         if not self.need_still_listen:
-            utils_logger.log("---> 已经放弃监听reply信息")
+            utils_logger.log("已经放弃监听reply信息")
             return
         # 检查是否是需要的回复
         is_reply_legal = wechat_core.check_reply(msg)
@@ -89,7 +89,7 @@ class TaskWechat(Base):
             # thread.start_new_thread(self.deal_reply_msg, (msg,))  # msg后必须添加逗号
 
     def __check_reply_msg(self):
-        # utils_logger.log("---> __check_reply_msg"
+        # utils_logger.log("__check_reply_msg"
 
         # 这里的TEXT表示如果有人发送文本消息，那么就会调用下面的方法
         @itchat.msg_register(TEXT)
@@ -123,7 +123,7 @@ class TaskWechat(Base):
 
         _target_user = self.get_target_user()
         if _target_user is None:
-            utils_logger.log("---> not found target_user,force exit")
+            utils_logger.log("not found target_user,force exit")
             return
 
         utils_logger.log(u'---> 开启itchat轮训线程')
@@ -143,13 +143,13 @@ class TaskWechat(Base):
         run_index = 0
         while True:
             if not self.is_need_listen_callback:
-                utils_logger.log("---> 不需要监听回调")
+                utils_logger.log("不需要监听回调")
                 break
             if run_index > runned_max_count:
                 self.task_scheduler_failed('指令reply程序检测次数超出上限，exit')
                 break
             if not self.need_still_listen:
-                utils_logger.log("---> 指令程序状态执行成功，exit")
+                utils_logger.log("指令程序状态执行成功，exit")
                 break
             self.__check_reply_msg()
             time.sleep(check_period)
@@ -163,7 +163,7 @@ class WechatSqjyxzsSign(TaskWechat):
     def get_target_user(self):
         friendslist = itchat.search_friends(u'省钱小助手-淘宝')
         if len(friendslist) != 1:
-            utils_logger.log("---> 获取到的朋友不唯一，exit")
+            utils_logger.log("获取到的朋友不唯一，exit")
             self.task_scheduler_failed(friendslist)
             return None
         return friendslist[0]["UserName"]
@@ -171,7 +171,7 @@ class WechatSqjyxzsSign(TaskWechat):
     def check_reply(self, msg):
         # msg['Type']
         reply_msg = json.dumps(msg['Content'], encoding='utf-8', ensure_ascii=False)
-        utils_logger.log("---> check_reply：", reply_msg)
+        utils_logger.log("check_reply：", reply_msg)
         if reply_msg.find(u'今天已经签到过了，明天再来哦') or reply_msg.find(u'签到成功'):
             return True
         else:
@@ -192,7 +192,7 @@ class WechatCreditcardRepayState(TaskWechat):
     def get_target_user(self):
         friendslist = itchat.search_mps(u'招商银行信用卡')
         if len(friendslist) != 1:
-            utils_logger.log("---> 获取到的朋友不唯一，exit")
+            utils_logger.log("获取到的朋友不唯一，exit")
             self.task_scheduler_failed(friendslist)
             return None
         return friendslist[0]["UserName"]
@@ -215,7 +215,7 @@ class WechatCreditcardRepayState(TaskWechat):
 
     def check_reply(self, msg):
         reply_msg = json.dumps(msg['Content'], encoding='utf-8', ensure_ascii=False)
-        utils_logger.log("---> check_reply:", reply_msg)
+        utils_logger.log("check_reply:", reply_msg)
         find_state = reply_msg.find(u'个人信用卡账单')
         if find_state != -1:
             # utils_logger.log(reply_msg
@@ -230,7 +230,7 @@ class WechatZhaoshangCreditcardSign(TaskWechat):
     def get_target_user(self):
         friendslist = itchat.search_mps(u'招商银行信用卡')
         if len(friendslist) != 1:
-            utils_logger.log("---> 获取到的朋友不唯一，exit")
+            utils_logger.log("获取到的朋友不唯一，exit")
             self.task_scheduler_failed(friendslist)
             return None
         return friendslist[0]["UserName"]
@@ -256,7 +256,7 @@ class WechatKeepAliveChecker(TaskWechat):
     def get_target_user(self):
         friendslist = itchat.search_friends(u'Jimmie')
         if len(friendslist) != 1:
-            utils_logger.log("---> 获取到的朋友不唯一，exit")
+            utils_logger.log("获取到的朋友不唯一，exit")
             self.task_scheduler_failed(friendslist)
             return None
         return friendslist[0]["UserName"]

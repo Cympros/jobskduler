@@ -7,7 +7,7 @@ project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0]
 sys.path.append(project_root_path)
 
 from tasks.appium.task_appium_base import AppiumBaseTask
-# from helper import utils_logger
+from helper import utils_logger
 
 
 # apk下载链接：http://sj.qq.com/myapp/detail.htm?apkName=com.sina.weibo
@@ -20,7 +20,7 @@ class TaskAppiumSinaWeiboBase(AppiumBaseTask):
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('不了，谢谢'), click_mode="click",
                                   is_ignore_except_case=True, retry_count=0) is not None:
             # 检测到评分弹窗
-            utils_logger.log("--->检测到评分弹窗")
+            utils_logger.log("检测到评分弹窗")
             return True
         return False
 
@@ -109,7 +109,7 @@ class TaskAppiumSinaWeiboDailyClockOn(TaskAppiumSinaWeiboDailyClockOnBase):
                                                    click_mode="click") is not None \
                         and self.query_ele_wrapper("//android.widget.LinearLayout//android.widget.TextView[@text='8']",
                                                    click_mode="click") is not None:
-                    utils_logger.log("---> write success,sleep to finish")
+                    utils_logger.log("write success,sleep to finish")
                     time.sleep(8)
                     return False
                 else:
@@ -154,7 +154,7 @@ class TaskAppiumSinaWeiboReceiverDakaReward(TaskAppiumSinaWeiboDailyClockOnBase)
             return False
         if self.query_ele_wrapper("//android.view.View[contains(@content-desc,'其余奖金自获得当日起30天内有效')]") is not None:
             # 进入打卡页面自动弹起领取奖励的弹框的时候
-            utils_logger.log("--->进入'早起打卡'页面like弹出领取奖金成功的弹框")
+            utils_logger.log("进入'早起打卡'页面like弹出领取奖金成功的弹框")
             self.task_scheduler_failed("--->进入'早起打卡'页面like弹出领取奖金成功的弹框")
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('我的战绩', view_type='android.view.View',
@@ -174,12 +174,12 @@ class TaskAppiumSinaWeiboReceiverDakaReward(TaskAppiumSinaWeiboDailyClockOnBase)
             return False
         else:
             # 默认搜索到'领取'按钮并点击，则认为今日打卡奖励已领取，不对点击后的结果做校验(没必要)
-            utils_logger.log("--->发现'领取'按钮并执行点击操作，默认领取成功")
+            utils_logger.log("发现'领取'按钮并执行点击操作，默认领取成功")
             return True
         # 以下为正则校验点击效果 - 没必要
         # # 仅匹配整数和小数
         # if self.query_only_point_within_text(u'^已领取[0-9]+([.]{1}[0-9]+){0,1}元奖金') is not None:
-        #     utils_logger.log("--->领取微博打卡奖励成功"
+        #     utils_logger.log("领取微博打卡奖励成功"
         #     return True
         # else:
         #     self.task_scheduler_failed("弹框里无\"已领取0.13元奖金\"类似文案")

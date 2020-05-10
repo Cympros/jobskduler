@@ -33,7 +33,7 @@ def get_shanghai_time(str_mode=None):
         return int(time.time())
     tz = pytz.timezone('Asia/Shanghai')
     fromtimestamp = datetime.datetime.fromtimestamp(int(time.time()), tz)
-    utils_logger.log("---> get_shanghai_time [", str_mode, "]: ", fromtimestamp.strftime(str_mode))
+    utils_logger.log("格式化样式[" + str_mode + "]:", fromtimestamp.strftime(str_mode))
     return fromtimestamp.strftime(str_mode)
 
 
@@ -56,7 +56,7 @@ def is_img_similary(file_first, file_second, hash_rule=100):
     utils_logger.log(file_second, ": ", hash_second)
     compare_status = True if hash_first - hash_second <= hash_rule else False
     if compare_status is False:
-        utils_logger.log("---> is_similary:" + str(compare_status), \
+        utils_logger.log("is_similary:" + str(compare_status), \
                          ",other_info:[", hash_second - hash_first, \
                          len(hash_second.hash), "]")
     return compare_status
@@ -78,30 +78,25 @@ def exec_shell_cmd(cmd_str, timeout=None, shell=True):
     if timeout is not None:
         end_time = datetime.datetime.now() + datetime.timedelta(seconds=timeout)
     # 没有指定标准输出和错误输出的管道，因此会打印到屏幕上；
-    utils_logger.log("---> exec_shell_cmd:[", cmd_str, "]")
+    utils_logger.log("\"" + cmd_str + "\"")
     sub = subprocess.Popen(cmdstr_list, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE,
                            shell=shell, bufsize=4096)
 
     while sub.poll() is None:
         sleep_time = 0.1
-        # utils_logger.log("---> exec_shell_cmd sleep:",sleep_time
         time.sleep(sleep_time)
         if timeout is not None and end_time <= datetime.datetime.now():
-            # utils_logger.log("exec_shell_cmd within timeout")
             return None, None
-
-    response_error = sub.stderr.read().lstrip().rstrip()
-    if response_error is not None and response_error != "":
-        utils_logger.log("exec_shell_cmd within stderr", response_error)
-        return None, response_error
 
     response_stdout = sub.stdout.read().lstrip().rstrip()
     if response_stdout is not None and response_stdout != "":
-        # utils_logger.log("---> exec_shell_cmd within stdout:", json.dumps(response_stdout))
-        return response_stdout, None
+        return response_stdout.decode(), None
 
-    # utils_logger.log("exec_shell_cmd within unknown", response_error, response_stdout)
+    response_error = sub.stderr.read().lstrip().rstrip()
+    if response_error is not None and response_error != "":
+        utils_logger.log("shell执行异常:", response_error)
+        return None, response_error.decode()
     return None, None
 
 
@@ -229,11 +224,7 @@ if __name__ == "__main__":
     utils_logger.log("success" if re.match(r'^打卡[0-9]+([.]{1}[0-9]+){0,1}时间',
                                            '打卡8.73336655时间') is not None else "None")  # ---> success
 
-    # cur_time=get_shanghai_time('%H%M')
-    # utils_logger.log("success" if 0 < cur_time < 2400 else "None"    # --->
-    # utils_logger.log("success" if 0 < int(cur_time) < 2400 else "None"   # --->
-
-    # # 元素切割：for youdao 
+    # # 元素切割：for youdao
     # strs=u'95,191,248,192,248,224,95,223'
     # point_tmp_list = list(map(int, re.split(',', strs)))
     # utils_logger.log(point_tmp_list
@@ -245,12 +236,5 @@ if __name__ == "__main__":
     # utils_logger.log(point_left, point_top, width, height
 
     # utils_logger.log(get_dominant_color('../out/ericp_600x1024.png')
-# get_point_range('../out/A.png', '../out/bb.png')
-# utils_logger.log(exec_shell_cmd("bash ../tasks/appium/appium_env.sh")
-#
-# test_pic = "/Users/john/Desktop/scr01.png"
-# desktop = "/Users/john/Desktop/"
-# # input("第二张图片:")
-# is_img_similary(desktop + "scr.png", desktop + "scr01.png")
-# is_img_similary(desktop + "scr.png", desktop + "scr02.png")
-# is_img_similary(desktop + "scr01.png", desktop + "scr02.png")
+    # get_point_range('../out/A.png', '../out/bb.png')
+    utils_logger.log(exec_shell_cmd("adb devices"))

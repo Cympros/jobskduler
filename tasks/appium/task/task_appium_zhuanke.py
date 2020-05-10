@@ -31,13 +31,13 @@ class TaskAppiumZhuankeBase(AppiumBaseTask):
             if self.query_ele_wrapper("#viewid#cn.zhuanke.zhuankeAPP:id/dialog_btn_left",
                                       retry_count=0,
                                       is_ignore_except_case=True, click_mode="click") is not None:
-                utils_logger.log("--->检测到版本升级")
+                utils_logger.log("检测到版本升级")
                 return True
         elif self.query_ele_wrapper(
                 self.get_query_str_within_xpath_only_text(text='哦耶，继续赚钱',
                                                           view_type='android.widget.Button'),
                 is_ignore_except_case=True, retry_count=0, click_mode='click') is not None:
-            utils_logger.log("---> 检测到上次的试玩奖励")
+            utils_logger.log("检测到上次的试玩奖励")
             return True
         return False
 
@@ -54,7 +54,7 @@ class TaskAppiumZhuankeSign(TaskAppiumZhuankeBase):
         if self.query_ele_wrapper(query_str="//android.view.View[contains(@content-desc, '每日抽奖')]",
                                   click_mode="click") is not None \
                 or self.query_only_point_within_text('^每日抽奖$', is_auto_click=True) is not None:
-            utils_logger.log("---> 进入\"每日抽奖\"页面")
+            utils_logger.log("进入\"每日抽奖\"页面")
         else:
             self.task_scheduler_failed(message="not found \'每日抽奖\'")
             return False
@@ -107,7 +107,7 @@ class TaskAppiumZhuankeTrial(TaskAppiumZhuankeBase):
             file.close()
         else:
             for line in open(self.file_installed_pkg):
-                utils_logger.log("---> start to uninstall apk:", line)
+                utils_logger.log("start to uninstall apk:", line)
                 utils_common.exec_shell_cmd('adb uninstall ' + line)
 
     def except_case_in_query_ele(self):
@@ -120,7 +120,7 @@ class TaskAppiumZhuankeTrial(TaskAppiumZhuankeBase):
                     self.get_query_str_within_xpath_only_text('删除',
                                                               view_type='android.widget.Button'),
                     click_mode='click', is_ignore_except_case=True, retry_count=0) is not None:
-                utils_logger.log("---> 删除安装包")
+                utils_logger.log("删除安装包")
                 return True
         return False
 
@@ -136,7 +136,7 @@ class TaskAppiumZhuankeTrial(TaskAppiumZhuankeBase):
         # if TaskAppiumZhuankeBase.run_task(self) is False:
         #     return False
         # if self.query_only_point_within_text('试玩任务',is_auto_click=True,is_output_event_tract=True) is None:
-        #     utils_logger.log("--->进入'试玩任务'失败"
+        #     utils_logger.log("进入'试玩任务'失败"
         #     self.task_scheduler_failed("进入'试玩任务'失败")
         #     return False
         # if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('试玩'),click_mode='click') is None:
@@ -152,18 +152,18 @@ class TaskAppiumZhuankeTrial(TaskAppiumZhuankeBase):
         # xpath_str="//android.widget.TextView[@resource-id='cn.zhuanke.zhuankeAPP:id/grabAmount']"
         # elements=self.driver.find_elements_by_xpath(xpath_str)
         # if len(elements) <=0:
-        #     utils_logger.log("--->试玩任务已抢光，退出"
+        #     utils_logger.log("试玩任务已抢光，退出"
         #     return True
         # 
         # click_index=int(random.randint(0,len(elements)-1))
-        # utils_logger.log("---> 当前共有任务数量：",len(elements),",index:",click_index,",选中元素坐标：",elements[click_index].location
+        # utils_logger.log("当前共有任务数量：",len(elements),",index:",click_index,",选中元素坐标：",elements[click_index].location
         # elements[click_index].click()
         # if self.wait_activity(self.driver,target=['com.fc.zhuanke.ui.PlayTaskDetailActivity'],is_ignore_except_case=True) is False:
         #     # 检测是否有未完成的任务
         #     if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text(text='去完成',view_type='android.widget.Button'),click_mode='click',retry_count=0,is_ignore_except_case=True) is not None:
-        #         utils_logger.log("---> 有任务未完成"
+        #         utils_logger.log("有任务未完成"
         #     else:
-        #         utils_logger.log("--->未进入任务详情界面，检查是否有未完成的任务失败"
+        #         utils_logger.log("未进入任务详情界面，检查是否有未完成的任务失败"
         #         self.task_scheduler_failed('检查是否有未完成的任务失败')
         #         return False
         #         
@@ -174,27 +174,27 @@ class TaskAppiumZhuankeTrial(TaskAppiumZhuankeBase):
         #     # 状态置为安装应用起始页面
         #     is_download_caught_exception=False  # 下载是否碰到异常
         #     for try_index in range(20):
-        #         utils_logger.log("---> 检查任务详情页状态：",try_index
+        #         utils_logger.log("检查任务详情页状态：",try_index
         #         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('下载'),click_mode='click',is_ignore_except_case=True,retry_count=0) is not None:
-        #             utils_logger.log("--->开始下载：",try_index
+        #             utils_logger.log("开始下载：",try_index
         #             time.sleep(2)
         #         elif self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('下载中',is_force_match=False),is_ignore_except_case=True,retry_count=0) is not None:
-        #             utils_logger.log("--->等待apk下载完成...:",try_index
+        #             utils_logger.log("等待apk下载完成...:",try_index
         #             time.sleep(2)
         #         elif self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('安装'),click_mode='click',is_ignore_except_case=True,retry_count=0) is not None:
-        #             utils_logger.log("--->开始安装"
+        #             utils_logger.log("开始安装"
         #         # 检查是否是安装应用界面或者是正在安装界面(包含安装完成后的去人页面，是'.InstallAppProgress')
         #         elif self.wait_activity(driver=self.driver,target=['.PackageInstallerActivity','.InstallAppProgress'],is_ignore_except_case=True,retry_count=0) is True:
-        #             utils_logger.log("---> 弹出安装应用界面"
+        #             utils_logger.log("弹出安装应用界面"
         #             break
         #         # 检查下载状态是否失败,若失败则退出至任务列表重新选择任务
         #         elif self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('任务下载失败'),is_ignore_except_case=True,retry_count=0) is not None:
-        #             utils_logger.log("---> 任务下载失败"
+        #             utils_logger.log("任务下载失败"
         #             if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text(text='好的',view_type='android.widget.Button'),click_mode='click') is not None:
         #                 if self.query_ele_wrapper("//android.widget.TextView[@text='放弃' and @resource-id='cn.zhuanke.zhuankeAPP:id/backTv']",click_mode='click') is not None:
         #                     # 来自弹框中的'放弃'按钮
         #                     if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('放弃',view_type='android.widget.Button'),click_mode='click') is not None:
-        #                         utils_logger.log("---> 放弃该任务"
+        #                         utils_logger.log("放弃该任务"
         #                     else:
         #                         self.task_scheduler_failed("'---> 放弃任务'失败")
         #                 else:
@@ -204,49 +204,49 @@ class TaskAppiumZhuankeTrial(TaskAppiumZhuankeBase):
         #             is_download_caught_exception=True
         #             break
         #     if is_download_caught_exception is True:
-        #         utils_logger.log("--->任务下载失败，放弃该任务,等待下次重新获取任务"
+        #         utils_logger.log("任务下载失败，放弃该任务,等待下次重新获取任务"
         #         return False
         #     # 执行安装流程并检测安装状态
         #     is_installed_success=False
         #     for check_if_installing_index in range(20):
-        #         utils_logger.log("---> check_if_installing_index with index:",check_if_installing_index
+        #         utils_logger.log("check_if_installing_index with index:",check_if_installing_index
         #         # 触发开始安装
         #         if self.wait_activity(self.driver,target=['.PackageInstallerActivity']) is True:
-        #             utils_logger.log("--->此刻正在应用安装起始页面，触发安装开始逻辑"
+        #             utils_logger.log("此刻正在应用安装起始页面，触发安装开始逻辑"
         #             if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('通过华为应用市场安全检测。')) is not None:
         #                 if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('安装',view_type='android.widget.Button'),click_mode='click') is not None:
-        #                     utils_logger.log("---> 触发'通过华为应用市场监测'的安装流程"
+        #                     utils_logger.log("触发'通过华为应用市场监测'的安装流程"
         #                 else:
         #                     self.task_scheduler_failed("触发'通过华为应用市场监测'的安装流程'失败")
         #             else:
         #                 if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('我已充分了解该风险',is_force_match=False,view_type='android.widget.CheckBox'),click_mode='click') is not None:
-        #                     utils_logger.log("---> 触发'了解风险'按钮"
+        #                     utils_logger.log("触发'了解风险'按钮"
         #                 if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('继续安装',view_type='android.widget.Button'),click_mode='click') is not None:
-        #                     utils_logger.log("--->触发'继续安装'弹框按钮"
+        #                     utils_logger.log("触发'继续安装'弹框按钮"
         #         # 检查是否回到任务详情页
         #         elif self.wait_activity(self.driver,target=['com.fc.zhuanke.ui.PlayTaskDetailActivity'],is_ignore_except_case=True) is True:
-        #             utils_logger.log("---> 此刻认为应用已安装完成，退出系统应用安装界面"
+        #             utils_logger.log("此刻认为应用已安装完成，退出系统应用安装界面"
         #             is_installed_success=True
         #             break
         #         # 识别到应用正在安装中，则等待
         #         elif self.wait_activity(self.driver,target=['.InstallAppProgress']) is True:
         #             xpath_install_done="//android.widget.Button[@text='完成' and @resource-id='com.android.packageinstaller:id/done_button']"
         #             if self.query_ele_wrapper(xpath_install_done,click_mode='click') is not None:
-        #                 utils_logger.log("---> 检测到'安装已完成'界面，触发'完成'按钮"
+        #                 utils_logger.log("检测到'安装已完成'界面，触发'完成'按钮"
         #             else:
-        #                 utils_logger.log("--->安装未完成,继续等待["+str(check_if_installing_index)+"]:",utils_appium.get_cur_act(self.driver)
+        #                 utils_logger.log("安装未完成,继续等待["+str(check_if_installing_index)+"]:",utils_appium.get_cur_act(self.driver)
         #                 time.sleep(3)
         #         else:
         #             self.task_scheduler_failed('not in 任何正确界面')
         #     if is_installed_success is False:
-        #         utils_logger.log("--->应用安装失败"
+        #         utils_logger.log("应用安装失败"
         #         self.task_scheduler_failed('应用安装失败')
         #         return False
         #     # check 新安装的应用包名
-        #     utils_logger.log("---> 检测新安装的应用包名"
+        #     utils_logger.log("检测新安装的应用包名"
         #     for  new_installed_pkg_itme in self.query_installed_packages():
         #         if new_installed_pkg_itme not in old_installed_packages:
-        #             utils_logger.log("--->检测到新的安装应用",new_installed_pkg_itme
+        #             utils_logger.log("检测到新的安装应用",new_installed_pkg_itme
         #             with open(self.file_installed_pkg, 'w') as f:
         #                 f.write(new_installed_pkg_itme)
         # # 计算休眠时间
@@ -255,26 +255,26 @@ class TaskAppiumZhuankeTrial(TaskAppiumZhuankeBase):
         # try:
         #     ele_txt=json.dumps(self.query_ele_wrapper(self.get_query_str_by_viewid('cn.zhuanke.zhuankeAPP:id/taskStep')).text, encoding='utf-8', ensure_ascii=False)
         #     ele_txt=str(ele_txt.replace('\"','').replace('\\',''))
-        #     utils_logger.log("--->ele_txt:",ele_txt
+        #     utils_logger.log("ele_txt:",ele_txt
         #     match_result=re.findall(r"试玩超过([0-9]\d*)分钟|体验超过([0-9]\d*)分钟|试玩([0-9]\d*)分钟", ele_txt)
-        #     utils_logger.log("--->[match_result]",match_result
+        #     utils_logger.log("[match_result]",match_result
         #     for match_item in match_result:
         #         for item in match_item:
         #             if item == "":
         #                 continue
         #             wait_time_minutes=int(item)
-        #             utils_logger.log("--->",wait_time_minutes
+        #             utils_logger.log("",wait_time_minutes
         # except:
         #     utils_logger.log(traceback.format_exc()
         #     self.task_scheduler_failed(ele_txt)
-        # utils_logger.log("---> 休眠等待安装分钟数:",wait_time_minutes
+        # utils_logger.log("休眠等待安装分钟数:",wait_time_minutes
         # # 执行试用逻辑
         # if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('已安装')) is not None \
         #     and self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('试玩应用'),click_mode='click') is not None:
-        #     utils_logger.log("--->休眠以等待试玩完成"
+        #     utils_logger.log("休眠以等待试玩完成"
         #     time.sleep(wait_time_minutes*60)
         #     for line in open(self.file_installed_pkg):
-        #         utils_logger.log("---> start to uninstall apk:",line
+        #         utils_logger.log("start to uninstall apk:",line
         #         utils_common.exec_shell_cmd('adb uninstall '+line)
         #     return True
         # else:

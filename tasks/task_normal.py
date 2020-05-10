@@ -103,7 +103,7 @@ class TaskCheckerAllTaskRunState(PcBaseTask):
                 normal_task_success += output_info
         # 组装邮件内容
         email_title = u'TodayTaskFailed' if normal_task_failed != "" else u"今日任务已全部完成"
-        utils_logger.log("---> wrapper_send_email", email_title)
+        utils_logger.log("wrapper_send_email", email_title)
         if normal_task_failed != "":
             email_content += "[未完成任务]：\n" + normal_task_failed + "\n"
         if retry_over_task != "":

@@ -39,7 +39,7 @@ def query_all_ocrs_throw_ocr(file_img):
         elif ocr_type == 'xunfei':
             status, results = _query_ocr_by_xunfei(file_img=file_img)
         if status is True:
-            utils_logger.log("---> start query in ocr_type:", ocr_type)
+            utils_logger.log("start query in ocr_type:", ocr_type)
             break
     return results
 
@@ -53,7 +53,7 @@ def get_points_within_text(file_img, text_matcher):
         return None
     matched_results = []
     for ocr_item in query_results:
-        utils_logger.log("---> get_points_within_text:'" + text_matcher + "' vs '" + str(
+        utils_logger.log("get_points_within_text:'" + text_matcher + "' vs '" + str(
             ocr_item['words']) + "'")
         if re.match(text_matcher, str(ocr_item['words'])) is None:  # 正则匹配失败,这里需要注意str转换，否则match失效
             continue
@@ -130,17 +130,17 @@ def _query_ocr_by_youdao(file_img):
         utils_logger.log("request failed with no regions", response)
         return False, None
 
-    utils_logger.log("---> _get_points_within_text_by_youdao")
+    utils_logger.log("_get_points_within_text_by_youdao")
     query_points = []
     for parase_item in response['Result']['regions']:
         if 'text' in parase_item:
-            utils_logger.log("---> regions:", parase_item['text'])
+            utils_logger.log("regions:", parase_item['text'])
         if 'lines' not in parase_item:
-            utils_logger.log("---> not need to anylaze in lines", parase_item)
+            utils_logger.log("not need to anylaze in lines", parase_item)
             continue
         for line_item in parase_item['lines']:
             if 'text' not in line_item:
-                utils_logger.log("---> not need to anylaze in line_item", line_item)
+                utils_logger.log("not need to anylaze in line_item", line_item)
                 continue
             # utils_logger.log(line_item
             # 先将字符串按照','切片，并将切片后每个字符串item转成int类型
@@ -190,7 +190,7 @@ def _query_ocr_by_tencentapi(file_img):
     request_str = request_str + 'app_key=' + 'X74khf5HkW058XtO'
     # utils_logger.log(request_str
     sign_value = hashlib.md5(request_str).hexdigest().upper()
-    utils_logger.log("--->sign_value：", sign_value)
+    utils_logger.log("sign_value：", sign_value)
 
     request_param['sign'] = sign_value
     # request_str=request_str+"&sign="+sign_value
@@ -252,7 +252,7 @@ def _query_ocr_by_xunfei(file_img):
             point_y = random.randint(top, bottom)
             point['avaiable_point'] = (point_x, point_y)
 
-            utils_logger.log("--->[_get_points_within_text_by_xunfei]", content, " - ", point)
+            utils_logger.log("[_get_points_within_text_by_xunfei]", content, " - ", point)
             query_points.append(point)
     return True, query_points
 

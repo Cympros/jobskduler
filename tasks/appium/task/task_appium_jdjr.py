@@ -66,7 +66,7 @@ class TaskAppiumJDJRSignBase(AppiumBaseTask):
                                 ['.ver2.account.login.ui.LoginActivity', '.bm.zhyy.login.ui.LoginActivity'],
                                 is_ignore_except_case=True) is True \
                 and self.__deal_within_login() is True:
-            utils_logger.log("---> 检测到需要登录界面")
+            utils_logger.log("检测到需要登录界面")
             return True
         elif self.query_ele_wrapper(self.get_query_str_by_viewid('com.jd.jrapp:id/ibtn_zc_product_notice_board_close'),
                                     is_ignore_except_case=True, click_mode="click", retry_count=0) is not None:
@@ -124,7 +124,7 @@ class TaskAppiumJDJRQuanyiCenter(TaskAppiumJDJRSignBase):
                                               click_mode="click", is_ignore_except_case=True) is not None:
                 search_result = True
                 break
-            utils_logger.log("--->开始滚动第", scroll_index, "次")
+            utils_logger.log("开始滚动第", scroll_index, "次")
             if self.safe_touch_action(tab_interval=[0.6, 0.4]) is True:
                 time.sleep(3)  # 这个时候滚动完了，可能页面还没有静止，因此延时等待下
         if search_result is False:
@@ -165,7 +165,7 @@ class TaskAppiumJDJRSign(TaskAppiumJDJRSignBase):
         if self.query_ele_wrapper("//android.widget.TextView[@text='登录' and @resource-id='com.jd.jrapp:id/tv_btn']",
                                   click_mode='click', retry_count=0, time_wait_page_completely_resumed=10) is not None:
             # 这里触发进入登录模块，后续的方法负责接力登录模块的处理
-            utils_logger.log("--->说明此时还没有登录，因此由上面的query方法触发进入登录模块")
+            utils_logger.log("说明此时还没有登录，因此由上面的query方法触发进入登录模块")
         if self.query_ele_wrapper(self.get_query_str_by_viewid("com.jd.jrapp:id/home_title_portrait"),
                                   click_mode='click') is None:
             self.task_scheduler_failed("未找到左上角用户头像")
@@ -255,7 +255,7 @@ class TaskAppiumJDJRDailyClockOn(TaskAppiumJDJRSignBase):
                     or self.query_only_point_within_text('^支付1元参与挑战$', is_auto_click=True) is not None:
                 if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('立即支付'),
                                           click_mode="click") is not None:
-                    utils_logger.log("---> wait for 支付完成")
+                    utils_logger.log("wait for 支付完成")
                     time.sleep(8)  # 等待支付完成
                     # 若开通免密支付，则会直接直接支付成功
                     if self.query_ele_wrapper("//android.view.View[@content-desc='支付成功 记得明早打卡哦']") is not None:

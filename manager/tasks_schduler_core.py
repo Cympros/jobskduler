@@ -7,11 +7,11 @@ project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0]
 sys.path.append(project_root_path)
 
 import inspect
+from helper import utils_logger
 
 
 # 查找指定目录下的所有.py类型的modules文件
 def find_all_modules(dir_name):
-    # print ("> start to find modules:" + dir_name)
     from os.path import basename, isfile, join, isdir
     import glob
     # return [basename(f)[:-3] for f in modules if isfile(f) and not f.endswith('__init__.py')]
@@ -22,7 +22,6 @@ def find_all_modules(dir_name):
     for item in os.listdir(dir_name):
         real_path = os.path.join(dir_name, item)
         if not item.endswith('__pycache__') and isdir(real_path):
-            # print (real_path)
             whole_py_files += find_all_modules(real_path)
     return whole_py_files
 
@@ -41,11 +40,11 @@ if __name__ == '__main__':
             continue
 
         if not module_dir in sys.path:
-            print ("> sys.path.append: " + module_dir)
+            utils_logger.log("> sys.path.append: " + module_dir)
             sys.path.append(module_dir)
 
         # if not module_name in sys.modules:
-        print ("> dynamic import: " + module_name)
+        utils_logger.log("> dynamic import: " + module_name)
         #     module = __import__(module_name)
         # else:
         #     eval("import a")
@@ -57,7 +56,7 @@ if __name__ == '__main__':
         for name, obj in inspect.getmembers(my_module):
             if not inspect.isclass(obj):
                 continue
-            print (name, obj)
+            utils_logger.log(name, obj)
 
             MyClass = getattr(my_module, name)
             instance = MyClass()

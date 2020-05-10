@@ -27,7 +27,7 @@ class TaskAppiumQutoutiaoBase(AppiumBaseTask):
             return True
         elif self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('开启锁屏阅读'), is_ignore_except_case=True,
                                     retry_count=0) is not None:
-            utils_logger.log("---> 检测到开启锁屏的弹框，点击左上角关闭弹框")
+            utils_logger.log("检测到开启锁屏的弹框，点击左上角关闭弹框")
             if self.safe_tap_in_point([0, 0]) is False:
                 self.task_scheduler_failed('safe_tap_in_point failed')
             else:
@@ -64,7 +64,7 @@ class TaskAppiumQtoutiaoYuedu(TaskAppiumQutoutiaoBase):
             return True
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('下载完成后并安装打开', is_force_match=False),
                                   is_ignore_except_case=True) is not None:
-            utils_logger.log("--->检测到'华为、vivo、oppo等机型，请勿选择“安全安装、官方推荐”选择“继续安装、取消”，否则将无法领取金币'")
+            utils_logger.log("检测到'华为、vivo、oppo等机型，请勿选择“安全安装、官方推荐”选择“继续安装、取消”，否则将无法领取金币'")
             if self.query_ele_wrapper(
                     '//android.widget.FrameLayout//android.widget.FrameLayout//android.widget.FrameLayout//android.widget.RelativeLayout//android.widget.RelativeLayout//android.view.View',
                     click_mode='click', is_ignore_except_case=True) is not None:
@@ -83,7 +83,7 @@ class TaskAppiumQtoutiaoYuedu(TaskAppiumQutoutiaoBase):
             if utils_appium.get_cur_act(self.driver) == '.Launcher':
                 utils_logger.log("运行过程中，软件回到了桌面程序，退出浏览任务")
                 return False
-            utils_logger.log("--->开启第(", index, "/", for_each_size, ")次浏览")
+            utils_logger.log("开启第(", index, "/", for_each_size, ")次浏览")
             # 循环回到首页
             def_main_activity = 'com.jifen.qkbase.main.MainActivity'
             try_count = 0
@@ -100,7 +100,7 @@ class TaskAppiumQtoutiaoYuedu(TaskAppiumQutoutiaoBase):
                 try:
                     self.browser_news(def_main_activity)
                 except Exception as e:
-                    utils_logger.log("--->TaskAppiumQtoutiaoYuedu.browser_news caught exception:",
+                    utils_logger.log("TaskAppiumQtoutiaoYuedu.browser_news caught exception:",
                                      traceback.format_exc())
             else:
                 utils_logger.log("不再首页，没办法执行新闻浏览任务")
@@ -120,7 +120,7 @@ class TaskAppiumQtoutiaoYuedu(TaskAppiumQutoutiaoBase):
             return False
         # 搜索应该阅读的文章
         scroll_size = int(random.randint(0, 20))
-        utils_logger.log("---> 页面滚动次数：", scroll_size)
+        utils_logger.log("页面滚动次数：", scroll_size)
         for index in range(scroll_size):
             # 滑动以选择文章开启阅读任务
             self.safe_touch_action(tab_interval=[float(random.uniform(0.6, 0.8)), 0.2])
@@ -142,12 +142,12 @@ class TaskAppiumQtoutiaoYuedu(TaskAppiumQutoutiaoBase):
         # 随便点击，选择指定文章开始读取
         for tab_index in range(10):
             self.safe_tap_in_point([random.randint(100, 400), random.randint(200, 800)])
-            utils_logger.log("--->等待进入新闻详情界面[", tab_index, "]：", utils_appium.get_cur_act(self.driver))
+            utils_logger.log("等待进入新闻详情界面[", tab_index, "]：", utils_appium.get_cur_act(self.driver))
             # wait_activity有针对异常情况的处理，因此弃用'utils_appium.get_cur_act'方式
             if self.wait_activity(driver=self.driver,
                                   target=news_activitys + video_activitys + image_activitys + other_activitys,
                                   retry_count=1) is True:
-                utils_logger.log("--->成功进入某个详情页面")
+                utils_logger.log("成功进入某个详情页面")
                 break
         # 判断是否在详情页面
         cur_activity = utils_appium.get_cur_act(self.driver)
@@ -155,7 +155,7 @@ class TaskAppiumQtoutiaoYuedu(TaskAppiumQutoutiaoBase):
             self.task_scheduler_failed('why 还在首页')
             return False
         # 根据页面调用指定阅读策略
-        utils_logger.log("--->cur_activity:", cur_activity)
+        utils_logger.log("cur_activity:", cur_activity)
         if cur_activity in news_activitys:
             # 开始模拟阅读
             time_to_foreach = random.randint(5, 10)  # 5~10s，因为每30秒就可以获得10积分的奖励
@@ -165,7 +165,7 @@ class TaskAppiumQtoutiaoYuedu(TaskAppiumQutoutiaoBase):
                     tab_interval = [0.65, 0.35]
                 else:
                     tab_interval = [0.25, 0.75]
-                utils_logger.log("--->[", time_to_foreach, "] for tab_interval[", tab_interval, "] with index:", index)
+                utils_logger.log("[", time_to_foreach, "] for tab_interval[", tab_interval, "] with index:", index)
                 if self.safe_touch_action(tab_interval=tab_interval, duration=int(float(period * 1000))) is False:
                     utils_logger.log("----> safe_touch_action caught exception")
             return True
@@ -214,14 +214,14 @@ class TaskAppiumQtoutiaoCoreShiduanJiangli(TaskAppiumQutoutiaoBase):
         if self.query_ele_wrapper(btn_ele_xpath, click_mode="click", time_wait_page_completely_resumed=5,
                                   retry_count=0) is not None:
             if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('时段奖励'), retry_count=0) is not None:
-                utils_logger.log("---> 成功弹出时段奖励弹框")
+                utils_logger.log("成功弹出时段奖励弹框")
                 return True
             else:
                 # 若第一次是成功签到，发起第二次查询是否已成功签到的检测
                 if self.query_ele_wrapper(btn_ele_xpath, click_mode="click", retry_count=0) is not None:
                     if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('时段奖励'),
                                               retry_count=0) is not None:
-                        utils_logger.log("---> 成功弹出时段奖励弹框")
+                        utils_logger.log("成功弹出时段奖励弹框")
                         return True
                 else:
                     self.task_scheduler_failed('第二次未搜索到右上角按钮')
@@ -263,7 +263,7 @@ class TaskAppiumQtoutiaoSign(TaskAppiumQtoutiaoTaskCenter):
                 or self.query_ele_wrapper(
             self.get_query_str_within_xpath_only_text(text='已签', view_type='android.view.View',
                                                       attribute='content-desc')) is not None:
-            utils_logger.log("---> 今日已签到")
+            utils_logger.log("今日已签到")
             return True
         else:
             self.task_scheduler_failed('为何发现今日未签到')
@@ -285,7 +285,7 @@ class TaskAppiumQtoutiaoOpenBaoxiang(TaskAppiumQtoutiaoTaskCenter):
                 break
 
             utils_logger.log('未找到开宝箱的按钮')
-            utils_logger.log("---> TaskAppiumQtoutiaoOpenBaoxiang swipe of index：", index)
+            utils_logger.log("TaskAppiumQtoutiaoOpenBaoxiang swipe of index：", index)
             self.safe_touch_action(tab_center=0.4, is_down=True, tab_interval=[0.65, 0.35])
             # 保留每次的page_resource以及截图文件
             upload_files.append(
@@ -338,7 +338,7 @@ class TaskAppiumQtoutiaoGrandTotalJiangli(TaskAppiumQtoutiaoTaskCenter):
         if TaskAppiumQtoutiaoTaskCenter.run_task(self) is False:
             return False
         for index in range(10):
-            utils_logger.log("---> TaskAppiumQtoutiaoGrandTotalJiangli for-each:", index)
+            utils_logger.log("TaskAppiumQtoutiaoGrandTotalJiangli for-each:", index)
             if self.query_ele_wrapper("//android.view.View[@content-desc='累计阅读时长达到60分钟']", click_mode="click",
                                       rect_scale_check_element_region=[0, 1, 0, 1]) is not None:
                 utils_logger.log("检测到\"累计阅读时长达到60分钟\"")
