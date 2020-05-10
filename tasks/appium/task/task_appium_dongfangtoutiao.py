@@ -76,7 +76,7 @@ class JobAppiumDongFangToutiaoYueDu(JobAppiumDongFangToutiaoBase):
             if utils_appium.get_cur_act(self.driver) == def_main_activity:
                 try:
                     self.browser_news(def_main_activity)
-                except Exception, e:
+                except Exception as e:
                     utils_logger.log("--->JobAppiumDongFangToutiaoYueDu.browser_news caught exception:",
                                      traceback.format_exc())
             else:

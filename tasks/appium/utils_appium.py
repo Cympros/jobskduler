@@ -12,7 +12,7 @@ sys.path.append(job_root_path)
 
 from helper import utils_common, utils_logger
 from config import env_job
-import utils_android
+from extra.job_schduler.job import utils_android
 
 
 def get_appium_element_position(element):

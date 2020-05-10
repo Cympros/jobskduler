@@ -34,7 +34,8 @@ class BaseJob():
         self.job_session = xargs_dict.get('taskcmd')
 
     def run_task(self):
-        utils_logger.log('--->', self.__class__, '|', utils_common.get_shanghai_time('%Y-%m-%d %H:%M:%S'))
+        utils_logger.log('--->', self.__class__, '|',
+                         utils_common.get_shanghai_time('%Y-%m-%d %H:%M:%S'))
         return True
 
     def release_after_task(self):
@@ -45,7 +46,8 @@ class BaseJob():
         """更新任务状态"""
         pass
 
-    def job_scheduler_failed(self, message="none message", email_title=u'异常信息', upload_files=None, exception_info=None):
+    def job_scheduler_failed(self, message="none message", email_title=u'异常信息', upload_files=None,
+                             exception_info=None):
         """
             脚本执行错误，收集想过错误信息
             spot_desc_file指当前错误页面
@@ -53,7 +55,8 @@ class BaseJob():
         # TODO:检查业务层调用一次job_scheduler_failed，这里为什么同一个文件会被添加多次？  ：暂时使用强制去重
         if upload_files is not None:
             self.upload_files.extend(upload_files)
-        utils_logger.log("---> job_scheduler_failed in BaseJob with upload_files:", list(set(self.upload_files)))
+        utils_logger.log("---> job_scheduler_failed in BaseJob with upload_files:",
+                         list(set(self.upload_files)))
         error = {'message': message,
                  'task_name': self.job_session if self.job_session is not None else "None",
                  'threadid': str(threading.currentThread().getName()),

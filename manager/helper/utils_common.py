@@ -1,19 +1,25 @@
 # coding=utf-8
+import os
+import sys
+
+root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
+sys.path.append(root_path)
+sys.path.append(root_path + 'job')
 
 import shlex
 import subprocess
-import json
 import re
 import imagehash
 import time
-import os
-import sys
 import datetime
 import hashlib
-import pytz
+try:
+    import pytz
+except:
+    os.system('pip install pytz')
+    import pytz
 import socket
 import traceback
-
 import colorsys
 from PIL import Image
 
@@ -21,8 +27,6 @@ from PIL import Image
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
-sys.path.append(root_path)
 from helper import utils_logger
 
 
@@ -78,7 +82,8 @@ def exec_shell_cmd(cmd_str, timeout=None, shell=True):
         end_time = datetime.datetime.now() + datetime.timedelta(seconds=timeout)
     # 没有指定标准输出和错误输出的管道，因此会打印到屏幕上；
     # utils_logger.log("---> exec_shell_cmd:[", cmd_str, "]")
-    sub = subprocess.Popen(cmdstr_list, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    sub = subprocess.Popen(cmdstr_list, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE,
                            shell=shell, bufsize=4096)
 
     while sub.poll() is None:

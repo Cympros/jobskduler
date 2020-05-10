@@ -12,7 +12,7 @@ from itchat.content import *
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-from job_base import BaseJob as Base
+from task_base import BaseJob as Base
 
 common_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../common')
 # utils_logger.log("---> common path is: ",common_path
