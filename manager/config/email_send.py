@@ -6,8 +6,8 @@ import json
 import hashlib
 import traceback
 
-root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
-sys.path.append(root_path)
+project_root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
+sys.path.append(project_root_path)
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -24,7 +24,7 @@ from smtplib import SMTPException
 
 from helper import utils_common, utils_logger, utils_yaml
 from helper import utils_file
-from config import env_job
+from config import envs
 
 
 def wrapper_send_email(title=None, content=None, files=None):
@@ -43,7 +43,7 @@ def wrapper_send_email(title=None, content=None, files=None):
                                                  ensure_ascii=False, ) + "\n\n" \
                    + "Content:    \n" + (content if content is not None else '来自python登录qq邮箱的测试邮件')
 
-    yaml_loader = utils_yaml.load_yaml(env_job.get_yaml_path())
+    yaml_loader = utils_yaml.load_yaml(envs.get_yaml_path())
     if yaml_loader is None:
         utils_logger.log("wrapper_send_email 邮件发送失败，未读取到配置")
         return
@@ -133,5 +133,5 @@ def mk_file_mime(file_path):
 
 
 if __name__ == "__main__":
-    file_first = root_path + '/job/appium/img/wc_jd_auth_confirm.png'
+    file_first = root_path + '/tasks/appium/img/wc_jd_auth_confirm.png'
     wrapper_send_email(files=[file_first])

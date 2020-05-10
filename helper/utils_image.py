@@ -4,12 +4,13 @@ import os
 import sys
 from PIL import Image
 
-root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
-sys.path.append(root_path)
+project_root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
+sys.path.append(project_root_path)
+
 from helper import utils_logger
 
-import utils_file as FileOperate
-from config import env_job
+from helper import utils_file as FileOperate
+from helper import envs
 
 
 def get_rect_formated(raw_file_path, cutted_scale=[0, 1, 0, 1]):
@@ -89,7 +90,7 @@ def get_color_if_img_solid(raw_image):
 
 
 if __name__ == '__main__':
-    file = root_path + 'job/appium/img/jingdong_double_sign_enterence.png'
-    cutted_file_path = FileOperate.generate_suffix_file(file, save_to_dir=env_job.get_out_dir(), suffix="cutted")
+    file = root_path + 'tasks/appium/img/jingdong_double_sign_enterence.png'
+    cutted_file_path = FileOperate.generate_suffix_file(file, save_to_dir=envs.get_out_dir(), suffix="cutted")
     cutted_image_with_scale(raw_file_path=file, cutted_save_file_path=cutted_file_path,
                             cutted_rect_scale=[0.82, 0.98, 0.47, 0.568])

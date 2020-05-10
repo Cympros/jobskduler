@@ -7,12 +7,12 @@ import sys
 import time
 import traceback
 
-job_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../')
-sys.path.append(job_root_path)
+project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../')
+sys.path.append(project_root_path)
 
 from helper import utils_common, utils_logger
-from config import env_job
-from extra.job_schduler.job import utils_android
+# from helper import envs
+# from helper import utils_android
 
 
 def get_appium_element_position(element):
@@ -167,7 +167,7 @@ def get_screen_shots(driver, target_device, file_path=None, retry_count=2):
         file_name = "screen_tmp_" + \
                     (resolution_within_devices if resolution_within_devices is not None else "none") \
                     + ".png"
-        file_path = os.path.abspath(env_job.get_out_dir() + file_name)
+        file_path = os.path.abspath(envs.get_out_dir() + file_name)
         # 删除缓存
     if os.path.exists(file_path):
         utils_logger.log("---> get_screen_shots clear cache for file: ", file_path)
@@ -205,7 +205,7 @@ def write_page_resource(driver, file_page_resource=None):
     '''
     desc:把pagr-resource文件写入文件
     :param driver: 
-    :param file_page_resource: such as file_page_resource=env_job.get_out_dir()+"page_resource.txt"
+    :param file_page_resource: such as file_page_resource=envs.get_out_dir()+"page_resource.txt"
     :return: 写入的文件路径，写入失败时返回None
     '''
     if file_page_resource is None:

@@ -11,27 +11,27 @@ import subprocess
 
 root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../')
 sys.path.append(root_path)
-sys.path.append(root_path + '/job/appium/task')
-sys.path.append(root_path + '/job/normal/task')
+sys.path.append(root_path + '/tasks/appium/task')
+sys.path.append(root_path + '/tasks/normal/task')
 sys.path.append(root_path + '/job')
 
 from helper.dbhelper import DataBaseOpenHelper
-from config import env_job
+from config import envs
 from helper import utils_logger
-from job.appium.utils import utils_android
+from tasks.appium.utils import utils_android
 from helper import utils_common
 from helper import utils_config_parser
 from config import email_send
 
 
-class JobSchdulerController(object):
+class TaskSchdulerController(object):
 
     def __init__(self):
-        self.db_path = env_job.get_db_path()
+        self.db_path = envs.get_db_path()
         self.db_helper = None
 
     def get_db_helper(self):
-        utils_logger.log("JobSchdulerController#get_db_helper")
+        utils_logger.log("TaskSchdulerController#get_db_helper")
         db_helper = DataBaseOpenHelper(self.db_path)
         db_helper.exec_sql('''create table if not exists tbjob
                 (taskcmd char(50)  not null ,
@@ -56,7 +56,7 @@ class JobSchdulerController(object):
         if self.db_helper is None:
             self.db_helper = self.get_db_helper()
 
-        utils_logger.log("##########JobSchdulerController#add_task [tbthreadinfo]开始插入线程信息")
+        utils_logger.log("##########TaskSchdulerController#add_task [tbthreadinfo]开始插入线程信息")
         for device_type in ['android', 'pc']:
             if device_type == "android":
                 # 插入所有android设备
@@ -86,15 +86,15 @@ class JobSchdulerController(object):
                     + "','" + device_type + "')")
 
         # 插入tbtask
-        utils_logger.log("##########JobSchdulerController#add_task [tbtask]开始插入task信息")
-        for task_item in utils_config_parser.get_sessions(env_job.get_job_config_path()):
-            runnable = utils_config_parser.get_value(env_job.get_job_config_path(), task_item, "runnable", "true")
+        utils_logger.log("##########TaskSchdulerController#add_task [tbtask]开始插入task信息")
+        for task_item in utils_config_parser.get_sessions(envs.get_project_config_path()):
+            runnable = utils_config_parser.get_value(envs.get_project_config_path(), task_item, "runnable", "true")
             if runnable != 'true':
                 self.db_helper.exec_sql("delete from tbjob where taskcmd='" + task_item + "'")
             else:
-                taskname = utils_config_parser.get_value(env_job.get_job_config_path(), task_item, 'job_name') \
+                taskname = utils_config_parser.get_value(envs.get_project_config_path(), task_item, 'task_name') \
                     .replace("'", "*")
-                daily_count = utils_config_parser.get_value(env_job.get_job_config_path(), task_item,
+                daily_count = utils_config_parser.get_value(envs.get_project_config_path(), task_item,
                                                             "daily_repeat_count", '1')
                 self.db_helper.exec_sql("insert or replace into tbtask(taskcmd,taskname,runnable,dailycount) values ('"
                                         + task_item + "','"
@@ -135,7 +135,7 @@ class JobSchdulerController(object):
             self.db_helper = self.get_db_helper()
         self.add_task()  # 重新导入任务
 
-        utils_logger.log("##########JobSchdulerController#exec_task")
+        utils_logger.log("##########TaskSchdulerController#exec_task")
         thread_maps = {}
         for threadid_item in self.db_helper.exec_sql('select distinct fsthreadid from tbjob;'):
             thread_name = threadid_item['fsthreadid']
@@ -162,7 +162,7 @@ class JobSchdulerController(object):
                 thread_maps[thread_name] = device_thread
 
     def clear(self):
-        utils_logger.log("#####JobSchdulerController#clear ")
+        utils_logger.log("#####TaskSchdulerController#clear ")
         if os.path.exists(self.db_path):
             os.remove(self.db_path)
 
@@ -179,7 +179,7 @@ class JobSchdulerController(object):
         # print "##################", "\"" + mod_str + "\"", root_path
 
     def check_env_dependence(self):
-        utils_logger.log("#####JobSchdulerController#check_env_dependence 检查环境依赖")
+        utils_logger.log("#####TaskSchdulerController#check_env_dependence 检查环境依赖")
         p = subprocess.Popen(["bash", os.path.abspath(root_path + "/config/schduler_doctor.sh")])
         p.communicate()  # 这一步表示等待Popen执行完成
         if p.returncode != 0:
@@ -189,7 +189,7 @@ class JobSchdulerController(object):
 
 def device_thread_loop(*jobs):
     job_list = list(jobs)
-    utils_logger.log("#####JobSchdulerController#device_thread_loop", job_list)
+    utils_logger.log("#####TaskSchdulerController#device_thread_loop", job_list)
     while True:
         # 记录每轮任务的执行时间，执行过短的进行休眠操作
         foreach_start_time = utils_common.get_shanghai_time()
@@ -218,7 +218,7 @@ def device_thread_loop(*jobs):
                 cls_obj.release_after_task()
             except Exception as exception:
                 utils_logger.log(traceback.format_exc())
-                env_job.zip_msg_within_files(u'异常信息[' + exception.__class__.__name__ + "]",
+                envs.zip_msg_within_files(u'异常信息[' + exception.__class__.__name__ + "]",
                                              "反射调用脚本错误:" + job_path + "\n" + traceback.format_exc())
         foreach_end_time = utils_common.get_shanghai_time()
         if foreach_end_time - foreach_start_time < 20:
@@ -228,7 +228,7 @@ def device_thread_loop(*jobs):
 
 def runner():
     utils_logger.log("[" + str(os.getpid()) + "]enter...")
-    JobSchdulerController().exec_task()
+    TaskSchdulerController().exec_task()
     utils_logger.log("[" + str(os.getpid()) + "]runner.")
 
 

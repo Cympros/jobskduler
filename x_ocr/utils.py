@@ -6,20 +6,23 @@ import sys
 import json
 import uuid
 import time
-import urllib2
+import urllib.request
 import random
 import base64
 import urllib
 import hashlib
-import requests
+import urllib.request
 import traceback
-from requests.exceptions import ConnectionError
-from aip import AipOcr
+try:
+    from aip import AipOcr
+except:
+    os.system('pip install baidu_aip')
+    from aip import AipOcr
 
-root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
-sys.path.append(root_path)
+project_root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
+sys.path.append(project_root_path)
 
-from helper import utils_common, utils_logger
+# from helper import utils_common, utils_logger
 
 
 def query_all_ocrs_throw_ocr(file_img):
@@ -50,7 +53,8 @@ def get_points_within_text(file_img, text_matcher):
         return None
     matched_results = []
     for ocr_item in query_results:
-        utils_logger.log("---> get_points_within_text:'" + text_matcher + "' vs '" + str(ocr_item['words']) + "'")
+        utils_logger.log("---> get_points_within_text:'" + text_matcher + "' vs '" + str(
+            ocr_item['words']) + "'")
         if re.match(text_matcher, str(ocr_item['words'])) is None:  # 正则匹配失败,这里需要注意str转换，否则match失效
             continue
         utils_logger.log(ocr_item)
@@ -87,8 +91,10 @@ def _query_ocr_by_baiduapi(file_img):
             continue
         # 下面判断需要顶部sys.setdefaultencoding的配合生效，否者会提示'ascii' codec can't encode characters in position 0-7: ordinal not in range(128)'
         point = {'location': word_item['location'], 'words': word_item['words']}
-        point_x = int(word_item['location']['left']) + random.randint(0, int(word_item['location']['width']))
-        point_y = int(word_item['location']['top']) + random.randint(0, int(word_item['location']['height']))
+        point_x = int(word_item['location']['left']) + random.randint(0, int(
+            word_item['location']['width']))
+        point_y = int(word_item['location']['top']) + random.randint(0, int(
+            word_item['location']['height']))
         point['avaiable_point'] = (point_x, point_y)
         query_points.append(point)
     # utils_logger.log("_get_points_within_text_by_baiduapi", json.dumps(query_points, encoding='utf-8', ensure_ascii=False)
@@ -107,7 +113,8 @@ def _query_ocr_by_youdao(file_img):
     sign_raw = app_key + img_base64 + salt + app_pwd
     hl.update(sign_raw.encode(encoding='utf-8'))
     sign = hl.hexdigest().upper()  # md5化并大写
-    request_param = {'img': img_base64, 'langType': 'zh-en', 'detectType': '10012', 'imageType': '1', 'appKey': app_key,
+    request_param = {'img': img_base64, 'langType': 'zh-en', 'detectType': '10012',
+                     'imageType': '1', 'appKey': app_key,
                      'salt': salt,
                      'docType': 'json', 'sign': sign}
     try:
@@ -215,11 +222,9 @@ def _query_ocr_by_xunfei(file_img):
                 'X-CurTime': x_time,
                 'X-Param': x_param_b64_str,
                 'X-CheckSum': hashlib.md5(string).hexdigest()}
-    # 发送网络请求
-    req = urllib2.Request(url, body, x_header)
-    # 开始解析数据
     try:
-        result = urllib2.urlopen(req).read()
+        request = urllib.request.Request(url=url, data=body, headers=x_header, method='POST')
+        result = urllib.request.urlopen(request).read()
         data = json.loads(result).get('data').get('block')
         for block in data:
             if block.get('type') == 'text':

@@ -3,10 +3,10 @@
 import os
 import sys
 
-root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
-sys.path.append(root_path)
+project_root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
+sys.path.append(project_root_path)
 
-import utils
+from x_ocr import utils
 
 
 def get_points_within_text(file_img, text_matcher, rect_limit=None):

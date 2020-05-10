@@ -3,48 +3,51 @@
 import os
 import sys
 
-job_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
-sys.path.append(job_root_path)
+project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
+sys.path.append(project_root_path)
 
-from helper import utils_common, utils_logger
-from config import env_job
-from job.appium.job_appium_base import AppiumBaseJob
+# from helper import utils_common, utils_logger
+# from helper import envs
+from tasks.appium.task_appium_base import AppiumBaseTask
 
 '需要重新绑定账号：13651968735'
 
 
-class JobAppiumZhuankeBase(AppiumBaseJob):
+class TaskAppiumZhuankeBase(AppiumBaseTask):
     def __init__(self):
-        AppiumBaseJob.__init__(self)
+        AppiumBaseTask.__init__(self)
 
     def run_task(self):
-        return AppiumBaseJob.run_task(self)
+        return AppiumBaseTask.run_task(self)
 
     def except_case_in_query_ele(self):
-        if AppiumBaseJob.except_case_in_query_ele(self) is True:
+        if AppiumBaseTask.except_case_in_query_ele(self) is True:
             return True
         # self.query_ele_wrapper(self.get_query_str_by_viewid('cn.zhuanke.zhuankeAPP:id/dialog_title'),is_ignore_except_case=True,retry_count=0) is not None 
-        if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("新版本升级"), is_ignore_except_case=True,
+        if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("新版本升级"),
+                                  is_ignore_except_case=True,
                                   retry_count=0) is not None:
             # 检测到升级逻辑，点击取消逻辑
-            if self.query_ele_wrapper("#viewid#cn.zhuanke.zhuankeAPP:id/dialog_btn_left", retry_count=0,
+            if self.query_ele_wrapper("#viewid#cn.zhuanke.zhuankeAPP:id/dialog_btn_left",
+                                      retry_count=0,
                                       is_ignore_except_case=True, click_mode="click") is not None:
                 utils_logger.log("--->检测到版本升级")
                 return True
         elif self.query_ele_wrapper(
-                self.get_query_str_within_xpath_only_text(text='哦耶，继续赚钱', view_type='android.widget.Button'),
+                self.get_query_str_within_xpath_only_text(text='哦耶，继续赚钱',
+                                                          view_type='android.widget.Button'),
                 is_ignore_except_case=True, retry_count=0, click_mode='click') is not None:
             utils_logger.log("---> 检测到上次的试玩奖励")
             return True
         return False
 
 
-class JobAppiumZhuankeSign(JobAppiumZhuankeBase):
+class TaskAppiumZhuankeSign(TaskAppiumZhuankeBase):
     def __init__(self):
-        JobAppiumZhuankeBase.__init__(self)
+        TaskAppiumZhuankeBase.__init__(self)
 
     def run_task(self):
-        if JobAppiumZhuankeBase.run_task(self) is False:
+        if TaskAppiumZhuankeBase.run_task(self) is False:
             return False
         # 首页点击"每日抽奖"入口，进入抽奖界面
         # "每日抽奖"还有个空格，因此基于xpath
@@ -53,7 +56,7 @@ class JobAppiumZhuankeSign(JobAppiumZhuankeBase):
                 or self.query_only_point_within_text('^每日抽奖$', is_auto_click=True) is not None:
             utils_logger.log("---> 进入\"每日抽奖\"页面")
         else:
-            self.job_scheduler_failed(message="not found \'每日抽奖\'")
+            self.task_scheduler_failed(message="not found \'每日抽奖\'")
             return False
 
         # 用于检测是否有抽奖机会
@@ -68,13 +71,13 @@ class JobAppiumZhuankeSign(JobAppiumZhuankeBase):
                 return True
             # 虽然点击，但是不修改任务执行成功标识，等待下次再修改标识
             elif self.query_point_size_within_text('^您已多日未参与试玩任务$') > 0:
-                self.job_scheduler_failed("找到\'您已多日未参与试玩任务\',请手动完成试玩任务")
+                self.task_scheduler_failed("找到\'您已多日未参与试玩任务\',请手动完成试玩任务")
                 return False
             else:
-                self.job_scheduler_failed('why zhuanke failed')
+                self.task_scheduler_failed('why zhuanke failed')
                 return False
         else:
-            self.job_scheduler_failed('未找到相关的抽奖按钮')
+            self.task_scheduler_failed('未找到相关的抽奖按钮')
             return False
         return False
 
@@ -86,19 +89,19 @@ class JobAppiumZhuankeSign(JobAppiumZhuankeBase):
         else:
             if self.query_only_point_within_text('前往试玩任务') is None:
                 # 若没搜索到试玩任务请求，则直接退出
-                self.job_scheduler_failed("抽奖失败")
+                self.task_scheduler_failed("抽奖失败")
             return False
 
 
-class JobAppiumZhuankeTrial(JobAppiumZhuankeBase):
+class TaskAppiumZhuankeTrial(TaskAppiumZhuankeBase):
     """
     试玩逻辑
     """
 
     def __init__(self):
-        JobAppiumZhuankeBase.__init__(self)
+        TaskAppiumZhuankeBase.__init__(self)
         # 管理试玩任务新增的apk资源
-        self.file_installed_pkg = env_job.get_out_dir() + "/new_installed.txt"
+        self.file_installed_pkg = envs.get_out_dir() + "/new_installed.txt"
         if os.path.exists(self.file_installed_pkg) is False:
             file = open(self.file_installed_pkg, 'w')
             file.close()
@@ -108,12 +111,14 @@ class JobAppiumZhuankeTrial(JobAppiumZhuankeBase):
                 utils_common.exec_shell_cmd('adb uninstall ' + line)
 
     def except_case_in_query_ele(self):
-        if JobAppiumZhuankeBase.except_case_in_query_ele(self) is True:
+        if TaskAppiumZhuankeBase.except_case_in_query_ele(self) is True:
             return True
-        if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('删除安装包'), is_ignore_except_case=True,
+        if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('删除安装包'),
+                                  is_ignore_except_case=True,
                                   retry_count=0) is not None:
             if self.query_ele_wrapper(
-                    self.get_query_str_within_xpath_only_text('删除', view_type='android.widget.Button'),
+                    self.get_query_str_within_xpath_only_text('删除',
+                                                              view_type='android.widget.Button'),
                     click_mode='click', is_ignore_except_case=True, retry_count=0) is not None:
                 utils_logger.log("---> 删除安装包")
                 return True
@@ -128,17 +133,17 @@ class JobAppiumZhuankeTrial(JobAppiumZhuankeBase):
 
     def run_task(self):
         return True
-        # if JobAppiumZhuankeBase.run_task(self) is False:
+        # if TaskAppiumZhuankeBase.run_task(self) is False:
         #     return False
         # if self.query_only_point_within_text('试玩任务',is_auto_click=True,is_output_event_tract=True) is None:
         #     utils_logger.log("--->进入'试玩任务'失败"
-        #     self.job_scheduler_failed("进入'试玩任务'失败")
+        #     self.task_scheduler_failed("进入'试玩任务'失败")
         #     return False
         # if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('试玩'),click_mode='click') is None:
-        #     self.job_scheduler_failed("选择'试玩'tab失败")
+        #     self.task_scheduler_failed("选择'试玩'tab失败")
         #     return False
         # if self.wait_activity(driver=self.driver,target=['com.fc.zhuanke.ui.TaskListActivity']) is False:
-        #     self.job_scheduler_failed('why not in 领取任务列表界面')
+        #     self.task_scheduler_failed('why not in 领取任务列表界面')
         #     return False
         # # 选择任务：不使用容器组件，使用任务的具体名称
         # # 以下为集中任务状态类别，其中剩余100份类似的表示可以点击
@@ -159,7 +164,7 @@ class JobAppiumZhuankeTrial(JobAppiumZhuankeBase):
         #         utils_logger.log("---> 有任务未完成"
         #     else:
         #         utils_logger.log("--->未进入任务详情界面，检查是否有未完成的任务失败"
-        #         self.job_scheduler_failed('检查是否有未完成的任务失败')
+        #         self.task_scheduler_failed('检查是否有未完成的任务失败')
         #         return False
         #         
         # # 校验'安装' - 应用安装逻辑
@@ -191,11 +196,11 @@ class JobAppiumZhuankeTrial(JobAppiumZhuankeBase):
         #                     if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('放弃',view_type='android.widget.Button'),click_mode='click') is not None:
         #                         utils_logger.log("---> 放弃该任务"
         #                     else:
-        #                         self.job_scheduler_failed("'---> 放弃任务'失败")
+        #                         self.task_scheduler_failed("'---> 放弃任务'失败")
         #                 else:
-        #                     self.job_scheduler_failed("--->未找到左上角的返回按钮，即'放弃'")
+        #                     self.task_scheduler_failed("--->未找到左上角的返回按钮，即'放弃'")
         #             else:
-        #                 self.job_scheduler_failed("---> 关闭'下载任务'弹框失败")
+        #                 self.task_scheduler_failed("---> 关闭'下载任务'弹框失败")
         #             is_download_caught_exception=True
         #             break
         #     if is_download_caught_exception is True:
@@ -212,7 +217,7 @@ class JobAppiumZhuankeTrial(JobAppiumZhuankeBase):
         #                 if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('安装',view_type='android.widget.Button'),click_mode='click') is not None:
         #                     utils_logger.log("---> 触发'通过华为应用市场监测'的安装流程"
         #                 else:
-        #                     self.job_scheduler_failed("触发'通过华为应用市场监测'的安装流程'失败")
+        #                     self.task_scheduler_failed("触发'通过华为应用市场监测'的安装流程'失败")
         #             else:
         #                 if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('我已充分了解该风险',is_force_match=False,view_type='android.widget.CheckBox'),click_mode='click') is not None:
         #                     utils_logger.log("---> 触发'了解风险'按钮"
@@ -232,10 +237,10 @@ class JobAppiumZhuankeTrial(JobAppiumZhuankeBase):
         #                 utils_logger.log("--->安装未完成,继续等待["+str(check_if_installing_index)+"]:",utils_appium.get_cur_act(self.driver)
         #                 time.sleep(3)
         #         else:
-        #             self.job_scheduler_failed('not in 任何正确界面')
+        #             self.task_scheduler_failed('not in 任何正确界面')
         #     if is_installed_success is False:
         #         utils_logger.log("--->应用安装失败"
-        #         self.job_scheduler_failed('应用安装失败')
+        #         self.task_scheduler_failed('应用安装失败')
         #         return False
         #     # check 新安装的应用包名
         #     utils_logger.log("---> 检测新安装的应用包名"
@@ -261,7 +266,7 @@ class JobAppiumZhuankeTrial(JobAppiumZhuankeBase):
         #             utils_logger.log("--->",wait_time_minutes
         # except:
         #     utils_logger.log(traceback.format_exc()
-        #     self.job_scheduler_failed(ele_txt)
+        #     self.task_scheduler_failed(ele_txt)
         # utils_logger.log("---> 休眠等待安装分钟数:",wait_time_minutes
         # # 执行试用逻辑
         # if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('已安装')) is not None \
@@ -273,17 +278,17 @@ class JobAppiumZhuankeTrial(JobAppiumZhuankeBase):
         #         utils_common.exec_shell_cmd('adb uninstall '+line)
         #     return True
         # else:
-        #     self.job_scheduler_failed("未在赚客中检测到'安装'按钮")
+        #     self.task_scheduler_failed("未在赚客中检测到'安装'按钮")
         #     return False
 
 
 if __name__ == "__main__":
-    tasks = ['JobAppiumZhuankeBase', 'JobAppiumZhuankeSign', 'JobAppiumZhuankeTrial']
+    tasks = ['TaskAppiumZhuankeBase', 'TaskAppiumZhuankeSign', 'TaskAppiumZhuankeTrial']
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):
             input_info += str(index) + "：" + task_item + "\n"
-        task_index_selected = raw_input(input_info + "请选择需运行任务对应索引(索引下标越界触发程序退出)：")
+        task_index_selected = input(input_info + "请选择需运行任务对应索引(索引下标越界触发程序退出)：")
         if task_index_selected.isdigit() is False:
             utils_logger.log("索引值非数字，请重新输入：", task_index_selected)
             continue
@@ -292,5 +297,5 @@ if __name__ == "__main__":
             utils_logger.log("[" + str(task_index_selected) + "]任务索引不存在，退出程序...")
             break
         task_name = tasks[task_index_selected]
-        job = eval(task_name + '()')
-        job.run_task()
+        task = eval(task_name + '()')
+        task.run_task()

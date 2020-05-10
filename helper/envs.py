@@ -4,8 +4,8 @@ import os
 import sys
 import zipfile
 
-root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../')
-sys.path.append(root_path)
+project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../')
+sys.path.append(project_root_path)
 
 from helper import utils_common, utils_file, utils_logger
 
@@ -19,7 +19,7 @@ def get_db_path():
     return os.path.abspath(get_out_dir() + "/schduler.db")
 
 
-def get_job_config_path():
+def get_project_config_path():
     return os.path.abspath(root_path + "/data/job.config")
 
 
@@ -44,17 +44,19 @@ def zip_msg_within_files(file_name, message, files=None):
     if message is not None:
         message_path = os.path.abspath(get_out_dir() + "/message.txt")
         utils_file.write_file(message_path, message)
-        new_zip.write(message_path, utils_file.get_file_name_by_file_path(message_path), zipfile.ZIP_DEFLATED)
+        new_zip.write(message_path, utils_file.get_file_name_by_file_path(message_path),
+                      zipfile.ZIP_DEFLATED)
     if files is not None:
         for file_path_item in files:
             if os.path.exists(file_path_item) is False:
                 continue
-            new_zip.write(file_path_item, utils_file.get_file_name_by_file_path(file_path_item), zipfile.ZIP_DEFLATED)
+            new_zip.write(file_path_item, utils_file.get_file_name_by_file_path(file_path_item),
+                          zipfile.ZIP_DEFLATED)
 
 
 def get_appium_img_dir():
     'appium下存放img的目录'
-    appium_img_dir = os.path.abspath(get_module_root_path() + "/job/appium/img")
+    appium_img_dir = os.path.abspath(get_module_root_path() + "/tasks/appium/img")
     if not os.path.exists(appium_img_dir):
         return None
     return appium_img_dir

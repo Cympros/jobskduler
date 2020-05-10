@@ -2,30 +2,27 @@
 import os
 import sys
 
-root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
-sys.path.append(root_path)
-sys.path.append(root_path + 'job')
+project_root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
+sys.path.append(project_root_path)
 
 import shlex
 import subprocess
 import re
+import json
 import imagehash
 import time
 import datetime
 import hashlib
+
 try:
     import pytz
 except:
-    os.system('pip install pytz')
+    os.system('sudo pip install pytz')
     import pytz
 import socket
 import traceback
 import colorsys
 from PIL import Image
-
-# 强制设置程序编码格式
-reload(sys)
-sys.setdefaultencoding('utf-8')
 
 from helper import utils_logger
 
@@ -81,7 +78,7 @@ def exec_shell_cmd(cmd_str, timeout=None, shell=True):
     if timeout is not None:
         end_time = datetime.datetime.now() + datetime.timedelta(seconds=timeout)
     # 没有指定标准输出和错误输出的管道，因此会打印到屏幕上；
-    # utils_logger.log("---> exec_shell_cmd:[", cmd_str, "]")
+    utils_logger.log("---> exec_shell_cmd:[", cmd_str, "]")
     sub = subprocess.Popen(cmdstr_list, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE,
                            shell=shell, bufsize=4096)
@@ -96,7 +93,7 @@ def exec_shell_cmd(cmd_str, timeout=None, shell=True):
 
     response_error = sub.stderr.read().lstrip().rstrip()
     if response_error is not None and response_error != "":
-        # utils_logger.log("exec_shell_cmd within stderr", json.dumps(response_error))
+        utils_logger.log("exec_shell_cmd within stderr", response_error)
         return None, response_error
 
     response_stdout = sub.stdout.read().lstrip().rstrip()
@@ -188,6 +185,19 @@ def get_dominant_color(file_image):
     return dominant_color
 
 
+# 指数衰减函数,随着时间的扩大衰减速度越来越慢,真好可以用于定义到下次执行的时间间隔
+# t:时间节点
+# length:衰减周期长度
+# init:初始衰减值
+# finish:结束衰减值
+def exponential_decay(time, length, init=1, finish=0.15):
+    import numpy as np
+    alpha = np.log(init / finish) / length
+    l = - np.log(init) / alpha
+    decay = np.exp(-alpha * (time + l))
+    return decay
+
+
 if __name__ == "__main__":
     # utils_logger.log(get_points_within_text('../test/job_scheduler_out_screen_tmp_600x1024_meirifuli.png', r'京东用户每日福利')
     # utils_logger.log(_get_point_within_text_tencentapi("../test/job_scheduler_out_screen_tmp_600x1024_double_quqiandao.png",'去签到')
@@ -236,7 +246,7 @@ if __name__ == "__main__":
 
     # utils_logger.log(get_dominant_color('../out/ericp_600x1024.png')
 # get_point_range('../out/A.png', '../out/bb.png')
-# utils_logger.log(exec_shell_cmd("bash ../job/appium/appium_env.sh")
+# utils_logger.log(exec_shell_cmd("bash ../tasks/appium/appium_env.sh")
 #
 # test_pic = "/Users/john/Desktop/scr01.png"
 # desktop = "/Users/john/Desktop/"

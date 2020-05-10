@@ -5,8 +5,8 @@
 import os
 import sys
 
-root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../')
-sys.path.append(root_path)
+project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../')
+sys.path.append(project_root_path)
 
 try:
     import appium
@@ -16,24 +16,25 @@ except:
     import appium
 import time
 import traceback
-from helper import utils_common
-from config import env_job
+from helper import envs
+# from helper import utils_common
 from helper import utils_logger
-from helper import utils_image as image_utils
-from helper import utils_file as file_utils
-from job.job_base import BaseJob
-from job.appium.utils import utils_android, utils_appium
-from helper.x_ocr import core as ocr_utils
-from helper.x_aircv.core import Template
+# from helper import utils_image as image_utils
+# from helper import utils_file as file_utils
+from helper import utils_android
+from tasks.task_base import BaseTask
+from tasks.appium import utils_appium
+from x_ocr import core as ocr_utils
+from x_aircv.core import Template
 
 PATH = lambda p: os.path.abspath(
     os.path.join(os.path.dirname(__file__), p)
 )
 
 
-class AppiumBaseJob(BaseJob):
+class AppiumBaseTask(BaseTask):
     def __init__(self, target_application_id=None, launch_activity=None):
-        BaseJob.__init__(self)
+        BaseTask.__init__(self)
         self.driver = None
         self.target_device_name = None
         self.appium_port = 4723
@@ -53,7 +54,7 @@ class AppiumBaseJob(BaseJob):
         :param is_ignore_except_case: 
         :return: boolean
         """
-        utils_logger.log("---> AppiumBaseJob wait_activity")
+        utils_logger.log("---> AppiumBaseTask wait_activity")
         # query_activity_status: true or false
         # 第一次搜索时retry_count设置为1次(即一秒)，以避免wait_activity_with_status的重试时间内权限弹框被系统倒计时逻辑关闭
         if utils_appium.wait_activity_with_status(driver=driver, target=target,
@@ -77,7 +78,7 @@ class AppiumBaseJob(BaseJob):
         utils_logger.log("--->[write_page_resource_into_file] page_resource write to file ")
         pgres = utils_appium.get_pg_source(self.driver)
         if pgres is not None:
-            file_page_resource = env_job.get_out_dir() + "page_resource_" + suffix + ".txt"
+            file_page_resource = envs.get_out_dir() + "page_resource_" + suffix + ".txt"
             # 删除历史文件
             if os.path.exists(file_page_resource) is True:
                 os.remove(file_page_resource)
@@ -89,20 +90,20 @@ class AppiumBaseJob(BaseJob):
     def write_screen_shot_into_file(self, suffix="normal"):
         """将截图文件写入待上传列表"""
         utils_logger.log("--->[write_screen_shot_into_file] screen shot write to file ")
-        scr_file_path = os.path.abspath(env_job.get_out_dir() + "/screen_shot_" + suffix + ".png")
+        scr_file_path = os.path.abspath(envs.get_out_dir() + "/screen_shot_" + suffix + ".png")
         scr_path = utils_appium.get_screen_shots(driver=self.driver,
                                                  target_device=self.target_device_name,
                                                  file_path=scr_file_path)
         if scr_path is not None:
             self.upload_files.append(scr_path)
 
-    def job_scheduler_failed(self, message, email_title=u'异常信息', is_page_source=True,
-                             is_scr_shot=True, upload_files=[],
-                             exception_info=None):
+    def task_scheduler_failed(self, message, email_title=u'异常信息', is_page_source=True,
+                              is_scr_shot=True, upload_files=[],
+                              exception_info=None):
         'upload_files：可以允许自定义添加待上传的文件'
         self.upload_files.extend(upload_files)
-        utils_logger.log("---> job_scheduler_failed in AppiumBaseJob with message:", message)
-        utils_logger.log("---> job_scheduler_failed in AppiumBaseJob with upload_files:",
+        utils_logger.log("---> task_scheduler_failed in AppiumBaseTask with message:", message)
+        utils_logger.log("---> task_scheduler_failed in AppiumBaseTask with upload_files:",
                          list(set(self.upload_files)))
         msgs = {'device_name': self.target_device_name,
                 'device_version': utils_android.get_deivce_android_version(
@@ -127,18 +128,18 @@ class AppiumBaseJob(BaseJob):
         if is_scr_shot is True:
             self.write_screen_shot_into_file()
         # 必须把self作为第一个参数传进去
-        BaseJob.job_scheduler_failed(self, message=msgs, email_title=email_title,
-                                     upload_files=list(set(self.upload_files)),
-                                     exception_info=exception_info)
+        BaseTask.task_scheduler_failed(self, message=msgs, email_title=email_title,
+                                       upload_files=list(set(self.upload_files)),
+                                       exception_info=exception_info)
 
     def register_config(self, xargs_dict=None):
-        BaseJob.register_config(self, xargs_dict)
+        BaseTask.register_config(self, xargs_dict)
         self.target_device_name = xargs_dict.get('device_name')
         self.appium_port = xargs_dict.get('appium_port')
         self.appium_port_bp = xargs_dict.get('appium_port_bp')
 
     def whether_support_device_type(self, device_type):
-        if BaseJob.whether_support_device_type(self, device_type) is False:
+        if BaseTask.whether_support_device_type(self, device_type) is False:
             return False
         if device_type != "android":
             return False
@@ -148,12 +149,12 @@ class AppiumBaseJob(BaseJob):
         return False
 
     def run_task(self):
-        if BaseJob.run_task(self) is False:
+        if BaseTask.run_task(self) is False:
             return False
         if self.target_device_name is not None:  # 未指定设备，则采用默认设备，那么appium端口也无须校验
             # 分配appium服务端口
             if self.appium_port is None or self.appium_port_bp is None:
-                self.job_scheduler_failed("未指定appium服务端口")
+                self.task_scheduler_failed("未指定appium服务端口")
                 return False
         # 检查设备在线状态
         if self.target_device_name is not None:
@@ -166,7 +167,7 @@ class AppiumBaseJob(BaseJob):
                 utils_logger.log("[" + self.target_device_name + "]设备不在线", device_status)
                 return False
         else:
-            if len(utils_android.get_connected_devcies()) > 0:
+            if utils_android.get_connected_devcies() is not None and len(utils_android.get_connected_devcies()) > 0:
                 self.target_device_name = utils_android.get_connected_devcies()[0]
         # 检查应用是否安装
         check_installed_response, response_errror = utils_android.is_app_installed(
@@ -195,11 +196,11 @@ class AppiumBaseJob(BaseJob):
                 return False
 
         if self.driver is None:
-            self.job_scheduler_failed("not init appium driver")
+            self.task_scheduler_failed("not init appium driver")
             return False
 
         if self.driver is None or self.target_device_name is None:
-            self.job_scheduler_failed(
+            self.task_scheduler_failed(
                 "cureent env not right:["
                 + str(self.driver) + ","
                 + str(self.target_device_name) + "]")
@@ -207,13 +208,13 @@ class AppiumBaseJob(BaseJob):
 
         # 检查是否锁屏
         if utils_android.lock_off_screen_if_need(self.target_device_name) is False:
-            self.job_scheduler_failed("---> lock_off_screen_if_need failed")
+            self.task_scheduler_failed("---> lock_off_screen_if_need failed")
             return False
         return True
 
     def release_after_task(self):
-        BaseJob.release_after_task(self)
-        utils_logger.log("---> job_appium_base 释放资源")
+        BaseTask.release_after_task(self)
+        utils_logger.log("---> task_appium_base 释放资源")
         if self.driver is not None:
             try:
                 self.driver.quit()
@@ -228,7 +229,7 @@ class AppiumBaseJob(BaseJob):
                 return file
             # 可能为相对路径
             abs_wrapper_file = os.path.abspath(
-                job_root_path + "/job/appium/img/" + target_page_file)
+                project_root_path + "/tasks/appium/img/" + target_page_file)
             if os.path.exists(abs_wrapper_file):
                 return abs_wrapper_file
             return None
@@ -283,7 +284,7 @@ class AppiumBaseJob(BaseJob):
         if query_str is None:
             utils_logger.log("not support this query with None protocal")
             return None
-        utils_logger.log("[job_appium_base.__query_element] query:[" + str(query_str) + "]")
+        utils_logger.log("[task_appium_base.__query_element] query:[" + str(query_str) + "]")
         '搜索element,以后有其他的情况，都可以在这里定义协议，以\'  # <协议标识>#的形式放在query_str的头部\''
         if query_str.startswith("#viewid#"):  # 针对可以拿到id的情况
             viewid = query_str.replace('#viewid#', '')  # strip('abc')表示会删除收尾的a、b、c字母，而不是只删除'abc'
@@ -299,7 +300,7 @@ class AppiumBaseJob(BaseJob):
             return utils_appium.find_element_by_xpath(driver=self.driver, xpath=query_str)
 
     def except_case_in_query_ele(self):
-        utils_logger.log("---> except_case_in_query_ele in AppiumBaseJob")
+        utils_logger.log("---> except_case_in_query_ele in AppiumBaseTask")
         '查询element的时候朋友的异常处理，True表示得以正常处理'
         # xpath模糊匹配速度太慢
         if self.query_ele_wrapper(
@@ -312,7 +313,7 @@ class AppiumBaseJob(BaseJob):
                     click_mode='click', is_ignore_except_case=True, retry_count=0) is not None:
                 return True
             else:
-                self.job_scheduler_failed("检测到'无响应，但是无法关闭'")
+                self.task_scheduler_failed("检测到'无响应，但是无法关闭'")
         elif self.query_ele_wrapper(
                 self.get_query_str_within_xpath_only_text('打印纸未准备好', is_force_match=False),
                 is_ignore_except_case=True, retry_count=0) is not None:
@@ -321,7 +322,7 @@ class AppiumBaseJob(BaseJob):
                                       retry_count=0) is not None:
                 return True
             else:
-                self.job_scheduler_failed("检测到'打印纸未准备好，请检查！'文案，但无法关闭")
+                self.task_scheduler_failed("检测到'打印纸未准备好，请检查！'文案，但无法关闭")
         elif self.query_ele_wrapper(
                 self.get_query_str_within_xpath_only_text('平板仍存有残留目录和文件', is_force_match=False),
                 is_ignore_except_case=True, retry_count=0) is not None:
@@ -337,7 +338,7 @@ class AppiumBaseJob(BaseJob):
 
     def get_path_in_appium_img_dir(self, file_name):
         '返回file_name对应的全路径'
-        return os.path.abspath(env_job.get_appium_img_dir() + "/" + file_name)
+        return os.path.abspath(envs.get_appium_img_dir() + "/" + file_name)
 
     def query_ele_wrapper(self, query_str, is_ignore_except_case=False, click_mode=None,
                           retry_count=2,
@@ -382,7 +383,7 @@ class AppiumBaseJob(BaseJob):
                                         point=(
                                                 query_ele_location['x'],
                                                 query_ele_location['y'])) is False:
-                                    self.job_scheduler_failed('safe_tap_in_point failed')
+                                    self.task_scheduler_failed('safe_tap_in_point failed')
                                     return None
                             elif click_mode == 'click':
                                 # 只有当click_mode是"position"且坐标可用时使用tab方式，其他默认使用element.click()方式
@@ -406,7 +407,7 @@ class AppiumBaseJob(BaseJob):
                         "--->[query_ele_wrapper.is_element_region_right_with_scale] 校验element坐标失败，启用重试机制")
             else:
                 utils_logger.log("unsupport type of element: ", type(query_res))
-        utils_logger.log("--- >[job_appium_base.query_ele_wrapper]", query_str,
+        utils_logger.log("--- >[task_appium_base.query_ele_wrapper]", query_str,
                          " with retry_count:", retry_count)
         # 若上面的判断逻辑失败，则表示还没有找到'可用'的element
         period_checked = 0.2
@@ -532,11 +533,11 @@ class AppiumBaseJob(BaseJob):
             is_check_view_inflated)
         if is_view_layout_finished is False:
             utils_logger.log("--->[_query_points_with_text_by_ocr] 页面在指定时间并没有加载完成")
-            self.job_scheduler_failed(
+            self.task_scheduler_failed(
                 "[_query_points_with_text_by_ocr] '" + search_text + "' 页面在指定时间并没有加载完成")
             return None
         if file_screen_shot is None:
-            self.job_scheduler_failed(
+            self.task_scheduler_failed(
                 "[_query_points_with_text_by_ocr] '" + search_text + "' failed because no file_screen_shot")
             return None
         # 根据参数裁剪图片
@@ -553,7 +554,7 @@ class AppiumBaseJob(BaseJob):
         if cutted_file_screen_shot is None:
             utils_logger.log(
                 "--->[_query_points_with_text_by_ocr] '" + search_text + "' 截图文件裁剪 failed")
-            self.job_scheduler_failed(
+            self.task_scheduler_failed(
                 '[_query_points_with_text_by_ocr] create cutted image for screen shot failed')
             return None
         # 检查匹配元素
@@ -629,7 +630,7 @@ class AppiumBaseJob(BaseJob):
         else:
             if len(points) > 1:
                 utils_logger.log("---> 查询元素不唯一，请检查页面元素")
-                self.job_scheduler_failed(
+                self.task_scheduler_failed(
                     ("query_only_point_within_text[" + search_text + "]元素不唯一: ").joins(points))
                 return None
             else:
@@ -641,7 +642,7 @@ class AppiumBaseJob(BaseJob):
                         self.write_screen_shot_into_file(suffix='ocr_start')
                         self.write_page_resource_into_file(suffix='ocr_start')
                     if self.safe_tap_in_point(single_point['avaiable_point']) is False:
-                        self.job_scheduler_failed('safe_tap_in_point failed')
+                        self.task_scheduler_failed('safe_tap_in_point failed')
                         return None
                     if is_output_event_tract is True:
                         self.write_screen_shot_into_file(suffix='ocr_end')
@@ -651,17 +652,18 @@ class AppiumBaseJob(BaseJob):
     def _query_part_image_matchs(self, part_pic_path, part_rect_scale):
         """查询所有在截图中满足条件的子图位置"""
         if os.path.exists(part_pic_path) is False:
-            part_pic_path = os.path.abspath(job_root_path + "/job/appium/img/" + part_pic_path)
+            part_pic_path = os.path.abspath(
+                project_root_path + "/tasks/appium/img/" + part_pic_path)
         utils_logger.log("---> query_point_throw_part_pic:", part_pic_path)
         # 检测页面是否加载完成
         is_view_layout_finished, file_screen_shot = self.wait_view_layout_finish()
         if is_view_layout_finished is False:
             utils_logger.log("--->[query_point_throw_part_pic] 页面在指定时间并没有加载完成")
-            self.job_scheduler_failed(
+            self.task_scheduler_failed(
                 "[query_point_throw_part_pic] '" + part_pic_path + "' 页面在指定时间并没有加载完成")
             return None
         if file_screen_shot is None:
-            self.job_scheduler_failed(
+            self.task_scheduler_failed(
                 "[query_point_throw_part_pic] '" + part_pic_path + "' failed because no file_screen_shot")
             return None
         # 裁剪获得比对的资源图片
@@ -670,7 +672,7 @@ class AppiumBaseJob(BaseJob):
                                                                cutted_rect_scale=part_rect_scale,
                                                                cutted_save_file_path=file_utils.generate_suffix_file(
                                                                    part_pic_path,
-                                                                   save_to_dir=env_job.get_out_dir(),
+                                                                   save_to_dir=envs.get_out_dir(),
                                                                    suffix="cutted"))
         child_template = Template(cutted_file_path)
         # cutted_file_path与当前截图比对:其中根据check_rect_scale裁剪截图
@@ -698,7 +700,7 @@ class AppiumBaseJob(BaseJob):
                 # self.write_page_resource_into_file(suffix='aircv_start')
                 # self.write_screen_shot_into_file(suffix='aircv_start')
                 if self.safe_tap_in_point(click_match_point) is False:
-                    self.job_scheduler_failed('safe_tap_in_point failed')
+                    self.task_scheduler_failed('safe_tap_in_point failed')
                     return None
                 # self.write_page_resource_into_file(suffix='aircv_end')
                 # self.write_screen_shot_into_file(suffix='aircv_end')

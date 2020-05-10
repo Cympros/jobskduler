@@ -4,14 +4,12 @@
 import os
 import sys
 import time
-import utils_common
 
-root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../')
-print root_path
-sys.path.append(root_path)
+project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../')
+sys.path.append(project_root_path)
 
 from helper import utils_logger
-
+from helper import utils_common
 
 def generate_suffix_file(raw_file_path, save_to_dir=None, suffix=None):
     """

@@ -3,26 +3,26 @@
 import os
 import sys
 
-job_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
-sys.path.append(job_root_path)
+project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
+sys.path.append(project_root_path)
 
-from job.appium.job_appium_base import AppiumBaseJob
-from job.appium.utils import utils_appium
-from helper import utils_logger
+from tasks.appium.task_appium_base import AppiumBaseTask
+from tasks.appium import utils_appium
+# from helper import utils_logger
 from helper import utils_yaml
-from config import env_job
+# from config import envs
 
 
-class JobAppiumFeizhu(AppiumBaseJob):
+class TaskAppiumFeizhu(AppiumBaseTask):
     def __init__(self):
-        AppiumBaseJob.__init__(self, "com.taobao.trip", "com.alipay.mobile.quinox.LauncherActivity")
+        AppiumBaseTask.__init__(self, "com.taobao.trip", "com.alipay.mobile.quinox.LauncherActivity")
 
     def run_task(self):
-        if AppiumBaseJob.run_task(self) is False:
+        if AppiumBaseTask.run_task(self) is False:
             return False
         wait_status = self.wait_activity(self.driver, ".home.HomeActivity")
         if not wait_status:
-            self.job_scheduler_failed(message='not in .home.HomeActivity')
+            self.task_scheduler_failed(message='not in .home.HomeActivity')
             return False
 
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("领里程"), click_mode="click") is None:
@@ -38,10 +38,10 @@ class JobAppiumFeizhu(AppiumBaseJob):
                     # 匹配：   签到\+.里程  --->  签到+2里程
                     return False
                 else:
-                    self.job_scheduler_failed('未找到\"签到\+.里程\"')
+                    self.task_scheduler_failed('未找到\"签到\+.里程\"')
                     return False
             else:
-                self.job_scheduler_failed("not fount 新版签到入口")
+                self.task_scheduler_failed("not fount 新版签到入口")
                 return False
         else:
             # 判断是否是签到页面
@@ -54,20 +54,20 @@ class JobAppiumFeizhu(AppiumBaseJob):
                 if self.query_ele_wrapper(self.get_query_str_by_desc("已签到")) is not None:
                     return True
                 else:
-                    self.job_scheduler_failed("caught unknown exception when sign in feizhu")
+                    self.task_scheduler_failed("caught unknown exception when sign in feizhu")
             return False
 
     def except_case_in_query_ele(self):
-        if AppiumBaseJob.except_case_in_query_ele(self) is True:
+        if AppiumBaseTask.except_case_in_query_ele(self) is True:
             return True
         # 用户还没有登录
         cur_act = utils_appium.get_cur_act(self.driver)
         if cur_act == 'com.ali.user.mobile.login.ui.UserLoginActivity':
             # 校验账号密码
-            account = utils_yaml.load_yaml(env_job.get_yaml_path()).get('feizu_account')
-            pwd = utils_yaml.load_yaml(env_job.get_yaml_path()).get('feizu_password')
+            account = utils_yaml.load_yaml(envs.get_yaml_path()).get('feizu_account')
+            pwd = utils_yaml.load_yaml(envs.get_yaml_path()).get('feizu_password')
             if account is None or pwd is None:
-                self.self.job_scheduler_failed("请设置飞猪账号&密钥")
+                self.self.task_scheduler_failed("请设置飞猪账号&密钥")
                 return False
 
             ele_name = self.query_ele_wrapper(self.get_query_str_by_desc('账户名输入框'), is_ignore_except_case=True)
@@ -80,7 +80,7 @@ class JobAppiumFeizhu(AppiumBaseJob):
                                       click_mode="click", is_ignore_except_case=True) is not None:
                 return True
             else:
-                self.job_scheduler_failed("search element by get_query_str_by_viewid for loginButton failed")
+                self.task_scheduler_failed("search element by get_query_str_by_viewid for loginButton failed")
         elif self.query_ele_wrapper(self.get_query_str_by_viewid('com.taobao.trip:id/update_contentDialog'),
                                     is_ignore_except_case=True, retry_count=0) is not None:
             if self.query_ele_wrapper(self.get_query_str_by_viewid('com.taobao.trip:id/update_button_cancel'),
@@ -88,17 +88,17 @@ class JobAppiumFeizhu(AppiumBaseJob):
                 utils_logger.log('---> 检测到更新弹框，但未搜索到取消按钮')
                 return True
             else:
-                self.job_scheduler_failed("搜索更新弹框的'取消'按钮失败")
+                self.task_scheduler_failed("搜索更新弹框的'取消'按钮失败")
         return False
 
 
 if __name__ == '__main__':
-    tasks = ['JobAppiumFeizhu']
+    tasks = ['TaskAppiumFeizhu']
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):
             input_info += str(index) + "：" + task_item + "\n"
-        task_index_selected = raw_input(input_info + "请选择需运行任务对应索引(索引下标越界触发程序退出)：")
+        task_index_selected = input(input_info + "请选择需运行任务对应索引(索引下标越界触发程序退出)：")
         if task_index_selected.isdigit() is False:
             utils_logger.log("索引值非数字，请重新输入：", task_index_selected)
             continue
@@ -107,5 +107,5 @@ if __name__ == '__main__':
             utils_logger.log("[" + str(task_index_selected) + "]任务索引不存在，退出程序...")
             break
         task_name = tasks[task_index_selected]
-        job = eval(task_name + '()')
-        job.run_task()
+        task = eval(task_name + '()')
+        task.run_task()

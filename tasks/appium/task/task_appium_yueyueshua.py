@@ -3,23 +3,23 @@
 import os
 import sys
 
-job_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
-sys.path.append(job_root_path)
+project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
+sys.path.append(project_root_path)
 
-from job.appium.job_appium_base import AppiumBaseJob
-from helper import utils_logger
+from tasks.appium.task_appium_base import AppiumBaseTask
+# from helper import utils_logger
 
 
-class JobAppiumYueyueShuaBase(AppiumBaseJob):
+class TaskAppiumYueyueShuaBase(AppiumBaseTask):
     def __init__(self):
-        AppiumBaseJob.__init__(self, "com.weifu.yys", "com.weifu.yys.YStartActivity")
+        AppiumBaseTask.__init__(self, "com.weifu.yys", "com.weifu.yys.YStartActivity")
 
 
-class JobAppiumYueyueshuaSign(JobAppiumYueyueShuaBase):
+class TaskAppiumYueyueshuaSign(TaskAppiumYueyueShuaBase):
     '月月刷app-签到'
 
     def run_task(self):
-        if JobAppiumYueyueShuaBase.run_task(self) is False:
+        if TaskAppiumYueyueShuaBase.run_task(self) is False:
             return False
         # 左上角'签到'按钮
         if self.query_ele_wrapper(self.get_query_str_by_viewid('com.weifu.yys:id/textView1'),
@@ -33,24 +33,24 @@ class JobAppiumYueyueshuaSign(JobAppiumYueyueShuaBase):
                 if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('签到成功')) is not None:
                     return True
                 else:
-                    self.job_scheduler_failed('未找到签到成功的按钮')
+                    self.task_scheduler_failed('未找到签到成功的按钮')
                     return False
             else:
-                self.job_scheduler_failed('签到失败')
+                self.task_scheduler_failed('签到失败')
                 return False
         else:
-            self.job_scheduler_failed('未找到左上角的签到按钮')
+            self.task_scheduler_failed('未找到左上角的签到按钮')
             return False
         return False
 
 
 if __name__ == '__main__':
-    tasks = ['JobAppiumYueyueShuaBase', 'JobAppiumYueyueshuaSign']
+    tasks = ['TaskAppiumYueyueShuaBase', 'TaskAppiumYueyueshuaSign']
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):
             input_info += str(index) + "：" + task_item + "\n"
-        task_index_selected = raw_input(input_info + "请选择需运行任务对应索引(索引下标越界触发程序退出)：")
+        task_index_selected = input(input_info + "请选择需运行任务对应索引(索引下标越界触发程序退出)：")
         if task_index_selected.isdigit() is False:
             utils_logger.log("索引值非数字，请重新输入：", task_index_selected)
             continue
@@ -59,5 +59,5 @@ if __name__ == '__main__':
             utils_logger.log("[" + str(task_index_selected) + "]任务索引不存在，退出程序...")
             break
         task_name = tasks[task_index_selected]
-        job = eval(task_name + '()')
-        job.run_task()
+        task = eval(task_name + '()')
+        task.run_task()

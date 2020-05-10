@@ -1,13 +1,17 @@
 # coding=utf-8
 import os
 import sys
-import yaml
 
 root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
 sys.path.append(root_path)
 
-import utils_common
-from config import env_job
+try:
+    import yaml
+except ImportError:
+    os.system('pip install pyyaml')
+    import yaml
+# from helper import utils_common
+# from config import envs
 
 
 def load_yaml(yaml_path):
@@ -18,7 +22,7 @@ def load_yaml(yaml_path):
 
 
 if __name__ == '__main__':
-    yaml_path = env_job.get_out_dir() + "schduler.yaml"
+    yaml_path = envs.get_out_dir() + "schduler.yaml"
     project = {
         'feizu_account': "",
         'feizu_password': "",

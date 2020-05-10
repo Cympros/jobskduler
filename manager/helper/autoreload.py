@@ -7,13 +7,13 @@ import time
 import subprocess
 import thread
 
-root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../')
-sys.path.append(root_path)
+project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../')
+sys.path.append(project_root_path)
 
 from helper import utils_logger, utils_common
-from job.appium.utils import utils_android
+from tasks.appium.utils import utils_android
 from helper.dbhelper import DataBaseOpenHelper
-from config import env_job
+from config import envs
 
 
 # def iter_module_files():
@@ -59,7 +59,7 @@ def is_connect_new_devices():
     connect_devices = utils_android.get_connected_devcies()
     if connect_devices is None:
         return 0
-    db_helper = DataBaseOpenHelper(env_job.get_db_path())
+    db_helper = DataBaseOpenHelper(envs.get_db_path())
     for device in connect_devices:
         t_thread_id = str(utils_android.get_device_tag(device)) + ".android.thread"
         count_within_device = db_helper.exec_sql(

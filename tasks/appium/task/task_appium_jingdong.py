@@ -5,20 +5,20 @@ import sys
 import time
 import random
 
-job_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
-sys.path.append(job_root_path)
+project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
+sys.path.append(project_root_path)
 
-from job.appium.job_appium_base import AppiumBaseJob
-from job.appium.utils import utils_appium
-from helper import utils_logger
+from tasks.appium.task_appium_base import AppiumBaseTask
+from tasks.appium import utils_appium
+# from helper import utils_logger
 
 
-class JobAppiumJingdong(AppiumBaseJob):
+class TaskAppiumJingdong(AppiumBaseTask):
     def __init__(self):
-        AppiumBaseJob.__init__(self, "com.jingdong.app.mall", "com.jingdong.app.mall.main.MainActivity")
+        AppiumBaseTask.__init__(self, "com.jingdong.app.mall", "com.jingdong.app.mall.main.MainActivity")
 
     def except_case_in_query_ele(self):
-        if AppiumBaseJob.except_case_in_query_ele(self) is True:
+        if AppiumBaseTask.except_case_in_query_ele(self) is True:
             return True
         # 关闭全屏模式下左右可滑动的
         if self.query_ele_wrapper(self.get_query_str_by_viewid('com.jingdong.app.mall:id/c5w'), click_mode='click',
@@ -30,14 +30,14 @@ class JobAppiumJingdong(AppiumBaseJob):
         return False
 
     def run_task(self):
-        return AppiumBaseJob.run_task(self)
+        return AppiumBaseTask.run_task(self)
 
 
 # 领京豆页面
-class JobAppiumJDEarnJingDou(JobAppiumJingdong):
+class TaskAppiumJDEarnJingDou(TaskAppiumJingdong):
 
     def except_case_in_query_ele(self):
-        if JobAppiumJingdong.except_case_in_query_ele(self) is True:
+        if TaskAppiumJingdong.except_case_in_query_ele(self) is True:
             return True
         # '种豆得豆'模块:检索坐标大概在横向居中，竖向在页面下半部分的关闭按钮
         # 注意xpath下支持索引搜索，类似多胞胎兄弟，可通过排行定位，以下表示"FrameLayout/ViewGroup/ViewGroup/ViewGroup"中选择类型是ViewGroup子元素的第二个元素
@@ -63,11 +63,11 @@ class JobAppiumJDEarnJingDou(JobAppiumJingdong):
             return True
 
     def run_task(self):
-        if JobAppiumJingdong.run_task(self) is False:
+        if TaskAppiumJingdong.run_task(self) is False:
             return False
         status = self.wait_activity(self.driver, '.MainFrameActivity')
         if not status:
-            self.job_scheduler_failed("wait_activity_with_status failed with '.MainFrameActivity'")
+            self.task_scheduler_failed("wait_activity_with_status failed with '.MainFrameActivity'")
             return False
         if self.__enter_earn_jd_pg_within_main() is True:
             if self.wait_activity(driver=self.driver, target=['com.jd.lib.enjoybuy.EnjoyBuyMainActivity',
@@ -76,39 +76,39 @@ class JobAppiumJDEarnJingDou(JobAppiumJingdong):
                 utils_logger.log("--->校验页面是在领京豆页面")
                 return True
             else:
-                self.job_scheduler_failed("not in 领京豆页面 by check activity")
+                self.task_scheduler_failed("not in 领京豆页面 by check activity")
                 return False
         else:
-            self.job_scheduler_failed("未找到'领京豆'的入口")
+            self.task_scheduler_failed("未找到'领京豆'的入口")
             return False
 
 
-# job:正常签到程序
-class JobAppiumJDSignNormal(JobAppiumJDEarnJingDou):
+# task:正常签到程序
+class TaskAppiumJDSignNormal(TaskAppiumJDEarnJingDou):
     def run_task(self):
-        if JobAppiumJDEarnJingDou.run_task(self) is False:
+        if TaskAppiumJDEarnJingDou.run_task(self) is False:
             return False
         # 点击签到按钮
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('已连续签到'), click_mode="click") is None \
                 and self.query_ele_wrapper(self.get_query_str_by_desc('已连续签到'), click_mode="click") is None \
                 and self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('签到领京豆'),
                                            click_mode="click") is None:
-            self.job_scheduler_failed(message="无法找到签到相关的按钮")
+            self.task_scheduler_failed(message="无法找到签到相关的按钮")
             return False
 
         # 通过辅助元素定位  --->  1.签到日历(十月)  2.'查看更多活动'
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('签到日历', is_force_match=False)) is not None:
             return True
         else:
-            self.job_scheduler_failed("签到失败")
+            self.task_scheduler_failed("签到失败")
             return False
 
 
-# job:京东签到后补充领取的弹框处理
-class JobAppiumJdSignAdditional(JobAppiumJDSignNormal):
+# task:京东签到后补充领取的弹框处理
+class TaskAppiumJdSignAdditional(TaskAppiumJDSignNormal):
     def run_task(self):
-        if JobAppiumJDSignNormal.run_task(self) is False:
-            utils_logger.log("---> run_task for JobAppiumJdSignAdditional failed")
+        if TaskAppiumJDSignNormal.run_task(self) is False:
+            utils_logger.log("---> run_task for TaskAppiumJdSignAdditional failed")
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('今日已翻1张牌')) \
                 or self.query_ele_wrapper(
@@ -125,26 +125,26 @@ class JobAppiumJdSignAdditional(JobAppiumJDSignNormal):
                                           click_mode="click") is not None \
                         or self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('我知道了'),
                                                   click_mode="click") is not None:
-                    self.job_scheduler_failed("xpath点击下标索引：" + str(index))
+                    self.task_scheduler_failed("xpath点击下标索引：" + str(index))
                     return True
                 else:
-                    self.job_scheduler_failed("not found '收入囊中' or '我知道了'")
+                    self.task_scheduler_failed("not found '收入囊中' or '我知道了'")
                     return False
             else:
                 # 默认失败
-                self.job_scheduler_failed("not found view to click with ele_xpath with index:" + str(index))
+                self.task_scheduler_failed("not found view to click with ele_xpath with index:" + str(index))
                 return False
 
 
-# job:进店领豆
-class JobAppiumJDEnterShopGotJD(JobAppiumJDEarnJingDou):
+# task:进店领豆
+class TaskAppiumJDEnterShopGotJD(TaskAppiumJDEarnJingDou):
     def run_task(self):
-        if JobAppiumJDEarnJingDou.run_task(self) is False:
+        if TaskAppiumJDEarnJingDou.run_task(self) is False:
             return False
         # 可能会进入'换流量'页面，因此添加延时
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('进店领豆'), click_mode="click",
                                   time_wait_page_completely_resumed=10) is None:
-            self.job_scheduler_failed("进入任务集市失败")
+            self.task_scheduler_failed("进入任务集市失败")
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('去完成'), click_mode="click") is None:
             if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('本期任务已被抢光，明天再来吧')) is not None:
@@ -160,7 +160,7 @@ class JobAppiumJDEnterShopGotJD(JobAppiumJDEarnJingDou):
                 # 此时不发送邮件说明
                 return False
             else:
-                self.job_scheduler_failed("进入的界面不正确")
+                self.task_scheduler_failed("进入的界面不正确")
                 return False
         else:
             # 关注店铺领取奖励 & 判断当前界面
@@ -170,19 +170,19 @@ class JobAppiumJDEnterShopGotJD(JobAppiumJDEarnJingDou):
                                                 delay_time=3) == 'com.jd.lib.jshop.jshop.JshopMainShopActivity':
                 return True
             else:
-                self.job_scheduler_failed("未进入店铺")
+                self.task_scheduler_failed("未进入店铺")
                 return False
 
 
-# job:转福利
-class JobAppiumJDZhuanFuli(JobAppiumJDEarnJingDou):
+# task:转福利
+class TaskAppiumJDZhuanFuli(TaskAppiumJDEarnJingDou):
     def run_task(self):
-        if JobAppiumJDEarnJingDou.run_task(self) is False:
+        if TaskAppiumJDEarnJingDou.run_task(self) is False:
             return False
         # 可能会进入'购物返豆'页面，故而添加延时
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('转福利'), click_mode="click",
                                   time_wait_page_completely_resumed=10) is None:
-            self.job_scheduler_failed("进入转福利页面失败")
+            self.task_scheduler_failed("进入转福利页面失败")
             return False
         only_point = self.query_only_point_within_text('^您还有.次抽奖机会(!$|$)|^今日还可以抽.次哦$|^可以抽.次哦$')
         if only_point is not None:
@@ -203,18 +203,18 @@ class JobAppiumJDZhuanFuli(JobAppiumJDEarnJingDou):
             utils_logger.log("---> 等待抽奖完成")
             time.sleep(8)  # 等待抽奖完成
         else:
-            self.job_scheduler_failed('未找到\'开始抽奖\'按钮')
+            self.task_scheduler_failed('未找到\'开始抽奖\'按钮')
             return False
 
 
-class JobAppiumJDUserMeiriFuli(JobAppiumJDEarnJingDou):
-    """job：京东用户每日福利"""
+class TaskAppiumJDUserMeiriFuli(TaskAppiumJDEarnJingDou):
+    """task：京东用户每日福利"""
 
     def run_task(self):
-        if JobAppiumJDEarnJingDou.run_task(self) is False:
+        if TaskAppiumJDEarnJingDou.run_task(self) is False:
             return False
         if self.query_only_point_within_text('^京东用户每日福利$', is_auto_click=True, cutted_rect=[0.65, 1, 0, 1]) is None:
-            self.job_scheduler_failed("进入转福利页面失败")
+            self.task_scheduler_failed("进入转福利页面失败")
             return False
         else:
             if self.query_only_point_within_text('^今日已抽奖$') is not None:
@@ -224,15 +224,15 @@ class JobAppiumJDUserMeiriFuli(JobAppiumJDEarnJingDou):
                 time.sleep(8)  # 等待每日抽奖
                 return False
             else:
-                self.job_scheduler_failed('JobAppiumJDUserMeiriFuli failed')
+                self.task_scheduler_failed('TaskAppiumJDUserMeiriFuli failed')
                 return False
 
 
-class JobAppiumJDUserMeiriFuliAddition(JobAppiumJDUserMeiriFuli):
+class TaskAppiumJDUserMeiriFuliAddition(TaskAppiumJDUserMeiriFuli):
     """京东用户每日福利-每日签到"""
 
     def run_task(self):
-        if JobAppiumJDUserMeiriFuli.run_task(self) is False:
+        if TaskAppiumJDUserMeiriFuli.run_task(self) is False:
             return False
         if self.query_only_point_within_text(search_text='^签到领取$', is_auto_click=True,
                                              cutted_rect=[0, 1, 0.4, 1]) is not None:
@@ -240,27 +240,27 @@ class JobAppiumJDUserMeiriFuliAddition(JobAppiumJDUserMeiriFuli):
                 utils_logger.log("该小时没获得奖励")
                 return False
             else:
-                self.job_scheduler_failed('签到领取后的效果')
+                self.task_scheduler_failed('签到领取后的效果')
                 return False
         elif self.query_point_size_within_text('^已签到领取$', cutted_rect=[0, 1, 0.4, 1]) > 0:
             return True
         else:
-            self.job_scheduler_failed('未找到\"签到领取\"相关按钮')
+            self.task_scheduler_failed('未找到\"签到领取\"相关按钮')
             return False
 
 
-class JobAppiumJDVoucherCenter(JobAppiumJingdong):
+class TaskAppiumJDVoucherCenter(TaskAppiumJingdong):
     """首页领卷中心内部的签到"""
 
     def run_task(self):
-        if JobAppiumJingdong.run_task(self) is False:
+        if TaskAppiumJingdong.run_task(self) is False:
             return False
         status = self.wait_activity(self.driver, '.MainFrameActivity')
         if not status:
-            self.job_scheduler_failed("wait_activity_with_status failed with '.MainFrameActivity'")
+            self.task_scheduler_failed("wait_activity_with_status failed with '.MainFrameActivity'")
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("领券"), click_mode="click") is None:
-            self.job_scheduler_failed("get_xpath_only_text failed with 领券")
+            self.task_scheduler_failed("get_xpath_only_text failed with 领券")
             return False
         else:
             # 检查标题是否是"领京豆"
@@ -278,24 +278,24 @@ class JobAppiumJDVoucherCenter(JobAppiumJingdong):
                             or self.query_point_size_within_text(r'^(已签\d天($|(,|，)坐等开奖$)|^签到领3元无门槛*)') > 0:
                         return True
                     else:
-                        self.job_scheduler_failed('未检测到中心弹框\"已签到n天\"部分内容')
+                        self.task_scheduler_failed('未检测到中心弹框\"已签到n天\"部分内容')
                         return False
                 else:
-                    self.job_scheduler_failed(message='未找到指定元素')
+                    self.task_scheduler_failed(message='未找到指定元素')
                     return False
             else:
-                self.job_scheduler_failed("未进入'领券中心'界面")
+                self.task_scheduler_failed("未进入'领券中心'界面")
                 return False
 
 
-class JobAppiumJDSignDoubleSign(JobAppiumJDEarnJingDou):
+class TaskAppiumJDSignDoubleSign(TaskAppiumJDEarnJingDou):
     """京豆双签逻辑"""
 
     def get_dependence_task(self):
-        return ["job_appium_jingdong.JobAppiumJDSignNormal", "job_appium_jdjr.JobAppiumJDJRSign"]
+        return ["task_appium_jingdong.TaskAppiumJDSignNormal", "task_appium_jdjr.TaskAppiumJDJRSign"]
 
     def run_task(self):
-        if JobAppiumJDEarnJingDou.run_task(self) is False:
+        if TaskAppiumJDEarnJingDou.run_task(self) is False:
             return False
 
         # 双签按钮
@@ -303,12 +303,12 @@ class JobAppiumJDSignDoubleSign(JobAppiumJDEarnJingDou):
                                                  part_rect_scale=[0.82, 0.98, 0.47, 0.568], is_auto_click=True) is None \
                 and self.query_only_point_within_text(r'^双签京豆$', is_auto_click=True, retry_count=0) is None:
             utils_logger.log("---> 找不到领取双签入口")
-            self.job_scheduler_failed('找不到领取双签入口')
+            self.task_scheduler_failed('找不到领取双签入口')
             return False
 
         # 查看表示是否是"双签领奖励"
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('双签领奖励')) is None:
-            self.job_scheduler_failed("未进入双签界面")
+            self.task_scheduler_failed("未进入双签界面")
             return False
 
         # 此时在'双签领奖励'界面
@@ -322,20 +322,20 @@ class JobAppiumJDSignDoubleSign(JobAppiumJDEarnJingDou):
             utils_logger.log("---> 双签条件还没有满足")
             return False
         else:
-            self.job_scheduler_failed("双签操作失败")
+            self.task_scheduler_failed("双签操作失败")
             return False
 
 
 if __name__ == '__main__':
-    tasks = ['JobAppiumJDEarnJingDou', 'JobAppiumJDEnterShopGotJD', 'JobAppiumJdSignAdditional',
-             'JobAppiumJDSignDoubleSign', 'JobAppiumJDSignNormal',
-             'JobAppiumJDUserMeiriFuli', 'JobAppiumJDUserMeiriFuliAddition', 'JobAppiumJDVoucherCenter',
-             'JobAppiumJDZhuanFuli', 'JobAppiumJingdong']
+    tasks = ['TaskAppiumJDEarnJingDou', 'TaskAppiumJDEnterShopGotJD', 'TaskAppiumJdSignAdditional',
+             'TaskAppiumJDSignDoubleSign', 'TaskAppiumJDSignNormal',
+             'TaskAppiumJDUserMeiriFuli', 'TaskAppiumJDUserMeiriFuliAddition', 'TaskAppiumJDVoucherCenter',
+             'TaskAppiumJDZhuanFuli', 'TaskAppiumJingdong']
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):
             input_info += str(index) + "：" + task_item + "\n"
-        task_index_selected = raw_input(input_info + "请选择需运行任务对应索引(索引下标越界触发程序退出)：")
+        task_index_selected = input(input_info + "请选择需运行任务对应索引(索引下标越界触发程序退出)：")
         if task_index_selected.isdigit() is False:
             utils_logger.log("索引值非数字，请重新输入：", task_index_selected)
             continue
@@ -344,5 +344,5 @@ if __name__ == '__main__':
             utils_logger.log("[" + str(task_index_selected) + "]任务索引不存在，退出程序...")
             break
         task_name = tasks[task_index_selected]
-        job = eval(task_name + '()')
-        job.run_task()
+        task = eval(task_name + '()')
+        task.run_task()

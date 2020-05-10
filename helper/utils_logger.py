@@ -7,12 +7,12 @@ import logging
 import threading
 from logging.handlers import RotatingFileHandler
 
-root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
-sys.path.append(root_path)
+project_root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
+sys.path.append(project_root_path)
 
 
 def get_log_file():
-    log_dir = root_path + "/out"
+    log_dir = project_root_path + "/out"
     if os.path.exists(log_dir) is False:
         os.makedirs(log_dir)
     return os.path.abspath(log_dir + "/logger_" + str(threading.currentThread().getName()) + ".txt")

@@ -3,14 +3,17 @@
 import os
 import sys
 
-import aircv
+try:
+    import aircv
+except:
+    os.system('pip install opencv-python --default-timeout=10000')
+    import aircv
 import traceback
 
 # from airtest import aircv as airtest_aircv
 
-root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
-sys.path.append(root_path)
-
+project_root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
+sys.path.append(project_root_path)
 
 def imread(file_path):
     return aircv.imread(file_path)

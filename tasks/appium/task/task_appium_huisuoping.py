@@ -3,19 +3,19 @@
 import os
 import sys
 
-job_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
-sys.path.append(job_root_path)
+project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
+sys.path.append(project_root_path)
 
-from job.appium.job_appium_base import AppiumBaseJob
-from helper import utils_logger
+from tasks.appium.task_appium_base import AppiumBaseTask
+# from helper import utils_logger
 
 
-class JobAppiumHSPBase(AppiumBaseJob):
+class TaskAppiumHSPBase(AppiumBaseTask):
     def __init__(self):
-        AppiumBaseJob.__init__(self)
+        AppiumBaseTask.__init__(self)
 
     def except_case_in_query_ele(self):
-        if AppiumBaseJob.except_case_in_query_ele(self) is True:
+        if AppiumBaseTask.except_case_in_query_ele(self) is True:
             return True
         elif self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("友情提醒"), is_ignore_except_case=True,
                                     retry_count=0) is not None:
@@ -23,7 +23,7 @@ class JobAppiumHSPBase(AppiumBaseJob):
                                       is_ignore_except_case=True, click_mode="click", retry_count=0) is not None:
                 return True
             else:
-                self.job_scheduler_failed('why not found com.huaqian:id/confirm_cancel')
+                self.task_scheduler_failed('why not found com.huaqian:id/confirm_cancel')
                 return False
         elif self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('立即更新'), is_ignore_except_case=True,
                                     retry_count=0) is not None:
@@ -32,32 +32,32 @@ class JobAppiumHSPBase(AppiumBaseJob):
                                       is_ignore_except_case=True, retry_count=0) is not None:
                 return True
             else:
-                self.job_scheduler_failed('关闭更新弹框失败')
+                self.task_scheduler_failed('关闭更新弹框失败')
         return False
 
-    def job_scheduler_failed(self, message, email_title=u'异常信息', is_page_source=True, is_scr_shot=True):
+    def task_scheduler_failed(self, message, email_title=u'异常信息', is_page_source=True, is_scr_shot=True):
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('网络出错了，请待会再试吧', is_force_match=False),
                                   is_ignore_except_case=True, retry_count=0) is not None:
-            utils_logger.log("--->JobAppiumHSPBase.job_scheduler_failed:网络出错，调整邮件提醒类别")
-            AppiumBaseJob.job_scheduler_failed(self, email_title='网络异常', message=message, is_page_source=is_page_source,
+            utils_logger.log("--->TaskAppiumHSPBase.task_scheduler_failed:网络出错，调整邮件提醒类别")
+            AppiumBaseTask.task_scheduler_failed(self, email_title='网络异常', message=message, is_page_source=is_page_source,
                                                is_scr_shot=is_scr_shot)
         else:
-            AppiumBaseJob.job_scheduler_failed(self, email_title=email_title, message=message,
+            AppiumBaseTask.task_scheduler_failed(self, email_title=email_title, message=message,
                                                is_page_source=is_page_source, is_scr_shot=is_scr_shot)
 
 
-class JobAppiumHSPHourCredit(JobAppiumHSPBase):
+class TaskAppiumHSPHourCredit(TaskAppiumHSPBase):
     '每小时的红包'
 
     def run_task(self):
-        if JobAppiumHSPBase.run_task(self) is False:
+        if TaskAppiumHSPBase.run_task(self) is False:
             return False
         if self.wait_activity(driver=self.driver, target='.account.ui.main.MainTabActivity', retry_count=20) is False:
-            self.job_scheduler_failed('not in .account.ui.main.MainTabActivity')
+            self.task_scheduler_failed('not in .account.ui.main.MainTabActivity')
             return False
         if self.query_ele_wrapper(self.get_query_str_by_viewid('com.huaqian:id/rlayout_menu')) is None:
             # 顶部右边是'邀请好友'的顶部titlebar部分
-            self.job_scheduler_failed("没找到顶部的'titlebar'部分内容")
+            self.task_scheduler_failed("没找到顶部的'titlebar'部分内容")
             return False
         if self.query_ele_wrapper(self.get_query_str_by_viewid('com.huaqian:id/hour_credit'),
                                   click_mode="click") is not None \
@@ -65,18 +65,18 @@ class JobAppiumHSPHourCredit(JobAppiumHSPBase):
                                           click_mode="click") is not None:
             return True
         elif self.query_ele_wrapper(self.get_query_str_by_viewid('com.huaqian:id/redbag_count_down')) is not None:
-            utils_logger.log("---> JobAppiumHSPHourCredit : still in count_down")
+            utils_logger.log("---> TaskAppiumHSPHourCredit : still in count_down")
             return True
         else:
-            self.job_scheduler_failed("query failed for viewid of com.huaqian:id/hour_credit")
+            self.task_scheduler_failed("query failed for viewid of com.huaqian:id/hour_credit")
             return False
 
 
-class JobAppiumDailySign(JobAppiumHSPBase):
+class TaskAppiumDailySign(TaskAppiumHSPBase):
     '每日签到'
 
     def run_task(self):
-        if JobAppiumHSPBase.run_task(self) is False:
+        if TaskAppiumHSPBase.run_task(self) is False:
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text(text="每日签到"), click_mode="position",
                                   rect_scale_check_element_region=[0.5, 0.75, 0, 1]) is not None:
@@ -84,43 +84,43 @@ class JobAppiumDailySign(JobAppiumHSPBase):
                 return True
             else:
                 # 这里没必要通知，直接忽略该异常
-                utils_logger.log("--->job_scheduler_failed:'您已签到并领取\d+金币 not matched'")
-                # self.job_scheduler_failed('您已签到并领取\d+金币 not matched')
+                utils_logger.log("--->task_scheduler_failed:'您已签到并领取\d+金币 not matched'")
+                # self.task_scheduler_failed('您已签到并领取\d+金币 not matched')
                 return False
         # elif self.query_ele_wrapper(self.get_query_str_within_xpath_only_text(text='签到中心'),click_mode="click") is not None\
         #         or self.query_ele_wrapper(self.get_query_str_within_xpath_only_text(text="任务中心"),click_mode="click") is not None:
         #     if self.query_ele_wrapper(self.get_query_str_by_viewid('com.huaqian:id/button_sign'),click_mode="click") is not None:
         #         return True
         #     else:
-        #         self.job_scheduler_failed("立即签到按钮未找到")
+        #         self.task_scheduler_failed("立即签到按钮未找到")
         #         return False
         else:
-            self.job_scheduler_failed("未找到\'每日签到\'入口")
+            self.task_scheduler_failed("未找到\'每日签到\'入口")
         return False
 
 
-class JobAppiumHSPMoreMakeMoneyBase(JobAppiumHSPBase):
+class TaskAppiumHSPMoreMakeMoneyBase(TaskAppiumHSPBase):
     """更多赚钱入口基类"""
 
     def run_task(self):
-        if JobAppiumHSPBase.run_task(self) is False:
+        if TaskAppiumHSPBase.run_task(self) is False:
             return False
         if self.wait_activity(self.driver, target=['.account.ui.main.MainTabActivity']) is False:
-            self.job_scheduler_failed('why not in 首页')
+            self.task_scheduler_failed('why not in 首页')
             return False
         if self.query_ele_wrapper(self.get_query_str_by_viewid('com.huaqian:id/more_channel_container'),
                                   click_mode='click', time_wait_page_completely_resumed=10) is None \
                 and self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('更多赚钱'), click_mode="click",
                                            time_wait_page_completely_resumed=10) is None:
-            self.job_scheduler_failed('\"更多赚钱\" 找不到')
+            self.task_scheduler_failed('\"更多赚钱\" 找不到')
             return False
         if self.wait_activity(self.driver, target=['.market.ui.activity.MoreChannelActivity']) is False:
-            self.job_scheduler_failed('未进入更多赚钱页面')
+            self.task_scheduler_failed('未进入更多赚钱页面')
             return False
         return True
 
 
-class JobAppiumHSPDailyClockOn(JobAppiumHSPMoreMakeMoneyBase):
+class TaskAppiumHSPDailyClockOn(TaskAppiumHSPMoreMakeMoneyBase):
     """
         每日6~8点打卡时间
         1.每天6~8点执行该方法，避免query_only_point_within_text的无效调用
@@ -134,16 +134,16 @@ class JobAppiumHSPDailyClockOn(JobAppiumHSPMoreMakeMoneyBase):
             "True" if is_run_support else "False"))
         return is_run_support
 
-    def job_scheduler_failed(self, message, email_title=u'Error', is_page_source=True, is_scr_shot=True):
+    def task_scheduler_failed(self, message, email_title=u'Error', is_page_source=True, is_scr_shot=True):
         # clockon任务失败影响超级严重，特殊处理
-        JobAppiumHSPMoreMakeMoneyBase.job_scheduler_failed(self, message=message, email_title=email_title,
+        TaskAppiumHSPMoreMakeMoneyBase.task_scheduler_failed(self, message=message, email_title=email_title,
                                                            is_page_source=is_page_source, is_scr_shot=is_scr_shot)
 
     def run_task(self):
-        if JobAppiumHSPMoreMakeMoneyBase.run_task(self) is False:
+        if TaskAppiumHSPMoreMakeMoneyBase.run_task(self) is False:
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('早起打卡'), click_mode="click") is None:
-            self.job_scheduler_failed('\"早起打卡\"找不到')
+            self.task_scheduler_failed('\"早起打卡\"找不到')
             return False
         # TODO：在打卡时间段若已打卡，则按钮会变成空白色
         if self.query_only_point_within_text(search_text=r'^打卡倒计时*') is not None:
@@ -152,24 +152,24 @@ class JobAppiumHSPDailyClockOn(JobAppiumHSPMoreMakeMoneyBase):
             if self.query_only_point_within_text('^继续坚持打卡$', is_auto_click=True) is not None:
                 return False
             else:
-                self.job_scheduler_failed('已打卡，但未搜索到\"打卡成功\"标识')
+                self.task_scheduler_failed('已打卡，但未搜索到\"打卡成功\"标识')
                 return False
         elif self.query_only_point_within_text(search_text='^支付1元参与挑战$', is_auto_click=True) is not None:
-            self.job_scheduler_failed('TODO:解析结果')
+            self.task_scheduler_failed('TODO:解析结果')
             return False
-        self.job_scheduler_failed(message='---> JobAppiumHSPDailyClockOn failed',
-                                  email_title='JobAppiumHSPDailyClockOn.FoundEmptyError')
+        self.task_scheduler_failed(message='---> TaskAppiumHSPDailyClockOn failed',
+                                  email_title='TaskAppiumHSPDailyClockOn.FoundEmptyError')
         return False
 
 
-class JobAppiumActiveRedPkg(JobAppiumHSPMoreMakeMoneyBase):
+class TaskAppiumActiveRedPkg(TaskAppiumHSPMoreMakeMoneyBase):
     """更多赚钱-活跃红包"""
 
     def run_task(self):
-        if JobAppiumHSPMoreMakeMoneyBase.run_task(self) is False:
+        if TaskAppiumHSPMoreMakeMoneyBase.run_task(self) is False:
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('活跃红包'), click_mode="click") is None:
-            self.job_scheduler_failed('\"活跃红包\"找不到')
+            self.task_scheduler_failed('\"活跃红包\"找不到')
             return False
         if self.query_ele_wrapper(self.get_query_str_by_viewid('com.huaqian:id/open_progress')) is not None:
             # '财神爷'图片
@@ -191,7 +191,7 @@ class JobAppiumActiveRedPkg(JobAppiumHSPMoreMakeMoneyBase):
                         utils_logger.log("点击\"立即领取\"按钮领取红包：解析结果...")
                         return True
                     else:
-                        self.job_scheduler_failed('打开红包弹框，但发现红包元素无法解析')
+                        self.task_scheduler_failed('打开红包弹框，但发现红包元素无法解析')
                         return False
                 elif self.query_ele_wrapper(self.get_query_str_by_viewid('com.huaqian:id/image_red_msg'),
                                             retry_count=0) is not None:
@@ -199,22 +199,22 @@ class JobAppiumActiveRedPkg(JobAppiumHSPMoreMakeMoneyBase):
                     utils_logger.log("---> 提示：无活跃值用于抽奖")
                     return True
                 else:
-                    self.job_scheduler_failed('why not found image_open_icon/image_red_msg')
+                    self.task_scheduler_failed('why not found image_open_icon/image_red_msg')
                     return False
             else:
-                self.job_scheduler_failed('why not found 无法点击')
+                self.task_scheduler_failed('why not found 无法点击')
                 return False
         else:
-            self.job_scheduler_failed('没找到进度条')
+            self.task_scheduler_failed('没找到进度条')
             return False
         return False
 
 
-class JobAppiumHSPLuckyPan(JobAppiumHSPMoreMakeMoneyBase):
+class TaskAppiumHSPLuckyPan(TaskAppiumHSPMoreMakeMoneyBase):
     '幸运转盘'
 
     def run_task(self):
-        if JobAppiumHSPMoreMakeMoneyBase.run_task(self) is False:
+        if TaskAppiumHSPMoreMakeMoneyBase.run_task(self) is False:
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('幸运转盘'), click_mode="click") is None:
             return False
@@ -224,18 +224,18 @@ class JobAppiumHSPLuckyPan(JobAppiumHSPMoreMakeMoneyBase):
         #                               click_mode="click") is not None:
         #         time.sleep(60 + 15)
         #     else:
-        #         self.job_scheduler_failed("检测到温馨提示，但是没检测到继续体验按钮")
+        #         self.task_scheduler_failed("检测到温馨提示，但是没检测到继续体验按钮")
         #         return False
 
 
 if __name__ == "__main__":
-    tasks = ['JobAppiumActiveRedPkg', 'JobAppiumDailySign', 'JobAppiumHSPDailyClockOn', 'JobAppiumHSPHourCredit',
-             'JobAppiumHSPLuckyPan', 'JobAppiumHSPMoreMakeMoneyBase']
+    tasks = ['TaskAppiumActiveRedPkg', 'TaskAppiumDailySign', 'TaskAppiumHSPDailyClockOn', 'TaskAppiumHSPHourCredit',
+             'TaskAppiumHSPLuckyPan', 'TaskAppiumHSPMoreMakeMoneyBase']
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):
             input_info += str(index) + "：" + task_item + "\n"
-        task_index_selected = raw_input(input_info + "请选择需运行任务对应索引(索引下标越界触发程序退出)：")
+        task_index_selected = input(input_info + "请选择需运行任务对应索引(索引下标越界触发程序退出)：")
         if task_index_selected.isdigit() is False:
             utils_logger.log("索引值非数字，请重新输入：", task_index_selected)
             continue
@@ -244,5 +244,5 @@ if __name__ == "__main__":
             utils_logger.log("[" + str(task_index_selected) + "]任务索引不存在，退出程序...")
             break
         task_name = tasks[task_index_selected]
-        job = eval(task_name + '()')
-        job.run_task()
+        task = eval(task_name + '()')
+        task.run_task()

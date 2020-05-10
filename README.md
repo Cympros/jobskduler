@@ -1,17 +1,17 @@
 # job_schduler模块简单使用
-1.添加job任务定义     
-具体可参考"./config/job.config"中结构申明
+1.添加task任务定义     
+具体可参考"./config/task.config"中结构申明
 ```
-[job_wechat.WechatZhaoshangCreditcardSign]      //必填项：以"python文件名.class名称"
-job_name = 招行信用卡微信签到        //任务名称描述
-runnable = false        //任务是否启用(总控开关)。另，也可通过其他条件灵活控制任务是否执行(详见job_base.py文件)
+[task_wechat.WechatZhaoshangCreditcardSign]      //必填项：以"python文件名.class名称"
+task_name = 招行信用卡微信签到        //任务名称描述
+runnable = false        //任务是否启用(总控开关)。另，也可通过其他条件灵活控制任务是否执行(详见task_base.py文件)
 ```
 2.自定义任务     
-所有任务类均继承至"./job/job_base.py#BaseJob"      
+所有任务类均继承至"./task/task_base.py#BaseTask"      
 function:run_task：任务执行入口类       
 补充：     
 ```
-./job/appium/helper/job_appium_base.py：appium类型任务的基类封装      
+./tasks/appium/helper/task_appium_base.py：appium类型任务的基类封装      
 ```
 2.1 appium任务支持功能
 ```

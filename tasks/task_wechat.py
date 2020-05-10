@@ -12,14 +12,14 @@ from itchat.content import *
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-from task_base import BaseJob as Base
+from task_base import BaseTask as Base
 
-common_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../common')
-# utils_logger.log("---> common path is: ",common_path
-sys.path.append(common_path)
+project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../common')
+sys.path.append(project_root_path)
+
 import email_send
 from helper import utils_logger
-import env_job
+import envs
 import utils
 
 
@@ -41,8 +41,8 @@ class QR_Callback:
 
 
 # 定义与微信模块调用相关的东西
-class JobWechat(Base):
-    wechat_job = None
+class TaskWechat(Base):
+    wechat_core = None
 
     def __init__(self, send_message, is_need_listen_callback=True):
         Base.__init__(self)
@@ -66,25 +66,25 @@ class JobWechat(Base):
         if msg['FromUserName'] != self.target_user:
             utils_logger.log("接收到非目标用户的消息，舍弃")
             return
-        global wechat_job
-        if wechat_job is None:
+        global wechat_core
+        if wechat_core is None:
             utils_logger.log("---> wechatjob not defined")
             return
         if not self.need_still_listen:
             utils_logger.log("---> 已经放弃监听reply信息")
             return
         # 检查是否是需要的回复
-        is_reply_legal = wechat_job.check_reply(msg)
+        is_reply_legal = wechat_core.check_reply(msg)
         if not is_reply_legal:
             # 仅当收到的有效回复数大于阈值时，才邮件通知解决
             if self.has_check_reply_count >= self.max_check_reply_count:
                 # 调用基类方法收集错误日志
-                wechat_job.job_scheduler_failed(message=msg)
+                wechat_core.task_scheduler_failed(message=msg)
             self.has_check_reply_count = self.has_check_reply_count + 1
         else:
             # 已经收到有效回复，停止循环监听
             self.need_still_listen = False
-            self.notify_job_success()
+            self.notify_task_success()
             self.deal_reply_msg(msg=msg)
             # thread.start_new_thread(self.deal_reply_msg, (msg,))  # msg后必须添加逗号
 
@@ -94,13 +94,13 @@ class JobWechat(Base):
         # 这里的TEXT表示如果有人发送文本消息，那么就会调用下面的方法
         @itchat.msg_register(TEXT)
         def simple_text_reply(msg):
-            global wechat_job
-            wechat_job.whole_reply(msg)
+            global wechat_core
+            wechat_core.whole_reply(msg)
 
         @itchat.msg_register(SHARING, isFriendChat=True, isGroupChat=True, isMpChat=True)
         def link_reply(msg):
-            global wechat_job
-            wechat_job.whole_reply(msg)
+            global wechat_core
+            wechat_core.whole_reply(msg)
 
     # 获取目标用户标识
     def get_target_user(self):
@@ -111,15 +111,15 @@ class JobWechat(Base):
         return False
 
     def run_task(self):
-        global wechat_job
-        wechat_job = self
+        global wechat_core
+        wechat_core = self
 
         # 判断是否还需要持续监听reply信息
         self.need_still_listen = True
 
         # 自动登录
         itchat.auto_login(hotReload=True, enableCmdQR=True, qrCallback=QR_Callback,
-                          statusStorageDir=env_job.get_out_dir() + "/itchat.pkl")
+                          statusStorageDir=envs.get_out_dir() + "/itchat.pkl")
 
         _target_user = self.get_target_user()
         if _target_user is None:
@@ -146,7 +146,7 @@ class JobWechat(Base):
                 utils_logger.log("---> 不需要监听回调")
                 break
             if run_index > runned_max_count:
-                self.job_scheduler_failed('指令reply程序检测次数超出上限，exit')
+                self.task_scheduler_failed('指令reply程序检测次数超出上限，exit')
                 break
             if not self.need_still_listen:
                 utils_logger.log("---> 指令程序状态执行成功，exit")
@@ -156,15 +156,15 @@ class JobWechat(Base):
             run_index = run_index + 1
 
 
-class WechatSqjyxzsSign(JobWechat):
+class WechatSqjyxzsSign(TaskWechat):
     def __init__(self):
-        JobWechat.__init__(self, u'签到')
+        TaskWechat.__init__(self, u'签到')
 
     def get_target_user(self):
         friendslist = itchat.search_friends(u'省钱小助手-淘宝')
         if len(friendslist) != 1:
             utils_logger.log("---> 获取到的朋友不唯一，exit")
-            self.job_scheduler_failed(friendslist)
+            self.task_scheduler_failed(friendslist)
             return None
         return friendslist[0]["UserName"]
 
@@ -178,9 +178,9 @@ class WechatSqjyxzsSign(JobWechat):
             return False
 
 
-class WechatCreditcardRepayState(JobWechat):
+class WechatCreditcardRepayState(TaskWechat):
     def __init__(self):
-        JobWechat.__init__(self, u'账单')
+        TaskWechat.__init__(self, u'账单')
 
     def query_similary_list(self, target, lists):
         result = []
@@ -193,17 +193,17 @@ class WechatCreditcardRepayState(JobWechat):
         friendslist = itchat.search_mps(u'招商银行信用卡')
         if len(friendslist) != 1:
             utils_logger.log("---> 获取到的朋友不唯一，exit")
-            self.job_scheduler_failed(friendslist)
+            self.task_scheduler_failed(friendslist)
             return None
         return friendslist[0]["UserName"]
 
     def deal_reply_msg(self, msg):
-        JobWechat.deal_reply_msg(self, msg)
+        TaskWechat.deal_reply_msg(self, msg)
         reply_msg = json.dumps(msg['Content'], encoding='utf-8', ensure_ascii=False)
         fliters = list(set(reply_msg.split(r'\n\n')))  # 双换行符分割并去重
         renmingbi_strs = self.query_similary_list("人民币账单", fliters)
         if len(renmingbi_strs) != 1:
-            self.job_scheduler_failed("not found '人民币账单'相关信息")
+            self.task_scheduler_failed("not found '人民币账单'相关信息")
             return
         else:
             if renmingbi_strs[0].find(u'您的人民币账单已还清') != -1:
@@ -223,15 +223,15 @@ class WechatCreditcardRepayState(JobWechat):
         return False
 
 
-class WechatZhaoshangCreditcardSign(JobWechat):
+class WechatZhaoshangCreditcardSign(TaskWechat):
     def __init__(self):
-        JobWechat.__init__(self, "签到")
+        TaskWechat.__init__(self, "签到")
 
     def get_target_user(self):
         friendslist = itchat.search_mps(u'招商银行信用卡')
         if len(friendslist) != 1:
             utils_logger.log("---> 获取到的朋友不唯一，exit")
-            self.job_scheduler_failed(friendslist)
+            self.task_scheduler_failed(friendslist)
             return None
         return friendslist[0]["UserName"]
 
@@ -242,22 +242,22 @@ class WechatZhaoshangCreditcardSign(JobWechat):
         elif reply_msg.find(u'亲~您今天已经签过到啦！回复“我的签到”可查看明细哦') != -1:
             return True
         else:
-            self.job_scheduler_failed(reply_msg)
+            self.task_scheduler_failed(reply_msg)
             return False
 
 
-class WechatKeepAliveChecker(JobWechat):
+class WechatKeepAliveChecker(TaskWechat):
     '用来检测wechat是否在线的模块'
 
     def __init__(self):
-        JobWechat.__init__(self, send_message="hell world," + str(utils.get_shanghai_time('%Y%m%d %H:%M:%S')),
+        TaskWechat.__init__(self, send_message="hell world," + str(utils.get_shanghai_time('%Y%m%d %H:%M:%S')),
                            is_need_listen_callback=False)
 
     def get_target_user(self):
         friendslist = itchat.search_friends(u'Jimmie')
         if len(friendslist) != 1:
             utils_logger.log("---> 获取到的朋友不唯一，exit")
-            self.job_scheduler_failed(friendslist)
+            self.task_scheduler_failed(friendslist)
             return None
         return friendslist[0]["UserName"]
 
@@ -269,7 +269,7 @@ if __name__ == "__main__":
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):
             input_info += str(index) + "：" + task_item + "\n"
-        task_index_selected = raw_input(input_info + "请选择需运行任务对应索引(索引下标越界触发程序退出)：")
+        task_index_selected = input(input_info + "请选择需运行任务对应索引(索引下标越界触发程序退出)：")
         if task_index_selected.isdigit() is False:
             utils_logger.log("索引值非数字，请重新输入：", task_index_selected)
             continue
@@ -278,5 +278,5 @@ if __name__ == "__main__":
             utils_logger.log("[" + str(task_index_selected) + "]任务索引不存在，退出程序...")
             break
         task_name = tasks[task_index_selected]
-        job = eval(task_name + '()')
-        job.run_task()
+        task = eval(task_name + '()')
+        task.run_task()

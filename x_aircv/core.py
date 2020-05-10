@@ -2,14 +2,13 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
-import utils as aircv_utils
 
-root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
-sys.path.append(root_path)
+project_root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
+sys.path.append(project_root_path)
 
-from helper import utils_image as ImageCutted
-from helper import utils_file as FileOperate
-import utils
+# from helper import utils_image as ImageCutted
+# from helper import utils_file as FileOperate
+from x_aircv import utils as aircv_utils
 
 
 class Template(object):
@@ -69,11 +68,11 @@ class Template(object):
 
     def find_templates_wrapper(self, imread_parent, imread_child, threshold=None, rgb=None):
         """图片匹配列表返回"""
-        match_results = utils.find_templates(imread_parent=imread_parent, imread_child=imread_child)
+        match_results = aircv_utils.find_templates(imread_parent=imread_parent, imread_child=imread_child)
         if match_results is not None:
             return match_results
 
-        only_match = utils.find_only_template(imread_parent=imread_parent, imread_child=imread_child)
+        only_match = aircv_utils.find_only_template(imread_parent=imread_parent, imread_child=imread_child)
         if only_match is not None:
             return [only_match]
         return None
@@ -83,11 +82,11 @@ class Template(object):
         基于特征值搜索
         @:return [{'confidence':(*,*),'result':(*,*),'rectangle':[left-top,right-top,right-bottom,left-bottom]},{}]
         '''
-        rets = utils.find_sifts(imread_parent=imred_parent, imread_child=imread_child)
+        rets = aircv_utils.find_sifts(imread_parent=imred_parent, imread_child=imread_child)
         if rets is not None:
             return rets
 
-        only_sift = utils.find_only_sift(imred_parent=imred_parent, imread_child=imread_child)
+        only_sift = aircv_utils.find_only_sift(imred_parent=imred_parent, imread_child=imread_child)
         if only_sift is not None:
             return [only_sift]
         return None

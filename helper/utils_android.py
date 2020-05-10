@@ -6,8 +6,8 @@ import os
 import re
 from PIL import Image
 
-job_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../')
-sys.path.append(job_root_path)
+project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../')
+sys.path.append(project_root_path)
 
 from helper import utils_image as image_utils
 from helper import utils_common
@@ -80,14 +80,16 @@ def get_device_tag(device):
     """获取android设备的唯一标识"""
     # 在第一次启用设备的时候随机生成，并且在用户使用设备时不会发生改变
     # utils_logger.log("---> 读取android设备的androidId")
-    cmd = "adb" + (" " if device is None else " -s " + str(device) + " ") + "shell settings get secure android_id"
+    cmd = "adb" + (" " if device is None else " -s " + str(
+        device) + " ") + "shell settings get secure android_id"
     response, response_error = _check_adb_command_result(cmd)
     return response
 
 
 def get_deivce_android_version(device=None):
     utils_logger.log("---> get_deivce_android_version within default:", device)
-    cmd = "adb" + (" " if device is None else " -s " + str(device) + " ") + "shell getprop ro.build.version.release"
+    cmd = "adb" + (" " if device is None else " -s " + str(
+        device) + " ") + "shell getprop ro.build.version.release"
     # cmd = "adb -s " \
     #       + device_name \
     #       + " shell cat /system/build.prop | grep ro.build.version.release | awk -F '=' '{print $2}' "
@@ -125,8 +127,10 @@ def get_battery_status_by_device(device):
 
 def get_brand_by_device(device):
     """设备型号"""
-    cmd = "adb " + (" " if device is None else " -s " + str(device) + " ") + " shell getprop | grep "
-    response, response_error = _check_adb_command_result(cmd + "ro.product.brand" + " | awk -F ':' '{print $2}'")
+    cmd = "adb " + (
+        " " if device is None else " -s " + str(device) + " ") + " shell getprop | grep "
+    response, response_error = _check_adb_command_result(
+        cmd + "ro.product.brand" + " | awk -F ':' '{print $2}'")
     if response is not None:
         return response
 
@@ -137,8 +141,10 @@ def get_brand_by_device(device):
 
 def get_model_by_device(device):
     """设备版本"""
-    cmd = "adb " + (" " if device is None else " -s " + str(device) + " ") + " shell getprop | grep "
-    response, response_error = _check_adb_command_result(cmd + "ro.product.model" + " | awk -F ':'  '{print $2}'")
+    cmd = "adb " + (
+        " " if device is None else " -s " + str(device) + " ") + " shell getprop | grep "
+    response, response_error = _check_adb_command_result(
+        cmd + "ro.product.model" + " | awk -F ':'  '{print $2}'")
     if response is not None:
         return response
 
@@ -162,7 +168,8 @@ def pull_file_from_phone(file_path_in_phone, target_dir_in_mac):
 def get_top_focuse_activity(device=None):
     """获取当前打开应用的信息"""
     cmd = "adb " + (
-        " " if device is None else " -s " + str(device) + " ") + " shell dumpsys activity | grep 'mFocusedActivity'"
+        " " if device is None else " -s " + str(
+            device) + " ") + " shell dumpsys activity | grep 'mFocusedActivity'"
     response, response_errror = _check_adb_command_result(cmd)
     return response
 
@@ -184,6 +191,7 @@ def get_connected_devcies(target_device=None, except_emulater=False):
     '''
     device_infos, device_infos_errror = _check_adb_command_result("adb devices")
     if device_infos is None:
+        print ("> get_connected_devcies:device_infos is None")
         return None
     contected_devices = []
     for device_info in device_infos.split("\n"):
@@ -250,7 +258,8 @@ def get_device_statue(device):
 def is_app_installed(device, application_id):
     # "-3"参数表示仅过滤第三方应用
     cmd = "adb " + (
-        " " if device is None else " -s " + str(device) + " ") + " shell pm list packages -3 | grep " + application_id
+        " " if device is None else " -s " + str(
+            device) + " ") + " shell pm list packages -3 | grep " + application_id
     check_installed_response, response_errror = _check_adb_command_result(cmd)
     utils_logger.log("--->[is_app_installed]:", check_installed_response, response_errror)
     return check_installed_response, response_errror
@@ -266,7 +275,7 @@ def _check_adb_command_result(adb_cmd, retry_count=3):
                          + "error_adb:[" + str(error_adb) + "]")
         return res_adb, error_adb
     if error_adb is not None:  # 表示有异常
-        if "error: device " in error_adb and " not found" in error_adb:
+        if "error: device " in error_adb.decode() and " not found" in error_adb.decode():
             # 重启adb服务
             # utils_common.exec_shell_cmd("adb kill-server && adb start-server")
             return _check_adb_command_result(adb_cmd, retry_count - 1)
@@ -274,6 +283,7 @@ def _check_adb_command_result(adb_cmd, retry_count=3):
                      + "adb_cmd:[" + str(adb_cmd) + "],"
                      + "res_adb:[" + str(res_adb) + "],"
                      + "error_adb:[" + str(error_adb) + "]")
+    print (adb_cmd, res_adb, error_adb)
     return res_adb, error_adb
 
 
@@ -295,8 +305,9 @@ def is_page_loging(check_file, x_cut_count=5, y_cut_count=10):
         for y_cut_index in range(y_cut_count):
             # utils_logger.log("--->is_page_loging:",x_cut_index,y_cut_index
             # crop参数以(left, top, right, bottom)方式组织
-            rect_formted = (x_cut_index * item_width, y_cut_index * item_height, (1 + x_cut_index) * item_width,
-                            (1 + y_cut_index) * item_height)
+            rect_formted = (
+            x_cut_index * item_width, y_cut_index * item_height, (1 + x_cut_index) * item_width,
+            (1 + y_cut_index) * item_height)
             # utils_logger.log("---rect_formted:",rect_formted
             is_solid, rgba = image_utils.get_color_if_img_solid(image_resorce.crop(rect_formted))
             if is_solid is False:
@@ -314,7 +325,8 @@ def is_page_loging(check_file, x_cut_count=5, y_cut_count=10):
     else:
         max_solid_count = max(solid_dict.values())  # 纯色区域中占用最大色块的色块数
         is_solid = (5 * max_solid_count > 3 * (x_cut_count * y_cut_count))
-        utils_logger.log("---> max_solid_count:", max_solid_count, ",max_solid_count/total_size>约定阈值:", is_solid)
+        utils_logger.log("---> max_solid_count:", max_solid_count,
+                         ",max_solid_count/total_size>约定阈值:", is_solid)
         # 最大的纯色区域占据2/3以上的部分则表示页面还在加载中
         if is_solid:
             utils_logger.log("---> 纯色区域比例大于阈值，认为页面还未加载完成")

@@ -6,20 +6,20 @@ import random
 import time
 import traceback
 
-job_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
-sys.path.append(job_root_path)
+project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
+sys.path.append(project_root_path)
 
-from job.appium.job_appium_base import AppiumBaseJob
-from job.appium.utils import utils_appium
-from helper import utils_logger
+from tasks.appium.task_appium_base import AppiumBaseTask
+from tasks.appium import utils_appium
+# from helper import utils_logger
 
 
-class JobAppiumTaoToutiaoBase(AppiumBaseJob):
+class TaskAppiumTaoToutiaoBase(AppiumBaseTask):
     def __init__(self):
-        AppiumBaseJob.__init__(self, 'com.ly.taotoutiao', 'com.ly.taotoutiao.view.activity.WelComeActivity')
+        AppiumBaseTask.__init__(self, 'com.ly.taotoutiao', 'com.ly.taotoutiao.view.activity.WelComeActivity')
 
     def except_case_in_query_ele(self):
-        if AppiumBaseJob.except_case_in_query_ele(self) is True:
+        if AppiumBaseTask.except_case_in_query_ele(self) is True:
             return True
         if self.query_ele_wrapper(self.get_query_str_by_viewid("com.ly.taotoutiao:id/img_hd_close"),
                                   is_ignore_except_case=True, click_mode='click') is not None:
@@ -27,16 +27,16 @@ class JobAppiumTaoToutiaoBase(AppiumBaseJob):
         return False
 
     def run_task(self):
-        if AppiumBaseJob.run_task(self) is False:
+        if AppiumBaseTask.run_task(self) is False:
             return False
         if self.wait_activity(self.driver, ".view.activity.MainActivity") is False:
-            self.job_scheduler_failed("未进入淘头条首页")
+            self.task_scheduler_failed("未进入淘头条首页")
             return False
 
 
-class JobAppiumTaotoutiaoCoreShiduanJiangli(JobAppiumTaoToutiaoBase):
+class TaskAppiumTaotoutiaoCoreShiduanJiangli(TaskAppiumTaoToutiaoBase):
     def run_task(self):
-        if JobAppiumTaoToutiaoBase.run_task(self) is False:
+        if TaskAppiumTaoToutiaoBase.run_task(self) is False:
             return False
         if self.query_ele_wrapper(self.get_query_str_by_viewid("com.ly.taotoutiao:id/tv_time_countdown"),
                                   click_mode="click") is not None:
@@ -51,19 +51,19 @@ class JobAppiumTaotoutiaoCoreShiduanJiangli(JobAppiumTaoToutiaoBase):
                         utils_logger.log("二次访问发现获取时段奖励成功")
                         return True
                     else:
-                        self.job_scheduler_failed("第二次点击为什么还是没发现时段奖励的提示")
+                        self.task_scheduler_failed("第二次点击为什么还是没发现时段奖励的提示")
                         return False
                 else:
-                    self.job_scheduler_failed("第二次次没找到'tv_time_countdown'")
+                    self.task_scheduler_failed("第二次次没找到'tv_time_countdown'")
                     return False
         else:
-            self.job_scheduler_failed("第一次没找到'tv_time_countdown'")
+            self.task_scheduler_failed("第一次没找到'tv_time_countdown'")
             return False
 
 
-class JobAppiumTaoToutiaoYueDu(JobAppiumTaoToutiaoBase):
+class TaskAppiumTaoToutiaoYueDu(TaskAppiumTaoToutiaoBase):
     def run_task(self):
-        if JobAppiumTaoToutiaoBase.run_task(self) is False:
+        if TaskAppiumTaoToutiaoBase.run_task(self) is False:
             return False
         for_each_size = int(random.randint(1, 15))
         for index in range(for_each_size):
@@ -87,8 +87,8 @@ class JobAppiumTaoToutiaoYueDu(JobAppiumTaoToutiaoBase):
             if utils_appium.get_cur_act(self.driver) == def_main_activity:
                 try:
                     self.browser_news(def_main_activity)
-                except Exception, e:
-                    utils_logger.log("--->JobAppiumHuiToutiaoYueDu.browser_news caught exception:",
+                except Exception as e:
+                    utils_logger.log("--->TaskAppiumHuiToutiaoYueDu.browser_news caught exception:",
                                      traceback.format_exc())
             else:
                 utils_logger.log("不再首页，没办法执行新闻浏览任务")
@@ -98,11 +98,11 @@ class JobAppiumTaoToutiaoYueDu(JobAppiumTaoToutiaoBase):
         module_text = random.choice([u"推荐", u'视频', u'美文', u'故事', u'育儿', u'科技'])
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text(module_text), click_mode="click",
                                   retry_count=0) is None:
-            self.job_scheduler_failed('找不到' + module_text + '板块')
+            self.task_scheduler_failed('找不到' + module_text + '板块')
             return False
         is_view_inflated, scr_shots = self.wait_view_layout_finish(True)
         if is_view_inflated is False:
-            self.job_scheduler_failed('页面还未绘制完成，please check')
+            self.task_scheduler_failed('页面还未绘制完成，please check')
             return False
         # 搜索应该阅读的文章
         scroll_size = int(random.randint(0, 10))
@@ -138,7 +138,7 @@ class JobAppiumTaoToutiaoYueDu(JobAppiumTaoToutiaoBase):
         # 判断是否在详情页面
         cur_activity = utils_appium.get_cur_act(self.driver)
         if cur_activity == main_activity:
-            self.job_scheduler_failed('why 还在首页')
+            self.task_scheduler_failed('why 还在首页')
             return False
         # 根据页面调用指定阅读策略
         utils_logger.log("--->cur_activity:", cur_activity)
@@ -163,17 +163,17 @@ class JobAppiumTaoToutiaoYueDu(JobAppiumTaoToutiaoBase):
             utils_logger.log("进入非指定详情页面，放弃此次浏览")
             return False
         else:
-            self.job_scheduler_failed(message='未知页面:' + cur_activity, email_title="UnknownPage")
+            self.task_scheduler_failed(message='未知页面:' + cur_activity, email_title="UnknownPage")
             return False
 
 
 if __name__ == '__main__':
-    tasks = ['JobAppiumTaoToutiaoBase', 'JobAppiumTaotoutiaoCoreShiduanJiangli', 'JobAppiumTaoToutiaoYueDu']
+    tasks = ['TaskAppiumTaoToutiaoBase', 'TaskAppiumTaotoutiaoCoreShiduanJiangli', 'TaskAppiumTaoToutiaoYueDu']
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):
             input_info += str(index) + "：" + task_item + "\n"
-        task_index_selected = raw_input(input_info + "请选择需运行任务对应索引(索引下标越界触发程序退出)：")
+        task_index_selected = input(input_info + "请选择需运行任务对应索引(索引下标越界触发程序退出)：")
         if task_index_selected.isdigit() is False:
             utils_logger.log("索引值非数字，请重新输入：", task_index_selected)
             continue
@@ -182,5 +182,5 @@ if __name__ == '__main__':
             utils_logger.log("[" + str(task_index_selected) + "]任务索引不存在，退出程序...")
             break
         task_name = tasks[task_index_selected]
-        job = eval(task_name + '()')
-        job.run_task()
+        task = eval(task_name + '()')
+        task.run_task()
