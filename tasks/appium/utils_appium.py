@@ -11,7 +11,7 @@ project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0]
 sys.path.insert(0, project_root_path)
 
 from helper import utils_common, utils_logger
-# from helper import envs
+from helper import envs
 from helper import utils_android
 
 
@@ -106,20 +106,18 @@ def touch_action(driver, target_device_name, is_down=True, tab_center=0.5, tab_i
 def start_appium_service(device, appium_port, access_appium_bp_port, retry_count=5,
                          interval_time=5):
     '''启动appium服务,添加重试机制'''
-    utils_logger.log("check_appium_service_state with retry_count:    ",
-                     retry_count)
-    # 存在appium进程则输出success，否则输出空串
-    appium_state_check_cmd = "ps -ef | grep \'appium"
-    if appium_port is not None:
-        appium_state_check_cmd += " -p " + str(appium_port)
-    appium_state_check_cmd += "\' | grep -v \'grep\' >/dev/null && echo success"
-
     # 检测appium是否安装
     check_res, check_error = utils_common.exec_shell_cmd('which appium')
     if not check_res:  # 空串表示未安装appium服务
         utils_logger.log("appium服务还未安装,调用'npm install -g appium'执行安装程序")
         return False
     utils_logger.log("appium服务安装地址", check_res)
+    utils_logger.log("重试检查appium服务启动状态 ", retry_count)
+    # 存在appium进程则输出success，否则输出空串
+    appium_state_check_cmd = "ps -ef | grep \'appium"
+    if appium_port is not None:
+        appium_state_check_cmd += " -p " + str(appium_port)
+    appium_state_check_cmd += "\' | grep -v \'grep\' >/dev/null && echo success"
     # 屏蔽因日志太多堵塞
     appium_start_cmd = "nohup appium "
     if appium_port is not None:
@@ -131,8 +129,7 @@ def start_appium_service(device, appium_port, access_appium_bp_port, retry_count
     appium_start_cmd += " 1>/dev/null 2>&1 & "
 
     res_apm, res_apm_error = utils_common.exec_shell_cmd(appium_state_check_cmd)
-    utils_logger.log(" appium服务是否启动", "[" + appium_state_check_cmd + "]",
-                     "[" + str(res_apm) + "]", "[" + str(res_apm_error) + "]")
+    utils_logger.log("appium服务是否启动", appium_state_check_cmd, str(res_apm), str(res_apm_error))
     if res_apm is not None:
         return True
     else:
@@ -290,19 +287,19 @@ def find_element_by_viewid(driver, viewid, retry_count=2, interval_time=0.1):
 
 def find_element_by_xpath(driver, xpath, retry_count=2, interval_time=0.1):
     '基于xpath寻找控件'
-    utils_logger.log("find_element_by_xpath[" + xpath + "] with retry_count:", retry_count)
+    utils_logger.log(xpath, "retry_count:" + str(retry_count))
     element = None
     try:
         element = driver.find_element_by_xpath(xpath)
     finally:
         if element is not None:
-            utils_logger.log("find_element_by_xpath with xpath", xpath)
+            # utils_logger.log("find_element_by_xpath with xpath", xpath)
             return element
         elif retry_count <= 0:
-            utils_logger.log("find_element_by_xpath：[" + xpath + "] failed with no chance")
+            utils_logger.log("failed with no chance")
             return None
         else:
-            utils_logger.log("find_element_by_xpath sleep:", interval_time)
+            utils_logger.log("sleep to wait:", interval_time)
             time.sleep(interval_time)
             return find_element_by_xpath(driver=driver, xpath=xpath, retry_count=retry_count - 1,
                                          interval_time=interval_time)
@@ -385,6 +382,7 @@ def get_driver_by_launch_app(application_id, launch_activity, device_name_to_con
         return None
 
     platform_version = utils_android.get_deivce_android_version(device=device_name_to_connected)
+    # 参数文档查阅:http://appium.io/docs/en/writing-running-appium/caps/
     desired_caps = {'platformName': 'Android',
                     'platformVersion': platform_version,
                     'deviceName': device_name_to_connected,
@@ -392,15 +390,16 @@ def get_driver_by_launch_app(application_id, launch_activity, device_name_to_con
                     'noReset': True,
                     'appPackage': application_id,
                     'appActivity': launch_activity,
-                    # 'chromeOptions':{'androidProcess': 'com.tencent.mm:tools'},   # 该语句非必须
                     'newCommandTimeout': 3 * 60,  # 无响应再关闭
+                    'adbExecTimeout': 50000,
+                    'disableWindowAnimation': True,
                     # 'automationName':'uiautomator2'   # todo:还不稳定，观望中
                     }
     if is_need_setting_input_manager is True:
         # 下面两项用于使键盘支持中文输入
         desired_caps['unicodeKeyboard'] = True
         desired_caps['resetKeyboard'] = True
-    utils_logger.log('#get_driver_by_launch_app#', desired_caps, appium_port)
+    utils_logger.log(desired_caps, appium_port)
     driver = appium_webdriver.Remote("http://127.0.0.1:" + str(appium_port) + '/wd/hub',
                                      desired_caps)
     # driver.implicitly_wait(10)  # 设置全局隐性等待时间，单位秒

@@ -19,8 +19,8 @@ import traceback
 from helper import envs
 from helper import utils_common
 from helper import utils_logger
-# from helper import utils_image as image_utils
-# from helper import utils_file as file_utils
+from helper import utils_image as image_utils
+from helper import utils_file as file_utils
 from helper import utils_android
 from tasks.task_base import BaseTask
 from tasks.appium import utils_appium
@@ -37,7 +37,7 @@ class BasicAppiumTask(BaseTask):
         BaseTask.__init__(self)
         self.driver = None
         self.target_device_name = None
-        self.appium_port = 4723
+        self.appium_port = None
         self.appium_port_bp = None
 
         self.target_application_id = target_application_id
@@ -107,7 +107,7 @@ class BasicAppiumTask(BaseTask):
         'upload_files：可以允许自定义添加待上传的文件'
         self.upload_files.extend(upload_files)
         if message is not None:
-            utils_logger.log("message:", message)
+            utils_logger.log(message)
         if self.upload_files is not None and len(self.upload_files) > 0:
             utils_logger.log("task_scheduler_failed in BasicAppiumTask with upload_files:",
                              list(set(self.upload_files)))
@@ -142,8 +142,6 @@ class BasicAppiumTask(BaseTask):
     def register_config(self, xargs_dict=None):
         BaseTask.register_config(self, xargs_dict)
         self.target_device_name = xargs_dict.get('device_name')
-        self.appium_port = xargs_dict.get('appium_port')
-        self.appium_port_bp = xargs_dict.get('appium_port_bp')
 
     def whether_support_device_type(self, device_type):
         if BaseTask.whether_support_device_type(self, device_type) is False:
@@ -158,11 +156,6 @@ class BasicAppiumTask(BaseTask):
     def run_task(self):
         if BaseTask.run_task(self) is False:
             return False
-        if self.target_device_name is not None:  # 未指定设备，则采用默认设备，那么appium端口也无须校验
-            # 分配appium服务端口
-            if self.appium_port is None or self.appium_port_bp is None:
-                self.task_scheduler_failed("未指定appium服务端口")
-                return False
         # 检查设备在线状态
         if self.target_device_name is not None:
             device_status = utils_android.get_device_statue(self.target_device_name)
@@ -181,6 +174,13 @@ class BasicAppiumTask(BaseTask):
         if self.target_device_name is None:
             self.task_scheduler_failed("未连接设备")
             return False
+        # 分配appium服务端口
+        self.appium_port = 4723
+        self.appium_port_bp = 4724
+        if self.appium_port is None or self.appium_port_bp is None:
+            self.task_scheduler_failed("未指定appium服务端口")
+            return False
+
         # 检查应用是否安装
         check_installed_response, response_errror = utils_android.is_app_installed(
             self.target_device_name,

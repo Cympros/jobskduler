@@ -298,17 +298,17 @@ def _check_adb_command_result(adb_cmd, retry_count=3):
     # 用于针对adb命令的异常处理
     res_adb, error_adb = utils_common.exec_shell_cmd(adb_cmd)
     if retry_count <= 0:
-        utils_logger.log("cmd[" + str(adb_cmd) + "],"
+        utils_logger.log("命令[" + str(adb_cmd) + "],"
                          + "retry_count[" + str(retry_count) + "]")
         utils_logger.log("response:[" + str(res_adb) + "],"
                          + "error:[" + str(error_adb) + "]")
         return res_adb, error_adb
     if error_adb is not None:  # 表示有异常
-        if "error: device " in error_adb.decode() and " not found" in error_adb.decode():
+        if "error: device " in error_adb and " not found" in error_adb:
             # 重启adb服务
             # utils_common.exec_shell_cmd("adb kill-server && adb start-server")
             return _check_adb_command_result(adb_cmd, retry_count - 1)
-    utils_logger.log("cmd[" + str(adb_cmd) + "],"
+    utils_logger.log("命令[" + str(adb_cmd) + "],"
                      + "retry_count[" + str(retry_count) + "]")
     utils_logger.log("response:[" + str(res_adb) + "],"
                      + "error:[" + str(error_adb) + "]")
@@ -342,7 +342,7 @@ def is_page_loging(check_file, x_cut_count=5, y_cut_count=10):
                 continue
             # utils_logger.log("rgb:",rgba
             rgb_key = "".join(str(rgba))
-            if solid_dict.has_key(rgb_key):
+            if rgb_key in solid_dict:
                 solid_dict[rgb_key] = int(solid_dict[rgb_key]) + 1
             else:
                 solid_dict[rgb_key] = 0

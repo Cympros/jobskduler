@@ -9,6 +9,7 @@ import shlex
 import subprocess
 import re
 import json
+
 try:
     import imagehash
 except:
@@ -93,15 +94,15 @@ def exec_shell_cmd(cmd_str, timeout=None, shell=True):
         if timeout is not None and end_time <= datetime.datetime.now():
             return None, None
 
-    response_stdout = sub.stdout.read().lstrip().rstrip()
-    if response_stdout is not None and response_stdout != "":
-        return response_stdout.decode(), None
+    response_stdout = sub.stdout.read().lstrip().rstrip().decode()
+    response_error = sub.stderr.read().lstrip().rstrip().decode()
+    utils_logger.log(response_stdout, response_error)
 
-    response_error = sub.stderr.read().lstrip().rstrip()
-    if response_error is not None and response_error != "":
-        utils_logger.log("shell执行异常:", response_error)
-        return None, response_error.decode()
-    return None, None
+    res_format_stdout = response_stdout if response_stdout is not None and response_stdout != "" else None
+    res_format_error = response_error if response_error is not None and response_error != "" else None
+    if res_format_error is not None and res_format_error != "":
+        utils_logger.log("shell执行异常:", cmd_str, response_error)
+    return res_format_stdout, res_format_error
 
 
 def get_file_md5(filename):

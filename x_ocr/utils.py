@@ -13,6 +13,7 @@ import urllib
 import hashlib
 import urllib.request
 import traceback
+
 try:
     from aip import AipOcr
 except:
@@ -22,7 +23,7 @@ except:
 project_root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
 sys.path.insert(0, project_root_path)
 
-# from helper import utils_common, utils_logger
+from helper import utils_common, utils_logger
 
 
 def query_all_ocrs_throw_ocr(file_img):

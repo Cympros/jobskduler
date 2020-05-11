@@ -43,5 +43,8 @@ def log(*log_infos):
     log_preffix = "[" + str(os.getpid()) + "]<" + str(module) \
                   + "#" + str(method_name) + ">         "
     for log_item in log_infos:
-        wrapper_log = wrapper_log + "[" + str(log_item) + "]"
+        if log_item is None:
+            wrapper_log = wrapper_log + "[None]"
+        else:
+            wrapper_log = wrapper_log + "[" + str(log_item) + "]"
     logger.warning(log_preffix + wrapper_log)
