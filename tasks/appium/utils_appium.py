@@ -116,9 +116,10 @@ def start_appium_service(device, appium_port, access_appium_bp_port, retry_count
 
     # 检测appium是否安装
     check_res, check_error = utils_common.exec_shell_cmd('which appium')
-    if check_error is not None:
+    if not check_res:  # 空串表示未安装appium服务
         utils_logger.log("appium服务还未安装,调用'npm install -g appium'执行安装程序")
         return False
+    utils_logger.log("appium服务安装地址", check_res)
     # 屏蔽因日志太多堵塞
     appium_start_cmd = "nohup appium "
     if appium_port is not None:

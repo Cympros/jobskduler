@@ -37,10 +37,11 @@ logger.addHandler(ch)
 def log(*log_infos):
     inspect_stack = inspect.stack()
     module_path = inspect_stack[1][1]
-    module=os.path.splitext(os.path.basename(module_path))[0]
+    module = os.path.splitext(os.path.basename(module_path))[0]
     method_name = inspect_stack[1][3]  # 所在方法名
     wrapper_log = ""
+    log_preffix = "[" + str(os.getpid()) + "]<" + str(module) \
+                  + "#" + str(method_name) + ">         "
     for log_item in log_infos:
-        wrapper_log += str(log_item) + " "
-        log_preffix = "[" + str(os.getpid()) + "]<" + str(module) + "#" + str(method_name) + ">         "
+        wrapper_log = wrapper_log + "[" + str(log_item) + "]"
     logger.warning(log_preffix + wrapper_log)

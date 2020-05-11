@@ -9,7 +9,7 @@ sys.path.insert(0, project_root_path)
 from tasks.appium.task_appium_base import BasicAppiumTask
 from tasks.appium import utils_appium
 # from helper import utils_logger
-from helper import utils_yaml
+from manager.helper import utils_yaml
 # from config import envs
 
 

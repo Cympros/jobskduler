@@ -4,10 +4,10 @@ import os
 import sys
 
 try:
-    import aircv
+    import cv2 as aircv
 except:
     os.system('pip install opencv-python --default-timeout=10000')
-    import aircv
+    import cv2 as aircv
 import traceback
 
 # from airtest import aircv as airtest_aircv
