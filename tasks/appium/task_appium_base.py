@@ -175,12 +175,13 @@ class BasicAppiumTask(BaseTask):
             self.task_scheduler_failed("未连接设备")
             return False
         # 分配appium服务端口
-        self.appium_port = 4723
-        self.appium_port_bp = 4724
-        if self.appium_port is None or self.appium_port_bp is None:
+        self.appium_port = utils_appium.query_avaiable_port(4273, 9999)
+        if self.appium_port is None:
             self.task_scheduler_failed("未指定appium服务端口")
             return False
-
+        self.appium_port_bp = utils_appium.query_avaiable_port(self.appium_port + 1, 9999)
+        utils_logger.log("指定端口", "appium_port:" + str(self.appium_port),
+                         "appium_port_bp:" + str(self.appium_port_bp))
         # 检查应用是否安装
         check_installed_response, response_errror = utils_android.is_app_installed(
             self.target_device_name,

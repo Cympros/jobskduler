@@ -406,5 +406,25 @@ def get_driver_by_launch_app(application_id, launch_activity, device_name_to_con
     return driver
 
 
+# 查询可用的port值
+# finish_if_found:找到时是否退出程序
+def query_avaiable_port(start_port, end_port, finish_if_found=True):
+    if start_port is None or end_port is None:
+        return None
+    if start_port > end_port:
+        return None
+    available_port = start_port
+    while available_port <= end_port:
+        res, error = utils_common.exec_shell_cmd('lsof -i:' + str(available_port)
+                                                 + " && echo success")
+        if res is None:
+            if finish_if_found is True:
+                return available_port
+        else:
+            utils_logger.log("port已被使用", available_port)
+        available_port = available_port + 1
+    return None
+
+
 if __name__ == '__main__':
-    pass
+    utils_logger.log(query_avaiable_port(0, 99999, False))

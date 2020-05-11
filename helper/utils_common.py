@@ -83,7 +83,6 @@ def exec_shell_cmd(cmd_str, timeout=None, shell=True):
     if timeout is not None:
         end_time = datetime.datetime.now() + datetime.timedelta(seconds=timeout)
     # 没有指定标准输出和错误输出的管道，因此会打印到屏幕上；
-    utils_logger.log("\"" + cmd_str + "\"")
     sub = subprocess.Popen(cmdstr_list, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE,
                            shell=shell, bufsize=4096)
@@ -96,6 +95,8 @@ def exec_shell_cmd(cmd_str, timeout=None, shell=True):
 
     response_stdout = sub.stdout.read().lstrip().rstrip().decode()
     response_error = sub.stderr.read().lstrip().rstrip().decode()
+
+    utils_logger.log(cmd_str)
     utils_logger.log(response_stdout, response_error)
 
     res_format_stdout = response_stdout if response_stdout is not None and response_stdout != "" else None
