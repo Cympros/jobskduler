@@ -5,6 +5,10 @@ import os
 import sys
 import threading
 
+# 添加python运行环境检测
+if sys.version_info.major < 3:
+    raise "Must be using Python 3"
+
 project_root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
 sys.path.insert(0, project_root_path)
 
