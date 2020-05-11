@@ -6,19 +6,19 @@ import sys
 project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
 sys.path.insert(0, project_root_path)
 
-from tasks.appium.task_appium_base import BasicAppiumTask
+from tasks.appium.task_appium_base import AbsBasicAppiumTask
 from tasks.appium import utils_appium
 # from helper import utils_logger
-from manager.helper import utils_yaml
+from helper import utils_yaml
 # from config import envs
 
 
-class TaskAppiumFeizhu(BasicAppiumTask):
+class TaskAppiumFeizhu(AbsBasicAppiumTask):
     def __init__(self):
-        BasicAppiumTask.__init__(self, "com.taobao.trip", "com.alipay.mobile.quinox.LauncherActivity")
+        AbsBasicAppiumTask.__init__(self, "com.taobao.trip", "com.alipay.mobile.quinox.LauncherActivity")
 
     def run_task(self):
-        if BasicAppiumTask.run_task(self) is False:
+        if AbsBasicAppiumTask.run_task(self) is False:
             return False
         wait_status = self.wait_activity(self.driver, ".home.HomeActivity")
         if not wait_status:
@@ -58,7 +58,7 @@ class TaskAppiumFeizhu(BasicAppiumTask):
             return False
 
     def except_case_in_query_ele(self):
-        if BasicAppiumTask.except_case_in_query_ele(self) is True:
+        if AbsBasicAppiumTask.except_case_in_query_ele(self) is True:
             return True
         # 用户还没有登录
         cur_act = utils_appium.get_cur_act(self.driver)
@@ -96,7 +96,7 @@ if __name__ == '__main__':
     import inspect
 
     tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
-             if not left.startswith('Basic')]
+             if not left.startswith('AbsBasic')]
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):

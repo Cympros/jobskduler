@@ -6,17 +6,17 @@ import sys
 project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
 sys.path.insert(0, project_root_path)
 
-from tasks.appium.task_appium_base import BasicAppiumTask
+from tasks.appium.task_appium_base import AbsBasicAppiumTask
 # from helper import utils_logger
 
 
-class TaskAppiumJDJRSignBase(BasicAppiumTask):
+class TaskAppiumJDJRSignBase(AbsBasicAppiumTask):
     '''
         用于进入京东金融的首页
     "'''
 
     def __init__(self):
-        BasicAppiumTask.__init__(self, "com.jd.jrapp", "com.jd.jrapp.WelcomeActivity")
+        AbsBasicAppiumTask.__init__(self, "com.jd.jrapp", "com.jd.jrapp.WelcomeActivity")
 
     def __deal_within_login(self):
         '处理在登录界面的情况'
@@ -54,7 +54,7 @@ class TaskAppiumJDJRSignBase(BasicAppiumTask):
         return False
 
     def except_case_in_query_ele(self):
-        if BasicAppiumTask.except_case_in_query_ele(self) is True:
+        if AbsBasicAppiumTask.except_case_in_query_ele(self) is True:
             return True
         if self.wait_activity(self.driver, ['.ver2.account.security.GestureLockActivity',
                                             '.bm.zhyy.account.security.GestureLockActivity'],
@@ -90,7 +90,7 @@ class TaskAppiumJDJRSignBase(BasicAppiumTask):
         return False
 
     def run_task(self):
-        if BasicAppiumTask.run_task(self) is False:
+        if AbsBasicAppiumTask.run_task(self) is False:
             return False
         search_fliter = ['.ver2.main.MainActivity', '.ver2.account.security.GestureLockActivity',
                          '.bm.zhyy.account.security.GestureLockActivity']
@@ -286,7 +286,7 @@ if __name__ == '__main__':
     import inspect
 
     tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
-             if not left.startswith('Basic')]
+             if not left.startswith('AbsBasic')]
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):

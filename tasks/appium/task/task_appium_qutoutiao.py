@@ -9,18 +9,18 @@ import traceback
 project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
 sys.path.insert(0, project_root_path)
 
-from tasks.appium.task_appium_base import BasicAppiumTask
+from tasks.appium.task_appium_base import AbsBasicAppiumTask
 from tasks.appium import utils_appium
 # from helper import envs
 # from helper import utils_logger
 
 
-class TaskAppiumQutoutiaoBase(BasicAppiumTask):
+class TaskAppiumQutoutiaoBase(AbsBasicAppiumTask):
     def __init__(self):
-        BasicAppiumTask.__init__(self, "com.jifen.qukan", "com.jifen.qkbase.main.MainActivity")
+        AbsBasicAppiumTask.__init__(self, "com.jifen.qukan", "com.jifen.qkbase.main.MainActivity")
 
     def except_case_in_query_ele(self):
-        if BasicAppiumTask.except_case_in_query_ele(self) is True:
+        if AbsBasicAppiumTask.except_case_in_query_ele(self) is True:
             return True
         if self.query_ele_wrapper(self.get_query_str_by_viewid('com.jifen.qukan:id/nu'), click_mode="click",
                                   is_ignore_except_case=True, retry_count=0) is not None:
@@ -47,7 +47,7 @@ class TaskAppiumQutoutiaoBase(BasicAppiumTask):
         return False
 
     def run_task(self):
-        if BasicAppiumTask.run_task(self) is False:
+        if AbsBasicAppiumTask.run_task(self) is False:
             return False
         # 延长重试次数，避免应用启动比较耗时的情况
         if self.wait_activity(self.driver, "com.jifen.qkbase.main.MainActivity", retry_count=50) is False:
@@ -378,7 +378,7 @@ if __name__ == '__main__':
     import inspect
 
     tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
-             if not left.startswith('Basic')]
+             if not left.startswith('AbsBasic')]
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):

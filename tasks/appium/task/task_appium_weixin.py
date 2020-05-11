@@ -15,14 +15,14 @@ sys.path.insert(0, project_root_path)
 from x_aircv.core import Template
 from tasks.appium import utils_appium
 
-from tasks.appium.task_appium_base import BasicAppiumTask
+from tasks.appium.task_appium_base import AbsBasicAppiumTask
 
 
-class TaskAppiumWeixinExit(BasicAppiumTask):
+class TaskAppiumWeixinExit(AbsBasicAppiumTask):
     """微信退出应用,7点之后重复检测退出微信页面"""
 
     def __init__(self):
-        BasicAppiumTask.__init__(self, "com.tencent.mm", "com.tencent.mm.ui.LauncherUI")
+        AbsBasicAppiumTask.__init__(self, "com.tencent.mm", "com.tencent.mm.ui.LauncherUI")
 
     def is_time_support(self, curent_time=None):
         # 微信任务只支持早上7点之前执行，白天还要使用微信的
@@ -32,7 +32,7 @@ class TaskAppiumWeixinExit(BasicAppiumTask):
         return is_run_support
 
     def run_task(self):
-        if BasicAppiumTask.run_task(self) is False:
+        if AbsBasicAppiumTask.run_task(self) is False:
             return False
         if self.wait_activity(self.driver, '.plugin.account.ui.LoginPasswordUI') is True:
             utils_logger.log("是登录页面")
@@ -60,11 +60,11 @@ class TaskAppiumWeixinExit(BasicAppiumTask):
                 self.task_scheduler_failed("未检测到'设置'入口")
 
 
-class TaskAppiumWeixinBase(BasicAppiumTask):
+class TaskAppiumWeixinBase(AbsBasicAppiumTask):
     """进入首页的基类"""
 
     def __init__(self):
-        BasicAppiumTask.__init__(self, "com.tencent.mm", "com.tencent.mm.ui.LauncherUI")
+        AbsBasicAppiumTask.__init__(self, "com.tencent.mm", "com.tencent.mm.ui.LauncherUI")
 
     def is_time_support(self, curent_time=None):
         # 微信任务只支持早上7点之前执行，白天还要使用微信的
@@ -74,7 +74,7 @@ class TaskAppiumWeixinBase(BasicAppiumTask):
         return is_run_support
 
     def except_case_in_query_ele(self):
-        if BasicAppiumTask.except_case_in_query_ele(self) is True:
+        if AbsBasicAppiumTask.except_case_in_query_ele(self) is True:
             return True
         if self.wait_activity(self.driver, '.plugin.account.ui.LoginPasswordUI', is_ignore_except_case=True,
                               retry_count=1) is True:
@@ -116,7 +116,7 @@ class TaskAppiumWeixinBase(BasicAppiumTask):
         return False
 
     def run_task(self):
-        if BasicAppiumTask.run_task(self) is False:
+        if AbsBasicAppiumTask.run_task(self) is False:
             return False
         if self.wait_activity(self.driver, '.ui.LauncherUI') is False:
             self.task_scheduler_failed('why not in main page of weixin')
@@ -404,7 +404,7 @@ class TaskAppiumWaziDashangchengBase(TaskAppiumWeixinBase):
         self.mode = mode
 
     def notify_task_success(self):
-        BasicAppiumTask.notify_task_success(self)
+        AbsBasicAppiumTask.notify_task_success(self)
         utils_logger.log("更新上次check时间")
         if self.task_session is not None:
             conf_modify.put(task_tag=self.task_session, key="last_check_task_state_time",
@@ -537,7 +537,7 @@ if __name__ == '__main__':
     import inspect
 
     tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
-             if not left.startswith('Basic')]
+             if not left.startswith('AbsBasic')]
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):

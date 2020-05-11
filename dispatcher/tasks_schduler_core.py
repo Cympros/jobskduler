@@ -18,7 +18,6 @@ def find_all_modules(dir_name):
     whole_py_files = [os.path.realpath(dir_name) + "/" + os.path.basename(f) for f in
                       glob.glob(join(dir_name, "*.py")) if
                       isfile(f) and not f.endswith('__init__.py')]
-
     for item in os.listdir(dir_name):
         real_path = os.path.join(dir_name, item)
         if not item.endswith('__pycache__') and isdir(real_path):
@@ -27,8 +26,13 @@ def find_all_modules(dir_name):
 
 
 # 查找指定.py文件中的class信息
-def find_class_witthin_module(py_path):
-    return
+def find_class_witthin_module(module_name):
+    if not module_dir in sys.path:
+        utils_logger.log("> sys.path.append: " + module_dir)
+        sys.path.append(module_dir)
+    utils_logger.log("> dynamic import: " + module_name)
+    import importlib
+    return inspect.getmembers(importlib.import_module(module_name))
 
 
 # 任务调度器,用于执行task
@@ -36,34 +40,22 @@ if __name__ == '__main__':
     for py_module_path in find_all_modules(project_root_path + "/tasks/appium"):
         (module_dir, tempt) = os.path.split(py_module_path)
         (module_name, extension) = os.path.splitext(tempt)
-        if not module_name.startswith("task_") or module_name.find("base") > -1:
+        if module_name is None \
+                or not module_name.startswith("task_") \
+                or module_name.find("base") > -1:
             continue
-
-        if not module_dir in sys.path:
-            utils_logger.log("> sys.path.append: " + module_dir)
-            sys.path.append(module_dir)
-
-        # if not module_name in sys.modules:
-        utils_logger.log("> dynamic import: " + module_name)
-        #     module = __import__(module_name)
-        # else:
-        #     eval("import a")
-        #     module = eval('reload(' + module_name + ')')
-        import importlib
-
-        my_module = importlib.import_module(module_name)
-
-        for name, obj in inspect.getmembers(my_module):
+        class_results = find_class_witthin_module(module_name=module_name)
+        if class_results is None:
+            continue
+        for name, obj in class_results:
             if not inspect.isclass(obj):
                 continue
-            utils_logger.log(name, obj)
-
+            if name.startswith('AbsBasic') is True:  # Abs开头的基类不参与task执行
+                continue
+            utils_logger.log(module_name, name)
+            continue  # for debug
             MyClass = getattr(my_module, name)
             instance = MyClass()
-            # module_clz = getattr(sys.modules[module_name], name)
-            # object = module_clz()
-            #
             if instance.run_task() is True:
                 instance.notify_job_success()
-            # 环境清理
-            instance.release_after_task()
+            instance.release_after_task()  # 环境清理

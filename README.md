@@ -81,3 +81,32 @@ uiautomatorviewer   //命令行输入该命令即启用Andorid自带View视图�
 10.thread被打断后自动重启
 11.基于'netstat -ano | findstr '+str(port_num)判断appium服务端口是否被占用
 12.appium:appWaitActivity配置的使用
+
+
+install_if_not_exist 'timeout' 'brew install coreutils && sudo ln -s /usr/local/bin/gtimeout /usr/local/bin/timeout'
+
+# 关闭appium进程
+utils_common.exec_shell_cmd('''ps -ef | grep "appium" | grep -v -E "grep|$$" | awk  '{print "kill -9 " $2}' | sh''')
+
+
+                device_thread = threading.Thread(target=device_thread_loop,
+                                                 args=(job_infos),
+                                                 name=thread_name)
+                # 设置为后台线程，这样主线程结束时能自动退出
+                device_thread.setDaemon(True)
+                device_thread.start()
+
+
+
+
+                `tesseract <img_path> <img_tesseract_result_name> -l chi_sim -psm 6 makebox`
+                -l <lang>
+                # 设置识别语言类型，支持多种语言混合识别(即lang用+链接)
+                另，查看支持语言可通过调用`tesseract --list-langs`
+                官方支持语言：https://github.com/tesseract-ocr/tessdata
+                新增支持语言：将*.traineddata拷贝至/usr/local/Cellar/tesseract/3.05.02/share/tessdata/
+                -psm
+                # 识别图像的方式
+                具体支持类型可使用`tesseract --help-psm`查看
+                makebox
+                # 输出坐标信息

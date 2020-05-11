@@ -96,13 +96,13 @@ def exec_shell_cmd(cmd_str, timeout=None, shell=True):
     response_stdout = sub.stdout.read().lstrip().rstrip().decode()
     response_error = sub.stderr.read().lstrip().rstrip().decode()
 
-    utils_logger.log(cmd_str)
-    utils_logger.log(response_stdout, response_error)
-
     res_format_stdout = response_stdout if response_stdout is not None and response_stdout != "" else None
     res_format_error = response_error if response_error is not None and response_error != "" else None
     if res_format_error is not None and res_format_error != "":
         utils_logger.log("shell执行异常:", cmd_str, response_error)
+    utils_logger.log("命令:" + cmd_str,
+                     "success_state:" + ("success" if res_format_stdout is not None else "fail"),
+                     "error_msg:" + response_error)
     return res_format_stdout, res_format_error
 
 

@@ -13,10 +13,10 @@ from config import email_send
 from config import envs
 from tasks.appium.utils import utils_android
 from helper import utils_config_parser, utils_logger, utils_common
-from tasks.task_pc_base import BasicPCTask
+from tasks.task_pc_base import AbsAbsBasicPCTask
 
 
-class TaskBrowserDeviceTimelyInfo(BasicPCTask):
+class TaskBrowserDeviceTimelyInfo(AbsAbsBasicPCTask):
     """即时浏览设备信息"""
 
     def run_task(self):
@@ -33,7 +33,7 @@ class TaskBrowserDeviceTimelyInfo(BasicPCTask):
         utils_logger.log(connected_device_info)
 
 
-class TaskCheckerAllTaskRunState(BasicPCTask):
+class TaskCheckerAllTaskRunState(AbsAbsBasicPCTask):
     '检查所有task的执行状态'
 
     def run_task(self):
@@ -144,7 +144,7 @@ class TaskCheckerAllTaskRunState(BasicPCTask):
         return is_run_support
 
 
-class TaskResetRunRetryModel(BasicPCTask):
+class TaskResetRunRetryModel(AbsAbsBasicPCTask):
     """用于解决超过重试次数的任务"""
 
     def run_task(self):
@@ -187,7 +187,7 @@ class TaskResetRunRetryModel(BasicPCTask):
             utils_logger.log("-----------------------------------------------\n")
 
 
-class TaskClearUnUseDevice(BasicPCTask):
+class TaskClearUnUseDevice(AbsAbsBasicPCTask):
     def run_task(self):
         """以设备为维度，清空不再使用的设备下对应的所有任务"""
         device_dict = clc.defaultdict(list)
@@ -231,7 +231,7 @@ if __name__ == "__main__":
     import inspect
 
     tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
-             if not left.startswith('Basic')]
+             if not left.startswith('AbsAbsBasic')]
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):

@@ -6,15 +6,15 @@ import sys
 project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
 sys.path.insert(0, project_root_path)
 
-from tasks.appium.task_appium_base import BasicAppiumTask
+from tasks.appium.task_appium_base import AbsBasicAppiumTask
 from helper import utils_logger
 
 
 # apk下载链接：http://sj.qq.com/myapp/detail.htm?apkName=com.sina.weibo
 
-class TaskAppiumSinaWeiboBase(BasicAppiumTask):
+class TaskAppiumSinaWeiboBase(AbsBasicAppiumTask):
     def __init__(self):
-        BasicAppiumTask.__init__(self, "com.sina.weibo", "com.sina.weibo.MainTabActivity")
+        AbsBasicAppiumTask.__init__(self, "com.sina.weibo", "com.sina.weibo.MainTabActivity")
 
     def except_case_in_query_ele(self):
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('不了，谢谢'),
@@ -225,11 +225,11 @@ if __name__ == '__main__':
     import inspect
 
     tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
-             if not left.startswith('Basic')]
+             if not left.startswith('AbsAbsBasic')]
     import inspect
 
     tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
-             if not left.startswith('Basic')]
+             if not left.startswith('AbsBasic')]
 
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
