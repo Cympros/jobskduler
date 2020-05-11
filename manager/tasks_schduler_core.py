@@ -2,11 +2,11 @@
 
 import os
 import sys
+import inspect
 
 project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../')
-sys.path.append(project_root_path)
+sys.path.insert(0, project_root_path)
 
-import inspect
 from helper import utils_logger
 
 

@@ -10,7 +10,7 @@ import inspect
 from logging.handlers import RotatingFileHandler
 
 project_root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
-sys.path.append(project_root_path)
+sys.path.insert(0, project_root_path)
 
 
 def get_log_file():

@@ -3,13 +3,17 @@ import os
 import sys
 
 project_root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
-sys.path.append(project_root_path)
+sys.path.insert(0, project_root_path)
 
 import shlex
 import subprocess
 import re
 import json
-import imagehash
+try:
+    import imagehash
+except:
+    os.system('pip install imagehash')
+    import imagehash
 import time
 import datetime
 import hashlib

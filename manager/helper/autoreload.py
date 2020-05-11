@@ -8,7 +8,7 @@ import subprocess
 import thread
 
 project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../')
-sys.path.append(project_root_path)
+sys.path.insert(0, project_root_path)
 
 from helper import utils_logger, utils_common
 from tasks.appium.utils import utils_android

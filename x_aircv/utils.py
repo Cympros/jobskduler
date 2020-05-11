@@ -13,7 +13,7 @@ import traceback
 # from airtest import aircv as airtest_aircv
 
 project_root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
-sys.path.append(project_root_path)
+sys.path.insert(0, project_root_path)
 
 def imread(file_path):
     return aircv.imread(file_path)

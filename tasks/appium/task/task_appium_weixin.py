@@ -6,7 +6,7 @@ import time
 import random
 
 project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
-sys.path.append(project_root_path)
+sys.path.insert(0, project_root_path)
 
 # from config import conf_modify
 # from helper import utils_image as image_utils, utils_logger

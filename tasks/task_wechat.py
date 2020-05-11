@@ -15,7 +15,7 @@ sys.setdefaultencoding('utf-8')
 from task_base import BaseTask as Base
 
 project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../common')
-sys.path.append(project_root_path)
+sys.path.insert(0, project_root_path)
 
 import email_send
 from helper import utils_logger
