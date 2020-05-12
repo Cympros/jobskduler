@@ -39,8 +39,6 @@ class BaseTask():
         self.task_session = xargs_dict.get('taskcmd')
 
     def run_task(self):
-        utils_logger.log('--->', self.__class__, '|',
-                         utils_common.get_shanghai_time('%Y-%m-%d %H:%M:%S'))
         return True
 
     def release_after_task(self):
