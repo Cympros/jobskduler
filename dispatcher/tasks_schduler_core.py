@@ -56,15 +56,23 @@ class DispatcherThread(threading.Thread):
     def get_task_key(self, task_name):  # 根据'线程id+任务名'唯一标识task_key
         return self.name + "@" + task_name
 
+    def thread_sleep(self):
+        time.sleep(15*60)  # 参数为秒
+
     def run(self):
         fail_count = 0
         while True:
-            if fail_count >= 5:  # 连续失败五次,则直接休眠30分钟
-                utils_logger.log("连续失败,尝试系统休眠")
-                time.sleep(30 * 60 * 1000)
+            if fail_count >= 3:  # 连续失败3次,则直接休眠30分钟
+                utils_logger.log("单个执行周期期间连续失败,尝试系统休眠", self.name)
+                self.thread_sleep()
                 fail_count = 0
             try:
-                if self.exec_single_loop_task() is True:
+                exec_start_time = time.time()
+                exec_state = self.exec_single_loop_task()
+                if time.time() - exec_start_time < 2 * 60 * 1000:
+                    utils_logger.log("单个执行周期执行时间过短,休眠当前线程", self.name)
+                    self.thread_sleep()
+                if exec_state is True:
                     fail_count = 0
                 else:
                     fail_count += 1
@@ -73,6 +81,7 @@ class DispatcherThread(threading.Thread):
 
     # 任务遍历的单个执行周期
     def exec_single_loop_task(self):
+        exec_result_state = False
         for py_module_path in find_all_modules(project_root_path + "/tasks/appium"):
             (module_dir, tempt) = os.path.split(py_module_path)
             (module_name, extension) = os.path.splitext(tempt)
@@ -102,8 +111,8 @@ class DispatcherThread(threading.Thread):
                     task_maps[self.get_task_key(name)] = task_state
                 now_time = time.time()
                 if task_state.next_exec_time > now_time:
-                    utils_logger.log("时间还未到,继续等待", self.get_task_key(name), task_state,
-                                     "now:" + timestamp_to_date(now_time))
+                    # utils_logger.log("时间还未到,继续等待", self.get_task_key(name), task_state,
+                    #                  "now:" + timestamp_to_date(now_time))
                     continue
 
                 # 反射执行task
@@ -117,8 +126,8 @@ class DispatcherThread(threading.Thread):
 
                 # 添加任务管理
                 task_state.update_time(self.get_task_key(name))
-                return True
-        return False
+                exec_result_state = True  # 仅有一个任务执行成功,也任务整个任务周期是执行成功的
+        return exec_result_state
 
 
 thread_names = ['pc']  # 线程集合
@@ -126,8 +135,11 @@ task_maps = dict()
 
 # 任务调度器,用于执行task
 if __name__ == '__main__':
+    utils_logger.enable_set(False)
     thread_names.extend(utils_android.get_connected_devcies())
-    utils_logger.log(thread_names)
+    utils_logger.enable_set(True)
+
+    utils_logger.log("thread_names", thread_names)
     for thread_name in thread_names:
         t = DispatcherThread(name=thread_name)
         t.start()

@@ -33,8 +33,12 @@ ch = logging.StreamHandler()
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
+log_stdout_enable = True
+
 
 def log(*log_infos):
+    if log_stdout_enable is False:
+        return
     inspect_stack = inspect.stack()
     module_path = inspect_stack[1][1]
     module = os.path.splitext(os.path.basename(module_path))[0]
@@ -48,3 +52,13 @@ def log(*log_infos):
         else:
             wrapper_log = wrapper_log + "[" + str(log_item) + "]"
     logger.warning(log_preffix + wrapper_log)
+
+
+def enable_set(enable):
+    global log_stdout_enable
+    if enable is None:
+        return
+    if enable is False:
+        log_stdout_enable = False
+    else:
+        log_stdout_enable = True
