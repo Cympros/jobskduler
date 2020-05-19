@@ -174,6 +174,16 @@ class AbsBasicAppiumTask(BaseTask):
         if self.target_device_name is None:
             self.task_scheduler_failed("未连接设备")
             return False
+        # 检查应用是否安装
+        check_installed_response, response_errror = utils_android.is_app_installed(
+            self.target_device_name,
+            self.target_application_id)
+        if response_errror is None and check_installed_response is None:
+            # utils_logger.log("当前应用未安装", "device_name:<" + str(self.target_device_name) + ">",
+            #                  "包名<" + str(self.target_application_id) + ">",
+            #                  "ResumedAct<" + utils_android.get_top_focuse_activity(
+            #                      self.target_device_name) + ">")
+            return False
         # 分配appium服务端口
         self.appium_port = utils_appium.query_avaiable_port(4273, 9999)
         if self.appium_port is None:
@@ -182,16 +192,6 @@ class AbsBasicAppiumTask(BaseTask):
         self.appium_port_bp = utils_appium.query_avaiable_port(self.appium_port + 1, 9999)
         utils_logger.log("指定端口", "appium_port:" + str(self.appium_port),
                          "appium_port_bp:" + str(self.appium_port_bp))
-        # 检查应用是否安装
-        check_installed_response, response_errror = utils_android.is_app_installed(
-            self.target_device_name,
-            self.target_application_id)
-        if response_errror is None and check_installed_response is None:
-            utils_logger.log("当前应用未安装", "device_name:<" + str(self.target_device_name) + ">",
-                             "包名<" + str(self.target_application_id) + ">",
-                             "ResumedAct<" + utils_android.get_top_focuse_activity(
-                                 self.target_device_name) + ">")
-            return False
 
         # 实例化该应用对应的driver对象
         try:
@@ -228,7 +228,7 @@ class AbsBasicAppiumTask(BaseTask):
 
     def release_after_task(self):
         BaseTask.release_after_task(self)
-        utils_logger.log("task_appium_base 释放资源")
+        # utils_logger.log("task_appium_base 释放资源")
         if self.driver is not None:
             try:
                 self.driver.quit()

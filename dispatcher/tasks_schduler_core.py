@@ -57,7 +57,7 @@ class DispatcherThread(threading.Thread):
         return self.name + "@" + task_name
 
     def thread_sleep(self):
-        time.sleep(15*60)  # 参数为秒
+        time.sleep(15 * 60)  # 参数为秒
 
     def run(self):
         fail_count = 0
@@ -66,18 +66,22 @@ class DispatcherThread(threading.Thread):
                 utils_logger.log("单个执行周期期间连续失败,尝试系统休眠", self.name)
                 self.thread_sleep()
                 fail_count = 0
+            # 执行任务
+            exec_start_time = time.time()
+            exec_state = None
             try:
-                exec_start_time = time.time()
                 exec_state = self.exec_single_loop_task()
-                if time.time() - exec_start_time < 2 * 60 * 1000:
-                    utils_logger.log("单个执行周期执行时间过短,休眠当前线程", self.name)
-                    self.thread_sleep()
-                if exec_state is True:
-                    fail_count = 0
-                else:
-                    fail_count += 1
             except:
+                utils_logger.log("job excture catch exception")
+            if exec_state is not None and exec_state is True:
+                fail_count = 0
+            else:
                 fail_count += 1
+            pass_time = time.time() - exec_start_time   #单位为秒
+            utils_logger.log("pass time is :" + str(pass_time))
+            if pass_time < 2 * 60 :  # 两分钟以内
+                utils_logger.log("单个执行周期执行时间过短,休眠当前线程", self.name)
+                self.thread_sleep()
 
     # 任务遍历的单个执行周期
     def exec_single_loop_task(self):
@@ -130,12 +134,13 @@ class DispatcherThread(threading.Thread):
         return exec_result_state
 
 
-thread_names = ['pc']  # 线程集合
+thread_names = []  # 线程集合
 task_maps = dict()
 
 # 任务调度器,用于执行task
 if __name__ == '__main__':
     utils_logger.enable_set(False)
+    # thread_names.append('pc')
     thread_names.extend(utils_android.get_connected_devcies())
     utils_logger.enable_set(True)
 

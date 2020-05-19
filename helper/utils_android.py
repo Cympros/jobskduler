@@ -4,7 +4,11 @@
 import sys
 import os
 import re
-from PIL import Image
+try:
+    from PIL import Image
+except:
+    os.system('pip install imagehash')
+    from PIL import Image
 
 project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../')
 sys.path.insert(0, project_root_path)
@@ -95,7 +99,7 @@ def get_device_tag(device):
 def get_deivce_android_version(device):
     if device is None:
         return None
-    utils_logger.log("get_deivce_android_version within default:", device)
+    # utils_logger.log("get_deivce_android_version within default:", device)
     cmd = "adb" + (" " if device is None else " -s " + str(device) + " ") \
           + "shell getprop ro.build.version.release"
     # cmd = "adb -s " \
@@ -290,7 +294,7 @@ def is_app_installed(device, application_id):
           + (" " if device is None else " -s " + device + " ") \
           + " shell pm list packages -3 | grep " + str(application_id)
     check_installed_response, response_errror = _check_adb_command_result(cmd)
-    utils_logger.log(check_installed_response, response_errror)
+    # utils_logger.log(check_installed_response, response_errror)
     return check_installed_response, response_errror
 
 
@@ -298,20 +302,20 @@ def _check_adb_command_result(adb_cmd, retry_count=3):
     # 用于针对adb命令的异常处理
     res_adb, error_adb = utils_common.exec_shell_cmd(adb_cmd)
     if retry_count <= 0:
-        utils_logger.log("命令[" + str(adb_cmd) + "],"
-                         + "retry_count[" + str(retry_count) + "]")
-        utils_logger.log("response:[" + str(res_adb) + "],"
-                         + "error:[" + str(error_adb) + "]")
+        # utils_logger.log("命令[" + str(adb_cmd) + "],"
+        #                  + "retry_count[" + str(retry_count) + "]")
+        # utils_logger.log("response:[" + str(res_adb) + "],"
+        #                  + "error:[" + str(error_adb) + "]")
         return res_adb, error_adb
     if error_adb is not None:  # 表示有异常
         if "error: device " in error_adb and " not found" in error_adb:
             # 重启adb服务
             # utils_common.exec_shell_cmd("adb kill-server && adb start-server")
             return _check_adb_command_result(adb_cmd, retry_count - 1)
-    utils_logger.log("命令[" + str(adb_cmd) + "],"
-                     + "retry_count[" + str(retry_count) + "]")
-    utils_logger.log("response:[" + str(res_adb) + "],"
-                     + "error:[" + str(error_adb) + "]")
+    # utils_logger.log("命令[" + str(adb_cmd) + "],"
+    #                  + "retry_count[" + str(retry_count) + "]")
+    # utils_logger.log("response:[" + str(res_adb) + "],"
+    #                  + "error:[" + str(error_adb) + "]")
     return res_adb, error_adb
 
 

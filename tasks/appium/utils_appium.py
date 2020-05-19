@@ -111,8 +111,8 @@ def start_appium_service(device, appium_port, access_appium_bp_port, retry_count
     if not check_res:  # 空串表示未安装appium服务
         utils_logger.log("appium服务还未安装,调用'npm install -g appium'执行安装程序")
         return False
-    utils_logger.log("appium服务安装地址", check_res)
-    utils_logger.log("重试检查appium服务启动状态 ", retry_count)
+    # utils_logger.log("appium服务安装地址", check_res)
+    # utils_logger.log("重试检查appium服务启动状态 ", retry_count)
     # 存在appium进程则输出success，否则输出空串
     appium_state_check_cmd = "ps -ef | grep \'appium"
     if appium_port is not None:
@@ -129,15 +129,15 @@ def start_appium_service(device, appium_port, access_appium_bp_port, retry_count
     appium_start_cmd += " 1>/dev/null 2>&1 & "
 
     res_apm, res_apm_error = utils_common.exec_shell_cmd(appium_state_check_cmd)
-    utils_logger.log("appium服务是否启动", appium_state_check_cmd, str(res_apm), str(res_apm_error))
+    # utils_logger.log("appium服务是否启动", appium_state_check_cmd, str(res_apm), str(res_apm_error))
     if res_apm is not None:
         return True
     else:
         # 启动appium服务
         res, err = utils_common.exec_shell_cmd(appium_start_cmd)
-        utils_logger.log("#start_appium_service# sleep:[" + str(interval_time) + "],[" + str(
-            appium_start_cmd) + "]",
-                         "[" + str(res) + "]", "[" + str(err) + "]")
+        # utils_logger.log("#start_appium_service# sleep:[" + str(interval_time) + "],["
+        #                  + str(appium_start_cmd) + "]",
+        #                  "[" + str(res) + "]", "[" + str(err) + "]")
         time.sleep(interval_time)  # 等待appium服务完全启动
         return False if retry_count <= 0 else start_appium_service(device, appium_port,
                                                                    access_appium_bp_port,
@@ -420,8 +420,8 @@ def query_avaiable_port(start_port, end_port, finish_if_found=True):
         if res is None:
             if finish_if_found is True:
                 return available_port
-        else:
-            utils_logger.log("port已被使用", available_port)
+        # else:
+        # utils_logger.log("port已被使用", available_port)
         available_port = available_port + 1
     return None
 
