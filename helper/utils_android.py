@@ -4,6 +4,7 @@
 import sys
 import os
 import re
+
 try:
     from PIL import Image
 except:
@@ -292,7 +293,7 @@ def is_app_installed(device, application_id):
     # "-3"参数表示仅过滤第三方应用
     cmd = "adb " \
           + (" " if device is None else " -s " + device + " ") \
-          + " shell pm list packages -3 | grep " + str(application_id)
+          + " shell pm list packages -3 | grep '" + str(application_id) + "'"
     check_installed_response, response_errror = _check_adb_command_result(cmd)
     # utils_logger.log(check_installed_response, response_errror)
     return check_installed_response, response_errror

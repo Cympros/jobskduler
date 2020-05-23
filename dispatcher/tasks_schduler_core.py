@@ -71,15 +71,16 @@ class DispatcherThread(threading.Thread):
             exec_state = None
             try:
                 exec_state = self.exec_single_loop_task()
-            except:
-                utils_logger.log("job excture catch exception")
+            except Exception:
+                import traceback
+                print ("exec_single_loop_task catch exception", traceback.format_exc())
             if exec_state is not None and exec_state is True:
                 fail_count = 0
             else:
                 fail_count += 1
-            pass_time = time.time() - exec_start_time   #单位为秒
+            pass_time = time.time() - exec_start_time  # 单位为秒
             utils_logger.log("pass time is :" + str(pass_time))
-            if pass_time < 2 * 60 :  # 两分钟以内
+            if pass_time < 2 * 60:  # 两分钟以内
                 utils_logger.log("单个执行周期执行时间过短,休眠当前线程", self.name)
                 self.thread_sleep()
 
@@ -125,7 +126,8 @@ class DispatcherThread(threading.Thread):
                 MyClass = getattr(module_dynamic_imported, name)
                 instance = MyClass()
                 if instance.run_task() is True:
-                    instance.notify_job_success()
+                    utils_logger.log("成功执行任务", module_dynamic_imported, name)
+                    instance.notify_task_success()
                 instance.release_after_task()  # 环境清理
 
                 # 添加任务管理

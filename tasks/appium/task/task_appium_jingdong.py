@@ -13,7 +13,7 @@ from tasks.appium import utils_appium
 from helper import utils_logger
 
 
-class TaskAppiumJingdong(AbsBasicAppiumTask):
+class TaskAppiumJingDongBase(AbsBasicAppiumTask):
     def __init__(self):
         AbsBasicAppiumTask.__init__(self, "com.jingdong.app.mall", "com.jingdong.app.mall.main.MainActivity")
 
@@ -30,14 +30,15 @@ class TaskAppiumJingdong(AbsBasicAppiumTask):
         return False
 
     def run_task(self):
-        return AbsBasicAppiumTask.run_task(self)
+        if  AbsBasicAppiumTask.run_task(self) is False:
+            return False
 
 
 # 领京豆页面
-class TaskAppiumJDEarnJingDou(TaskAppiumJingdong):
+class TaskAppiumJingDongEarnJingDou(TaskAppiumJingDongBase):
 
     def except_case_in_query_ele(self):
-        if TaskAppiumJingdong.except_case_in_query_ele(self) is True:
+        if TaskAppiumJingDongBase.except_case_in_query_ele(self) is True:
             return True
         # '种豆得豆'模块:检索坐标大概在横向居中，竖向在页面下半部分的关闭按钮
         # 注意xpath下支持索引搜索，类似多胞胎兄弟，可通过排行定位，以下表示"FrameLayout/ViewGroup/ViewGroup/ViewGroup"中选择类型是ViewGroup子元素的第二个元素
@@ -50,7 +51,7 @@ class TaskAppiumJDEarnJingDou(TaskAppiumJingdong):
 
     def __enter_earn_jd_pg_within_main(self):
         "从'主页'进入领京豆页面"
-        utils_logger.log('---> __enter_earn_jd_pg_within_main')
+        # utils_logger.log('---> __enter_earn_jd_pg_within_main')
         if self.query_ele_wrapper(self.get_query_str_by_desc('首页'), click_mode="click") is None:
             utils_logger.log("get_query_str_by_desc('首页') failed")
             return False
@@ -63,7 +64,7 @@ class TaskAppiumJDEarnJingDou(TaskAppiumJingdong):
             return True
 
     def run_task(self):
-        if TaskAppiumJingdong.run_task(self) is False:
+        if TaskAppiumJingDongBase.run_task(self) is False:
             return False
         status = self.wait_activity(self.driver, '.MainFrameActivity')
         if not status:
@@ -84,9 +85,9 @@ class TaskAppiumJDEarnJingDou(TaskAppiumJingdong):
 
 
 # task:正常签到程序
-class TaskAppiumJDSignNormal(TaskAppiumJDEarnJingDou):
+class TaskAppiumJingDongSignNormal(TaskAppiumJingDongEarnJingDou):
     def run_task(self):
-        if TaskAppiumJDEarnJingDou.run_task(self) is False:
+        if TaskAppiumJingDongEarnJingDou.run_task(self) is False:
             return False
         # 点击签到按钮
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('已连续签到'), click_mode="click") is None \
@@ -105,10 +106,10 @@ class TaskAppiumJDSignNormal(TaskAppiumJDEarnJingDou):
 
 
 # task:京东签到后补充领取的弹框处理
-class TaskAppiumJdSignAdditional(TaskAppiumJDSignNormal):
+class TaskAppiumJingDongSignAdditional(TaskAppiumJingDongSignNormal):
     def run_task(self):
-        if TaskAppiumJDSignNormal.run_task(self) is False:
-            utils_logger.log("run_task for TaskAppiumJdSignAdditional failed")
+        if TaskAppiumJingDongSignNormal.run_task(self) is False:
+            utils_logger.log("run_task for TaskAppiumJingDongSignAdditional failed")
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('今日已翻1张牌')) \
                 or self.query_ele_wrapper(
@@ -137,9 +138,9 @@ class TaskAppiumJdSignAdditional(TaskAppiumJDSignNormal):
 
 
 # task:进店领豆
-class TaskAppiumJDEnterShopGotJD(TaskAppiumJDEarnJingDou):
+class TaskAppiumJingDongEnterShopGotJD(TaskAppiumJingDongEarnJingDou):
     def run_task(self):
-        if TaskAppiumJDEarnJingDou.run_task(self) is False:
+        if TaskAppiumJingDongEarnJingDou.run_task(self) is False:
             return False
         # 可能会进入'换流量'页面，因此添加延时
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('进店领豆'), click_mode="click",
@@ -175,9 +176,9 @@ class TaskAppiumJDEnterShopGotJD(TaskAppiumJDEarnJingDou):
 
 
 # task:转福利
-class TaskAppiumJDZhuanFuli(TaskAppiumJDEarnJingDou):
+class TaskAppiumJingDongZhuanFuli(TaskAppiumJingDongEarnJingDou):
     def run_task(self):
-        if TaskAppiumJDEarnJingDou.run_task(self) is False:
+        if TaskAppiumJingDongEarnJingDou.run_task(self) is False:
             return False
         # 可能会进入'购物返豆'页面，故而添加延时
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('转福利'), click_mode="click",
@@ -207,11 +208,11 @@ class TaskAppiumJDZhuanFuli(TaskAppiumJDEarnJingDou):
             return False
 
 
-class TaskAppiumJDUserMeiriFuli(TaskAppiumJDEarnJingDou):
+class TaskAppiumJingDongUserMeiriFuli(TaskAppiumJingDongEarnJingDou):
     """task：京东用户每日福利"""
 
     def run_task(self):
-        if TaskAppiumJDEarnJingDou.run_task(self) is False:
+        if TaskAppiumJingDongEarnJingDou.run_task(self) is False:
             return False
         if self.query_only_point_within_text('^京东用户每日福利$', is_auto_click=True, cutted_rect=[0.65, 1, 0, 1]) is None:
             self.task_scheduler_failed("进入转福利页面失败")
@@ -224,15 +225,15 @@ class TaskAppiumJDUserMeiriFuli(TaskAppiumJDEarnJingDou):
                 time.sleep(8)  # 等待每日抽奖
                 return False
             else:
-                self.task_scheduler_failed('TaskAppiumJDUserMeiriFuli failed')
+                self.task_scheduler_failed('TaskAppiumJingDongUserMeiriFuli failed')
                 return False
 
 
-class TaskAppiumJDUserMeiriFuliAddition(TaskAppiumJDUserMeiriFuli):
+class TaskAppiumJingDongUserMeiriFuliAddition(TaskAppiumJingDongUserMeiriFuli):
     """京东用户每日福利-每日签到"""
 
     def run_task(self):
-        if TaskAppiumJDUserMeiriFuli.run_task(self) is False:
+        if TaskAppiumJingDongUserMeiriFuli.run_task(self) is False:
             return False
         if self.query_only_point_within_text(search_text='^签到领取$', is_auto_click=True,
                                              cutted_rect=[0, 1, 0.4, 1]) is not None:
@@ -249,11 +250,11 @@ class TaskAppiumJDUserMeiriFuliAddition(TaskAppiumJDUserMeiriFuli):
             return False
 
 
-class TaskAppiumJDVoucherCenter(TaskAppiumJingdong):
+class TaskAppiumJingDongVoucherCenter(TaskAppiumJingDongBase):
     """首页领卷中心内部的签到"""
 
     def run_task(self):
-        if TaskAppiumJingdong.run_task(self) is False:
+        if TaskAppiumJingDongBase.run_task(self) is False:
             return False
         status = self.wait_activity(self.driver, '.MainFrameActivity')
         if not status:
@@ -288,18 +289,18 @@ class TaskAppiumJDVoucherCenter(TaskAppiumJingdong):
                 return False
 
 
-class TaskAppiumJDSignDoubleSign(TaskAppiumJDEarnJingDou):
+class TaskAppiumJingDongSignDoubleSign(TaskAppiumJingDongEarnJingDou):
     """京豆双签逻辑"""
 
     def get_dependence_task(self):
-        return ["task_appium_jingdong.TaskAppiumJDSignNormal", "task_appium_jdjr.TaskAppiumJDJRSign"]
+        return ["task_appium_jingdong.TaskAppiumJingDongSignNormal", "task_appium_jdjr.TaskAppiumJDJRSign"]
 
     def run_task(self):
-        if TaskAppiumJDEarnJingDou.run_task(self) is False:
+        if TaskAppiumJingDongEarnJingDou.run_task(self) is False:
             return False
 
         # 双签按钮
-        if self.query_only_match_part_with_click('jingdong_double_sign_enterence.png',
+        if self.query_only_match_part_with_click(project_root_path+'/tasks/appium/task/img/jingdong_double_sign_enterence.png',
                                                  part_rect_scale=[0.82, 0.98, 0.47, 0.568], is_auto_click=True) is None \
                 and self.query_only_point_within_text(r'^双签京豆$', is_auto_click=True, retry_count=0) is None:
             utils_logger.log("找不到领取双签入口")

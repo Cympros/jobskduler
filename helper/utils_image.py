@@ -73,7 +73,7 @@ def get_color_if_img_solid(raw_image):
     image = raw_image.convert('RGBA')
     image_colors = image.getcolors(image.size[0] * image.size[1])
     if len(image_colors) == 1:
-        utils_logger.log("是纯色图片:颜色唯一")
+        # utils_logger.log("是纯色图片:颜色唯一")
         return True, image_colors[0][1]
     else:
         max_color_count = 0

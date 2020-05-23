@@ -54,7 +54,7 @@ class AbsBasicAppiumTask(BaseTask):
         :param is_ignore_except_case: 
         :return: boolean
         """
-        utils_logger.log("AbsBasicAppiumTask wait_activity")
+        # utils_logger.log("AbsBasicAppiumTask wait_activity")
         # query_activity_status: true or false
         # 第一次搜索时retry_count设置为1次(即一秒)，以避免wait_activity_with_status的重试时间内权限弹框被系统倒计时逻辑关闭
         if utils_appium.wait_activity_with_status(driver=driver, target=target,
@@ -179,10 +179,7 @@ class AbsBasicAppiumTask(BaseTask):
             self.target_device_name,
             self.target_application_id)
         if response_errror is None and check_installed_response is None:
-            # utils_logger.log("当前应用未安装", "device_name:<" + str(self.target_device_name) + ">",
-            #                  "包名<" + str(self.target_application_id) + ">",
-            #                  "ResumedAct<" + utils_android.get_top_focuse_activity(
-            #                      self.target_device_name) + ">")
+            utils_logger.log("应用未安装", self.target_application_id)
             return False
         # 分配appium服务端口
         self.appium_port = utils_appium.query_avaiable_port(4273, 9999)
@@ -298,7 +295,7 @@ class AbsBasicAppiumTask(BaseTask):
         if query_str is None:
             utils_logger.log("not support this query with None protocal")
             return None
-        utils_logger.log("[task_appium_base.__query_element] query:[" + str(query_str) + "]")
+        # utils_logger.log("[task_appium_base.__query_element] query:[" + str(query_str) + "]")
         '搜索element,以后有其他的情况，都可以在这里定义协议，以\'  # <协议标识>#的形式放在query_str的头部\''
         if query_str.startswith("#viewid#"):  # 针对可以拿到id的情况
             viewid = query_str.replace('#viewid#', '')  # strip('abc')表示会删除收尾的a、b、c字母，而不是只删除'abc'
@@ -314,7 +311,7 @@ class AbsBasicAppiumTask(BaseTask):
             return utils_appium.find_element_by_xpath(driver=self.driver, xpath=query_str)
 
     def except_case_in_query_ele(self):
-        utils_logger.log("except_case_in_query_ele in AbsBasicAppiumTask")
+        # utils_logger.log("except_case_in_query_ele in AbsBasicAppiumTask")
         '查询element的时候朋友的异常处理，True表示得以正常处理'
         # xpath模糊匹配速度太慢
         if self.query_ele_wrapper(
@@ -376,8 +373,8 @@ class AbsBasicAppiumTask(BaseTask):
         # 屏蔽有时候页面还没有延迟刷新的问题
         if time_wait_page_completely_resumed > 0:
             # 该方法仅第一次执行是会被调用,递归中不执行
-            utils_logger.log("query_ele_wrapper for sleep-time_wait_page_completely_resumed:",
-                             time_wait_page_completely_resumed)
+            # utils_logger.log("query_ele_wrapper for sleep-time_wait_page_completely_resumed:",
+            #                  time_wait_page_completely_resumed)
             time.sleep(time_wait_page_completely_resumed)
         query_res = self.__query_element(query_str=query_str)
         if query_res is not None:
@@ -401,7 +398,7 @@ class AbsBasicAppiumTask(BaseTask):
                                     return None
                             elif click_mode == 'click':
                                 # 只有当click_mode是"position"且坐标可用时使用tab方式，其他默认使用element.click()方式
-                                utils_logger.log("[query_ele_wrapper] 基于element.click()响应单击事件")
+                                # utils_logger.log("[query_ele_wrapper] 基于element.click()响应单击事件")
                                 query_res.click()
                             else:
                                 raise Exception(
@@ -421,11 +418,11 @@ class AbsBasicAppiumTask(BaseTask):
                         "--->[query_ele_wrapper.is_element_region_right_with_scale] 校验element坐标失败，启用重试机制")
             else:
                 utils_logger.log("unsupport type of element: ", type(query_res))
-        utils_logger.log("--- >[task_appium_base.query_ele_wrapper]", query_str,
-                         " with retry_count:", retry_count)
+        # utils_logger.log("--- >[task_appium_base.query_ele_wrapper]", query_str,
+        #                  " with retry_count:", retry_count)
         # 若上面的判断逻辑失败，则表示还没有找到'可用'的element
         period_checked = 0.2
-        utils_logger.log("query_ele_wrapper sleep:", period_checked)
+        # utils_logger.log("query_ele_wrapper sleep:", period_checked)
         time.sleep(period_checked)  # 500毫秒重复执行一次
         if is_ignore_except_case is False and self.except_case_in_query_ele() is True:
             # except_case_in_query_ele为True表示处理生效

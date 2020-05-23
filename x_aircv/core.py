@@ -9,7 +9,7 @@ sys.path.insert(0, project_root_path)
 # from helper import utils_image as ImageCutted
 # from helper import utils_file as FileOperate
 from x_aircv import utils as aircv_utils
-
+from helper import utils_logger
 
 class Template(object):
     """子图定位"""

@@ -10,7 +10,7 @@ from tasks.appium.task_appium_base import AbsBasicAppiumTask
 # from helper import utils_logger
 
 
-class TaskAppiumHSPBase(AbsBasicAppiumTask):
+class TaskAppiumHuiSuoPingBase(AbsBasicAppiumTask):
     def __init__(self):
         AbsBasicAppiumTask.__init__(self)
 
@@ -38,7 +38,7 @@ class TaskAppiumHSPBase(AbsBasicAppiumTask):
     def task_scheduler_failed(self, message, email_title=u'异常信息', is_page_source=True, is_scr_shot=True):
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('网络出错了，请待会再试吧', is_force_match=False),
                                   is_ignore_except_case=True, retry_count=0) is not None:
-            utils_logger.log("TaskAppiumHSPBase.task_scheduler_failed:网络出错，调整邮件提醒类别")
+            utils_logger.log("TaskAppiumHuiSuoPingBase.task_scheduler_failed:网络出错，调整邮件提醒类别")
             AbsBasicAppiumTask.task_scheduler_failed(self, email_title='网络异常', message=message, is_page_source=is_page_source,
                                                is_scr_shot=is_scr_shot)
         else:
@@ -46,11 +46,11 @@ class TaskAppiumHSPBase(AbsBasicAppiumTask):
                                                is_page_source=is_page_source, is_scr_shot=is_scr_shot)
 
 
-class TaskAppiumHSPHourCredit(TaskAppiumHSPBase):
+class TaskAppiumHuiSuoPingHourCredit(TaskAppiumHuiSuoPingBase):
     '每小时的红包'
 
     def run_task(self):
-        if TaskAppiumHSPBase.run_task(self) is False:
+        if TaskAppiumHuiSuoPingBase.run_task(self) is False:
             return False
         if self.wait_activity(driver=self.driver, target='.account.ui.main.MainTabActivity', retry_count=20) is False:
             self.task_scheduler_failed('not in .account.ui.main.MainTabActivity')
@@ -65,18 +65,18 @@ class TaskAppiumHSPHourCredit(TaskAppiumHSPBase):
                                           click_mode="click") is not None:
             return True
         elif self.query_ele_wrapper(self.get_query_str_by_viewid('com.huaqian:id/redbag_count_down')) is not None:
-            utils_logger.log("TaskAppiumHSPHourCredit : still in count_down")
+            utils_logger.log("TaskAppiumHuiSuoPingHourCredit : still in count_down")
             return True
         else:
             self.task_scheduler_failed("query failed for viewid of com.huaqian:id/hour_credit")
             return False
 
 
-class TaskAppiumDailySign(TaskAppiumHSPBase):
+class TaskAppiumHuiSuoPingDailySign(TaskAppiumHuiSuoPingBase):
     '每日签到'
 
     def run_task(self):
-        if TaskAppiumHSPBase.run_task(self) is False:
+        if TaskAppiumHuiSuoPingBase.run_task(self) is False:
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text(text="每日签到"), click_mode="position",
                                   rect_scale_check_element_region=[0.5, 0.75, 0, 1]) is not None:
@@ -99,11 +99,11 @@ class TaskAppiumDailySign(TaskAppiumHSPBase):
         return False
 
 
-class TaskAppiumHSPMoreMakeMoneyBase(TaskAppiumHSPBase):
+class TaskAppiumHuiSuoPingMoreMakeMoneyBase(TaskAppiumHuiSuoPingBase):
     """更多赚钱入口基类"""
 
     def run_task(self):
-        if TaskAppiumHSPBase.run_task(self) is False:
+        if TaskAppiumHuiSuoPingBase.run_task(self) is False:
             return False
         if self.wait_activity(self.driver, target=['.account.ui.main.MainTabActivity']) is False:
             self.task_scheduler_failed('why not in 首页')
@@ -120,7 +120,7 @@ class TaskAppiumHSPMoreMakeMoneyBase(TaskAppiumHSPBase):
         return True
 
 
-class TaskAppiumHSPDailyClockOn(TaskAppiumHSPMoreMakeMoneyBase):
+class TaskAppiumHuiSuoPingDailyClockOn(TaskAppiumHuiSuoPingMoreMakeMoneyBase):
     """
         每日6~8点打卡时间
         1.每天6~8点执行该方法，避免query_only_point_within_text的无效调用
@@ -136,11 +136,11 @@ class TaskAppiumHSPDailyClockOn(TaskAppiumHSPMoreMakeMoneyBase):
 
     def task_scheduler_failed(self, message, email_title=u'Error', is_page_source=True, is_scr_shot=True):
         # clockon任务失败影响超级严重，特殊处理
-        TaskAppiumHSPMoreMakeMoneyBase.task_scheduler_failed(self, message=message, email_title=email_title,
+        TaskAppiumHuiSuoPingMoreMakeMoneyBase.task_scheduler_failed(self, message=message, email_title=email_title,
                                                            is_page_source=is_page_source, is_scr_shot=is_scr_shot)
 
     def run_task(self):
-        if TaskAppiumHSPMoreMakeMoneyBase.run_task(self) is False:
+        if TaskAppiumHuiSuoPingMoreMakeMoneyBase.run_task(self) is False:
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('早起打卡'), click_mode="click") is None:
             self.task_scheduler_failed('\"早起打卡\"找不到')
@@ -157,16 +157,16 @@ class TaskAppiumHSPDailyClockOn(TaskAppiumHSPMoreMakeMoneyBase):
         elif self.query_only_point_within_text(search_text='^支付1元参与挑战$', is_auto_click=True) is not None:
             self.task_scheduler_failed('TODO:解析结果')
             return False
-        self.task_scheduler_failed(message='---> TaskAppiumHSPDailyClockOn failed',
-                                  email_title='TaskAppiumHSPDailyClockOn.FoundEmptyError')
+        self.task_scheduler_failed(message='---> TaskAppiumHuiSuoPingDailyClockOn failed',
+                                  email_title='TaskAppiumHuiSuoPingDailyClockOn.FoundEmptyError')
         return False
 
 
-class TaskAppiumActiveRedPkg(TaskAppiumHSPMoreMakeMoneyBase):
+class TaskAppiumHuiSuoPingActiveRedPkg(TaskAppiumHuiSuoPingMoreMakeMoneyBase):
     """更多赚钱-活跃红包"""
 
     def run_task(self):
-        if TaskAppiumHSPMoreMakeMoneyBase.run_task(self) is False:
+        if TaskAppiumHuiSuoPingMoreMakeMoneyBase.run_task(self) is False:
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('活跃红包'), click_mode="click") is None:
             self.task_scheduler_failed('\"活跃红包\"找不到')
@@ -210,11 +210,11 @@ class TaskAppiumActiveRedPkg(TaskAppiumHSPMoreMakeMoneyBase):
         return False
 
 
-class TaskAppiumHSPLuckyPan(TaskAppiumHSPMoreMakeMoneyBase):
+class TaskAppiumHuiSuoPingLuckyPan(TaskAppiumHuiSuoPingMoreMakeMoneyBase):
     '幸运转盘'
 
     def run_task(self):
-        if TaskAppiumHSPMoreMakeMoneyBase.run_task(self) is False:
+        if TaskAppiumHuiSuoPingMoreMakeMoneyBase.run_task(self) is False:
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('幸运转盘'), click_mode="click") is None:
             return False

@@ -3,41 +3,47 @@
 import os
 import sys
 
-try:
-    import cv2 as aircv
-except:
-    os.system('pip install opencv-python --default-timeout=10000')
-    import cv2 as aircv
+# try:
+#     import aircv as aircv
+# except:
+#     os.system('pip install opencv-python --default-timeout=10000')
+#     import aircv as aircv
 import traceback
-
-# from airtest import aircv as airtest_aircv
 
 project_root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
 sys.path.insert(0, project_root_path)
 
+from helper import utils_logger
+
+# python3不支持aircv
+
 def imread(file_path):
-    return aircv.imread(file_path)
+    return None
+    # return aircv.imread(file_path)
 
 
 def find_only_template(imread_parent, imread_child):
-    return aircv.find_template(imread_parent, imread_child)
+    return None
+    # return aircv.find_template(imread_parent, imread_child)
 
 
 def find_templates(imread_parent, imread_child):
-    return aircv.find_all_template(imread_parent, imread_child)
+    return None
+    # return aircv.find_all_template(imread_parent, imread_child)
 
 
 def find_only_sift(imred_parent, imread_child, threshold=None, rgb=None):
     """基于特征值单个搜索"""
-    utils_logger.log("find_only_sift")
-    try:
-        match_result = aircv.find_sift(imred_parent, imread_child)
-        if match_result is not None:
-            return match_result
-    except Exception:
-        utils_logger.log("[find_only_sift] faile with caught exception")
-        utils_logger.log(traceback.print_exc())
     return None
+    # utils_logger.log("find_only_sift")
+    # try:
+    #     match_result = aircv.find_sift(imred_parent, imread_child)
+    #     if match_result is not None:
+    #         return match_result
+    # except Exception:
+    #     utils_logger.log("[find_only_sift] faile with caught exception")
+    #     utils_logger.log(traceback.print_exc())
+    # return None
 
 
 def find_sifts(imread_parent, imread_child, threshold=None, rgb=None):

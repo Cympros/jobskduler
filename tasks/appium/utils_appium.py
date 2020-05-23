@@ -29,7 +29,7 @@ def get_appium_element_position(element):
 
 
 def is_element_region_right_with_scale(element, device, region_rect_scale=None):
-    utils_logger.log("is_element_region_right_with_scale calling...")
+    # utils_logger.log("is_element_region_right_with_scale calling...")
     region_rect = None
     if region_rect_scale is not None:
         resolution = utils_android.get_resolution_by_device(device).split('x')
@@ -246,20 +246,17 @@ def get_cur_act(driver, delay_time=0):
 
 def find_element_by_content_desc(driver, content_desc, retry_count=2, interval_time=0.1):
     '查询content-desc字段'
-    utils_logger.log("find_element_by_content_desc[\"" + content_desc + "\"] with retry_count:",
-                     retry_count)
     element = None
     try:
         element = driver.find_element_by_accessibility_id(content_desc)
     finally:
         if element is not None:
+            utils_logger.log(content_desc, "retry_count:" + str(retry_count))
             return element
         elif retry_count <= 0:
-            utils_logger.log(
-                "find_element_by_content_desc[" + content_desc + "] failed with no chance")
+            utils_logger.log(" failed with no chance", content_desc)
             return None
         else:
-            utils_logger.log("find_element_by_content_desc sleep:", interval_time)
             time.sleep(interval_time)
             return find_element_by_content_desc(driver, content_desc, retry_count - 1,
                                                 interval_time)
@@ -287,19 +284,17 @@ def find_element_by_viewid(driver, viewid, retry_count=2, interval_time=0.1):
 
 def find_element_by_xpath(driver, xpath, retry_count=2, interval_time=0.1):
     '基于xpath寻找控件'
-    utils_logger.log(xpath, "retry_count:" + str(retry_count))
     element = None
     try:
         element = driver.find_element_by_xpath(xpath)
     finally:
         if element is not None:
-            # utils_logger.log("find_element_by_xpath with xpath", xpath)
+            utils_logger.log(xpath, "retry_count:" + str(retry_count))
             return element
         elif retry_count <= 0:
-            utils_logger.log("failed with no chance")
+            utils_logger.log("failed with no chance", xpath)
             return None
         else:
-            utils_logger.log("sleep to wait:", interval_time)
             time.sleep(interval_time)
             return find_element_by_xpath(driver=driver, xpath=xpath, retry_count=retry_count - 1,
                                          interval_time=interval_time)
@@ -318,8 +313,8 @@ def wait_activity_with_status(driver, target, check_period=1, retry_count=10):
             return False
 
         search_status = False
-        utils_logger.log(
-            "wait_activity_with_status.is_in_fliter<" + search_fliter + "> in <" + str(lists) + ">")
+        # utils_logger.log(
+        #     "wait_activity_with_status.is_in_fliter<" + search_fliter + "> in <" + str(lists) + ">")
         for item in lists:
             if item.endswith(search_fliter):
                 search_status = True
@@ -349,8 +344,10 @@ def wait_activity_with_status(driver, target, check_period=1, retry_count=10):
         if count >= retry_count:
             break
         else:
-            utils_logger.log("wait_activity_with_status sleep:", check_period)
+            # utils_logger.log("wait_activity_with_status sleep:", check_period)
             time.sleep(check_period)
+    if res_status is False:
+        utils_logger.log("检索当前Activity元素", get_cur_act(driver=driver), str(fliters))
     return res_status
 
 
