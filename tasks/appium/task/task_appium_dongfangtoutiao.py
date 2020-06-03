@@ -11,13 +11,20 @@ sys.path.insert(0, project_root_path)
 
 from tasks.appium.task_appium_base import AbsBasicAppiumTask
 from tasks.appium import utils_appium
-# from helper import utils_logger
+from helper import utils_logger
 
 
 class TaskAppiumDongFangToutiaoBase(AbsBasicAppiumTask):
     def __init__(self):
         AbsBasicAppiumTask.__init__(self, 'com.songheng.eastnews',
-                                'com.oa.eastfirst.activity.WelcomeActivity')
+                                    'com.oa.eastfirst.activity.WelcomeActivity')
+
+    def except_case_in_query_ele(self):
+        resume_act = utils_appium.get_cur_act(self.driver)
+        if (resume_act is not None and resume_act.startswith('com.') and not resume_act.startswith(
+                'com.songheng.')):
+            sys.exit()
+        return AbsBasicAppiumTask.except_case_in_query_ele()
 
     def run_task(self):
         if AbsBasicAppiumTask.run_task(self) is False:
@@ -87,12 +94,13 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
                 utils_logger.log("不再首页，没办法执行新闻浏览任务")
 
     def browser_news(self, main_activity):
-        module_text = random.choice([u"推荐", u'热点', u'视频', u'社会', u'科技', u'军事', u'国际'])
-        if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text(module_text),
-                                  click_mode="click",
-                                  retry_count=0) is None:
-            self.task_scheduler_failed('找不到' + module_text + '板块')
-            return False
+        # TODO: 不要指定具体的tab
+        # module_text = random.choice([u"推荐", u'热点', u'视频', u'社会', u'科技', u'军事', u'国际'])
+        # if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text(module_text),
+        #                           click_mode="click",
+        #                           retry_count=0) is None:
+        #     self.task_scheduler_failed('找不到' + module_text + '板块')
+        #     return False
         is_view_inflated, scr_shots = self.wait_view_layout_finish(True)
         if is_view_inflated is False:
             self.task_scheduler_failed('页面还未绘制完成，please check')
@@ -107,7 +115,8 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
         news_activitys = [
             'com.songheng.eastfirst.business.newsdetail.view.activity.NewsDetailH5Activity',
             'com.songheng.eastfirst.business.newsdetail.view.activity.NewsDetailHardwareActivity']
-        video_activitys = ['.alivideodetail.AliVideoDetailActivity']
+        video_activitys = ['.alivideodetail.AliVideoDetailActivity',
+                           'com.songheng.eastfirst.business.video.view.activity.VideoDetailActivity']
         other_activitys = ['com.bdtt.sdk.wmsdk.activity.TTLandingPageActivity', '.EastNewActivity',
                            '.lightbrowser.LightBrowserActivity',
                            'com.tencent.mtt.MainActivity', 'com.qq.e.ads.ADActivity',
@@ -165,7 +174,7 @@ if __name__ == '__main__':
     import inspect
 
     tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
-         if not left.startswith('AbsBasic')]
+             if not left.startswith('AbsBasic')]
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):

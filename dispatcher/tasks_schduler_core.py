@@ -146,7 +146,15 @@ if __name__ == '__main__':
     thread_names.extend(utils_android.get_connected_devcies())
     utils_logger.enable_set(True)
 
-    utils_logger.log("thread_names", thread_names)
-    for thread_name in thread_names:
-        t = DispatcherThread(name=thread_name)
-        t.start()
+    yes = {'yes', 'y'}
+    no = {'no', 'n'}
+    choice = input("确认线程信息(yes/y)：" + str(thread_names) + "\n")
+    if choice in yes:
+        utils_logger.log("thread_names", thread_names)
+        for thread_name in thread_names:
+            t = DispatcherThread(name=thread_name)
+            t.start()
+    elif choice in no:
+        print ("不支持")
+    else:
+        sys.stdout.write("Please respond with 'yes' or 'no'")
