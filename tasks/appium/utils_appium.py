@@ -300,7 +300,7 @@ def find_element_by_xpath(driver, xpath, retry_count=2, interval_time=0.1):
                                          interval_time=interval_time)
 
 
-def wait_activity_with_status(driver, target, check_period=1, retry_count=10):
+def wait_activity_with_status(driver, target, check_period=1):
     '''
     :param retry_count: 重试次数
     :param target: 待匹配的界面，支持单个字串以及数组
@@ -316,7 +316,7 @@ def wait_activity_with_status(driver, target, check_period=1, retry_count=10):
         # utils_logger.log(
         #     "wait_activity_with_status.is_in_fliter<" + search_fliter + "> in <" + str(lists) + ">")
         for item in lists:
-            if item.endswith(search_fliter):
+            if item.endswith(search_fliter) is True:
                 search_status = True
                 break
         return search_status
@@ -336,18 +336,19 @@ def wait_activity_with_status(driver, target, check_period=1, retry_count=10):
     else:
         fliters = target
     count = 0
-    while count < retry_count:
-        if is_in_fliter(fliters, get_cur_act(driver=driver)):
+    show_activity = None
+    while count < 10:
+        show_activity = get_cur_act(driver=driver)
+        # utils_logger.log("wangjun:", count, str(show_activity), str(fliters))
+        if is_in_fliter(fliters, show_activity) is True:
             res_status = True
             break
         count = count + 1
-        if count >= retry_count:
-            break
-        else:
-            # utils_logger.log("wait_activity_with_status sleep:", check_period)
-            time.sleep(check_period)
+
+        # utils_logger.log("wait_activity_with_status sleep:", check_period)
+        time.sleep(check_period)
     if res_status is False:
-        utils_logger.log("检索当前Activity元素", get_cur_act(driver=driver), str(fliters))
+        utils_logger.log("检索当前Activity元素", show_activity, str(fliters))
     return res_status
 
 

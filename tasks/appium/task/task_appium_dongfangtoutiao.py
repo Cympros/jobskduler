@@ -24,7 +24,7 @@ class TaskAppiumDongFangToutiaoBase(AbsBasicAppiumTask):
         if (resume_act is not None and resume_act.startswith('com.') and not resume_act.startswith(
                 'com.songheng.')):
             sys.exit()
-        return AbsBasicAppiumTask.except_case_in_query_ele()
+        return AbsBasicAppiumTask.except_case_in_query_ele(self)
 
     def run_task(self):
         if AbsBasicAppiumTask.run_task(self) is False:

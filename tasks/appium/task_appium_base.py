@@ -58,8 +58,7 @@ class AbsBasicAppiumTask(BaseTask):
         # query_activity_status: true or false
         # 第一次搜索时retry_count设置为1次(即一秒)，以避免wait_activity_with_status的重试时间内权限弹框被系统倒计时逻辑关闭
         if utils_appium.wait_activity_with_status(driver=driver, target=target,
-                                                  check_period=check_period,
-                                                  retry_count=1) is True:
+                                                  check_period=check_period) is True:
             return True
         for index in range(20):
             if is_ignore_except_case is False and self.except_case_in_query_ele() is True:
@@ -69,8 +68,7 @@ class AbsBasicAppiumTask(BaseTask):
             else:
                 break
         query_activity_status = utils_appium.wait_activity_with_status(driver=driver, target=target,
-                                                                       check_period=check_period,
-                                                                       retry_count=retry_count)
+                                                                       check_period=check_period)
         return query_activity_status
 
     def write_page_resource_into_file(self, suffix="normal"):

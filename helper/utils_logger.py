@@ -23,7 +23,7 @@ def get_log_file():
 # 普通日志信息，容量受限
 logger = logging.getLogger('my_logger')
 # 2M的容量
-formatter = logging.Formatter("%(asctime)s%(message)s")
+formatter = logging.Formatter("%(asctime)s(%(threadName)s) %(message)s")
 
 fh = RotatingFileHandler(filename=get_log_file(), maxBytes=5 * 1000 * 1000, backupCount=1)
 fh.setFormatter(formatter)
@@ -44,8 +44,7 @@ def log(*log_infos):
     module = os.path.splitext(os.path.basename(module_path))[0]
     method_name = inspect_stack[1][3]  # 所在方法名
     wrapper_log = ""
-    log_preffix = "[" + str(os.getpid()) + "]<" + str(module) \
-                  + "#" + str(method_name) + ">         "
+    log_preffix = "<" + str(module) + "#" + str(method_name) + ">         "
     for log_item in log_infos:
         if log_item is None:
             wrapper_log = wrapper_log + "[None]"
