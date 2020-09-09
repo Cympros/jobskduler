@@ -56,6 +56,11 @@ def get_resolution_by_device(device):
     :param device: 
     :return: 
     '''
+    # 其他方案:正则
+    # clear_btn_loc = re.search(r'Physical size: (\d+)x(\d+)', result)
+    # x = int(clear_btn_loc.group(1))
+    # y = int(clear_btn_loc.group(2))
+
     if device is None:
         return None
     # cmd="adb shell wm size" 该方法也可以
@@ -367,3 +372,7 @@ def is_page_loging(check_file, x_cut_count=5, y_cut_count=10):
         else:
             utils_logger.log("纯色区域比例小于阈值，因此认为页面已绘制完成")
             return False
+
+
+if __name__ == '__main__':
+    get_connected_devcies()
