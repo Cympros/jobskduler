@@ -141,7 +141,6 @@ task_maps = dict()
 
 # 任务调度器,用于执行task
 if __name__ == '__main__':
-    utils_logger.enable_set(False)
     # thread_names.append('pc')
 
     yes = {'yes', 'y'}
@@ -152,7 +151,6 @@ if __name__ == '__main__':
             thread_names.append(android_device)
         else:
             sys.stdout.write("Please respond with 'yes' or 'no'")
-    utils_logger.enable_set(True)
     utils_logger.log("thread_names", thread_names)
     for thread_name in thread_names:
         t = DispatcherThread(name=thread_name)

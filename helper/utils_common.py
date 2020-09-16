@@ -38,7 +38,7 @@ def get_shanghai_time(str_mode=None):
         return int(time.time())
     tz = pytz.timezone('Asia/Shanghai')
     fromtimestamp = datetime.datetime.fromtimestamp(int(time.time()), tz)
-    utils_logger.log("格式化样式[" + str_mode + "]:", fromtimestamp.strftime(str_mode))
+    utils_logger.debug("格式化样式[" + str_mode + "]:", fromtimestamp.strftime(str_mode))
     return fromtimestamp.strftime(str_mode)
 
 

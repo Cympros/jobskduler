@@ -63,7 +63,7 @@ class TaskAppiumQtoutiaoYuedu(TaskAppiumQutoutiaoBase):
         if TaskAppiumQutoutiaoBase.except_case_in_query_ele(self) is True:
             return True
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('下载完成后并安装打开', is_force_match=False),
-                                  is_ignore_except_case=True) is not None:
+                                  is_ignore_except_case=True, retry_count=0) is not None:
             utils_logger.log("检测到'华为、vivo、oppo等机型，请勿选择“安全安装、官方推荐”选择“继续安装、取消”，否则将无法领取金币'")
             if self.query_ele_wrapper(
                     '//android.widget.FrameLayout//android.widget.FrameLayout//android.widget.FrameLayout//android.widget.RelativeLayout//android.widget.RelativeLayout//android.view.View',
@@ -83,15 +83,15 @@ class TaskAppiumQtoutiaoYuedu(TaskAppiumQutoutiaoBase):
             if utils_appium.get_cur_act(self.driver) == '.Launcher':
                 utils_logger.log("运行过程中，软件回到了桌面程序，退出浏览任务")
                 return False
-            utils_logger.log("开启第(", index, "/", for_each_size, ")次浏览")
+            utils_logger.log("开启第("+str(index)+ "/"+str(for_each_size)+ ")次浏览")
             # 循环回到首页
             def_main_activity = 'com.jifen.qkbase.main.MainActivity'
             try_count = 0
             while utils_appium.get_cur_act(self.driver) != def_main_activity:
-                if try_count > 15:
+                if try_count > 5:
                     break
                 try:
-                    utils_logger.log("返回键返回至首页:", try_count)
+                    utils_logger.debug("返回键返回至首页:", try_count)
                     self.driver.keyevent(4)
                 except Exception:
                     utils_logger.log("返回键事件响应异常")
@@ -103,7 +103,8 @@ class TaskAppiumQtoutiaoYuedu(TaskAppiumQutoutiaoBase):
                     utils_logger.log("TaskAppiumQtoutiaoYuedu.browser_news caught exception:",
                                      traceback.format_exc())
             else:
-                utils_logger.log("不再首页，没办法执行新闻浏览任务")
+                utils_logger.log("无法回退至首页，没办法执行新闻浏览任务")
+                return False
         return True
 
     def browser_news(self, main_activity):
@@ -112,7 +113,7 @@ class TaskAppiumQtoutiaoYuedu(TaskAppiumQutoutiaoBase):
         utils_logger.log('--->module_text:', module_text)
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text(module_text), click_mode="click",
                                   retry_count=0) is None:
-            self.task_scheduler_failed('找不到' + module_text + '板块')
+            self.task_scheduler_failed('找不到\"' + module_text + '\"板块')
             return False
         is_view_inflated, scr_shots = self.wait_view_layout_finish(True)
         if is_view_inflated is False:
@@ -120,7 +121,7 @@ class TaskAppiumQtoutiaoYuedu(TaskAppiumQutoutiaoBase):
             return False
         # 搜索应该阅读的文章
         scroll_size = int(random.randint(0, 20))
-        utils_logger.log("页面滚动次数：", scroll_size)
+        utils_logger.debug("页面滚动次数：", scroll_size)
         for index in range(scroll_size):
             # 滑动以选择文章开启阅读任务
             self.safe_touch_action(tab_interval=[float(random.uniform(0.6, 0.8)), 0.2])
@@ -129,7 +130,8 @@ class TaskAppiumQtoutiaoYuedu(TaskAppiumQutoutiaoBase):
         video_activitys = ['.content.view.activity.VideoNewsDetailActivity',
                            '.content.newsdetail.video.VideoNewsDetailActivity',
                            '.content.newsdetail.video.VideoNewsDetailNewActivity',
-                           '.content.shortvideo.ShortVideoDetailsActivity']
+                           '.content.shortvideo.ShortVideoDetailsActivity',
+                           '.content.videodetail.VideoDetailsActivity']
         image_activitys = ['.imagenews.ImageNewsDetailActivity', '.content.imagenews.ImageNewsDetailActivity',
                            '.content.imagenews.ImageNewsDetailNewActivity']
         other_activitys = ['.content.view.activity.ImagePagersActivity', '.content.imagenews.ImagePagersActivity',
@@ -142,36 +144,43 @@ class TaskAppiumQtoutiaoYuedu(TaskAppiumQutoutiaoBase):
         # 随便点击，选择指定文章开始读取
         for tab_index in range(10):
             self.safe_tap_in_point([random.randint(100, 400), random.randint(200, 800)])
-            utils_logger.log("等待进入新闻详情界面[", tab_index, "]：", utils_appium.get_cur_act(self.driver))
+            utils_logger.log("等待进入详情界面[重试:"+ str(tab_index)+ "]：", utils_appium.get_cur_act(self.driver))
             # wait_activity有针对异常情况的处理，因此弃用'utils_appium.get_cur_act'方式
             if self.wait_activity(driver=self.driver,
                                   target=news_activitys + video_activitys + image_activitys + other_activitys,
                                   retry_count=1) is True:
-                utils_logger.log("成功进入某个详情页面")
+                utils_logger.debug("成功进入某个详情页面")
                 break
         # 判断是否在详情页面
         cur_activity = utils_appium.get_cur_act(self.driver)
         if cur_activity == main_activity:
-            self.task_scheduler_failed('why 还在首页')
+            self.task_scheduler_failed('why 还在首页?')
             return False
         # 根据页面调用指定阅读策略
-        utils_logger.log("cur_activity:", cur_activity)
+        utils_logger.debug("cur_activity:", cur_activity)
         if cur_activity in news_activitys:
             # 开始模拟阅读
-            time_to_foreach = random.randint(5, 10)  # 5~10s，因为每30秒就可以获得10积分的奖励
+            time_to_foreach = random.randint(10, 30)  # 5~10s，因为每30秒就可以获得10积分的奖励
             period = 0.2  # 每次浏览间隔，单位：秒
             for index in range(int(float(time_to_foreach) / period)):
                 if bool(random.getrandbits(1)) is True:
                     tab_interval = [0.65, 0.35]
                 else:
                     tab_interval = [0.25, 0.75]
-                utils_logger.log("[", time_to_foreach, "] for tab_interval[", tab_interval, "] with index:", index)
+                utils_logger.debug("["+str(time_to_foreach)+ "] for tab_interval["+str(tab_interval)+"] with index:"+str(index))
                 if self.safe_touch_action(tab_interval=tab_interval, duration=int(float(period * 1000))) is False:
                     utils_logger.log("----> safe_touch_action caught exception")
+                    break
+                #每滑动一次,均判断是否还在详情页
+                scroll_activity=utils_appium.get_cur_act(self.driver)
+                if scroll_activity not in news_activitys:
+                    utils_logger.log("浏览过程中退出新闻页: ",scroll_activity)
+                    break
             return True
         elif cur_activity in video_activitys:
-            utils_logger.log("等待视频播放完成：45")
-            time.sleep(random.randint(25, 45))  # 休眠45秒
+            video_play_time=random.randint(25, 45)
+            utils_logger.log("等待视频播放完成："+str(video_play_time))
+            time.sleep(video_play_time)  # 休眠45秒
             return True
         elif cur_activity in image_activitys + other_activitys:
             utils_logger.log("进入非指定详情页面，放弃此次浏览")

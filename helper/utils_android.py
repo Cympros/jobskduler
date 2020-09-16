@@ -317,7 +317,7 @@ def is_page_loging(check_file, x_cut_count=5, y_cut_count=10):
     '''
     image_resorce = Image.open(check_file)
     # 这里务必根据图片自身宽高来进行切片，不要会用分辨率的宽高
-    utils_logger.log("---image_resorce:", image_resorce.size)
+    utils_logger.debug("---image_resorce:", image_resorce.size)
     item_width = int(image_resorce.size[0]) / x_cut_count  # 切片的横向宽度
     item_height = int(image_resorce.size[1]) / y_cut_count  # 切片的宽度
     solid_dict = {}  # 纯色出片存储
@@ -338,21 +338,21 @@ def is_page_loging(check_file, x_cut_count=5, y_cut_count=10):
                 solid_dict[rgb_key] = int(solid_dict[rgb_key]) + 1
             else:
                 solid_dict[rgb_key] = 0
-    utils_logger.log("各纯色块及数量:", solid_dict)
+    utils_logger.debug("各纯色块及数量:", solid_dict)
     if len(solid_dict) == 0:
-        utils_logger.log("不存在纯色子图，因此认为页面已绘制完成")
+        utils_logger.debug("不存在纯色子图，因此认为页面已绘制完成")
         return False
     else:
         max_solid_count = max(solid_dict.values())  # 纯色区域中占用最大色块的色块数
         is_solid = (5 * max_solid_count > 3 * (x_cut_count * y_cut_count))
-        utils_logger.log("max_solid_count:", max_solid_count,
+        utils_logger.debug("max_solid_count:", max_solid_count,
                          ",max_solid_count/total_size>约定阈值:", is_solid)
         # 最大的纯色区域占据2/3以上的部分则表示页面还在加载中
         if is_solid:
             utils_logger.log("纯色区域比例大于阈值，认为页面还未加载完成")
             return True
         else:
-            utils_logger.log("纯色区域比例小于阈值，因此认为页面已绘制完成")
+            utils_logger.debug("纯色区域比例小于阈值，因此认为页面已绘制完成")
             return False
 
 

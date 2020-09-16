@@ -21,7 +21,7 @@ def get_appium_element_position(element):
         return None
     try:
         ele_position = element.location
-        utils_logger.log("[get_appium_element_position]", ele_position)
+        utils_logger.debug("get_appium_element_position", ele_position)
         return ele_position
     except Exception:
         utils_logger.log(traceback.format_exc())
@@ -51,7 +51,7 @@ def is_element_region_right(element, region_rect=None):
     """
     if region_rect is None:
         # 为什么为空时，不构造[0,1,0,1]的默认值？  因为有时候有些情况下比如浮框类似的，坐标并不是理想中的样子
-        utils_logger.log("[is_element_region_right] 待校验区域为空，因此认为搜索的element在屏幕内")
+        utils_logger.debug("[is_element_region_right] 待校验区域为空，因此认为搜索的element在屏幕内")
         return True
     utils_logger.log("[is_element_region_right] 校验元素是否在指定区域")
     ele_location = get_appium_element_position(element)
@@ -81,8 +81,7 @@ def touch_action(driver, target_device_name, is_down=True, tab_center=0.5, tab_i
     :param duration: 滑动的时长
     :return: 
     '''
-    utils_logger.log("[touch_action] tab_interval=", tab_interval, ",is_down=", is_down,
-                     ",tab_center", tab_center)
+    utils_logger.debug("[touch_action] tab_interval="+str(tab_interval)+",is_down="+str(is_down)+",tab_center="+str(tab_center))
     'TODO：Peform Action的使用'
     resolution = utils_android.get_resolution_by_device(target_device_name).split('x')
     screen_width = float(resolution[0])
@@ -135,10 +134,11 @@ def start_appium_service(device, appium_port, access_appium_bp_port, retry_count
     else:
         # 启动appium服务
         res, err = utils_common.exec_shell_cmd(appium_start_cmd)
-        # utils_logger.log("#start_appium_service# sleep:[" + str(interval_time) + "],["
-        #                  + str(appium_start_cmd) + "]",
-        #                  "[" + str(res) + "]", "[" + str(err) + "]")
-        time.sleep(interval_time)  # 等待appium服务完全启动
+        if interval_time >0:
+            utils_logger.debug("#start_appium_service# sleep:[" + str(interval_time) + "],["
+                             + str(appium_start_cmd) + "]",
+                             "[" + str(res) + "]", "[" + str(err) + "]")
+            time.sleep(interval_time)  # 等待appium服务完全启动
         return False if retry_count <= 0 else start_appium_service(device, appium_port,
                                                                    access_appium_bp_port,
                                                                    retry_count=retry_count - 1,
@@ -155,7 +155,7 @@ def tap_in_point(driver, point, delay_to_load=0):
     if delay_to_load > 0:
         utils_logger.log("tap_in_point sleep:", delay_to_load)
         time.sleep(delay_to_load)
-    utils_logger.log("tap_in_point: [" + str(tab_x) + "," + str(tab_y) + "]")
+    utils_logger.debug("tap_in_point: [" + str(tab_x) + "," + str(tab_y) + "]")
     driver.tap([(tab_x, tab_y)], 2)
 
 
@@ -171,17 +171,17 @@ def get_screen_shots(driver, target_device, file_path=None, retry_count=2):
     if driver is None:
         utils_logger.log("failed with no driver")
         return None
-    utils_logger.log("[get_screen_shots] screen shot with retry count:", retry_count)
+    utils_logger.debug("[get_screen_shots] screen shot with retry count:", retry_count)
     if file_path is None:
-        utils_logger.log("[get_screen_shots] 构建默认截图存储路径")
+        utils_logger.debug("[get_screen_shots] 构建默认截图存储路径")
         resolution_within_devices = utils_android.get_resolution_by_device(device=target_device)
         file_name = "screen_tmp_" + \
                     (resolution_within_devices if resolution_within_devices is not None else "none") \
                     + ".png"
         file_path = os.path.abspath(envs.get_out_dir() + file_name)
-        # 删除缓存
+    # 删除缓存
     if os.path.exists(file_path):
-        utils_logger.log("get_screen_shots clear cache for file: ", file_path)
+        utils_logger.debug("get_screen_shots clear cache for file: ", file_path)
         os.remove(file_path)
     try:
         driver.get_screenshot_as_file(file_path)
@@ -201,14 +201,14 @@ def get_pg_source(driver, retry_count=5):
     if driver is None:
         utils_logger.log('failed because driver is null')
         return None
-    utils_logger.log("get_pg_source with retry_count:", retry_count)
+    utils_logger.debug("get_pg_source with retry_count:", retry_count)
     try:
         return driver.page_source
     except Exception:
         if retry_count <= 0:
             return None
         else:
-            time.sleep(1)
+            # time.sleep(1)
             return get_pg_source(driver=driver, retry_count=retry_count - 1)
 
 
@@ -244,7 +244,7 @@ def get_cur_act(driver, delay_time=0):
         return None
 
 
-def find_element_by_content_desc(driver, content_desc, retry_count=2, interval_time=0.1):
+def find_element_by_content_desc(driver, content_desc, retry_count=2, interval_time=0):
     '查询content-desc字段'
     element = None
     try:
@@ -257,7 +257,9 @@ def find_element_by_content_desc(driver, content_desc, retry_count=2, interval_t
             utils_logger.log(" failed with no chance", content_desc)
             return None
         else:
-            time.sleep(interval_time)
+            if interval_time >0:
+                utils_logger.log("find_element_by_content_desc sleep: "+interval_time)
+                time.sleep(interval_time)
             return find_element_by_content_desc(driver, content_desc, retry_count - 1,
                                                 interval_time)
 
@@ -282,20 +284,22 @@ def find_element_by_viewid(driver, viewid, retry_count=2, interval_time=0.1):
     #                                       interval_time=interval_time)
 
 
-def find_element_by_xpath(driver, xpath, retry_count=2, interval_time=0.1):
+def find_element_by_xpath(driver, xpath, retry_count=2, interval_time=0):
     '基于xpath寻找控件'
     element = None
     try:
         element = driver.find_element_by_xpath(xpath)
     finally:
         if element is not None:
-            utils_logger.log(xpath, "retry_count:" + str(retry_count))
+            utils_logger.debug(xpath, "retry_count:" + str(retry_count))
             return element
         elif retry_count <= 0:
             utils_logger.log("failed with no chance", xpath)
             return None
         else:
-            time.sleep(interval_time)
+            if interval_time >0:
+                utils_logger.log("find_element_by_xpath sleep: "+interval_time)
+                time.sleep(interval_time)
             return find_element_by_xpath(driver=driver, xpath=xpath, retry_count=retry_count - 1,
                                          interval_time=interval_time)
 
@@ -344,11 +348,11 @@ def wait_activity_with_status(driver, target, check_period=1):
             res_status = True
             break
         count = count + 1
-
-        # utils_logger.log("wait_activity_with_status sleep:", check_period)
-        time.sleep(check_period)
+        if check_period >0:
+            utils_logger.log("wait_activity_with_status sleep:", check_period)
+            time.sleep(check_period)
     if res_status is False:
-        utils_logger.log("检索当前Activity元素", show_activity, str(fliters))
+        utils_logger.debug("检索当前Activity元素失败", show_activity, str(fliters))
     return res_status
 
 

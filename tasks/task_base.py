@@ -58,7 +58,7 @@ class BaseTask():
         # TODO:检查业务层调用一次task_scheduler_failed，这里为什么同一个文件会被添加多次？  ：暂时使用强制去重
         if upload_files is not None:
             self.upload_files.extend(upload_files)
-        utils_logger.log("upload_files:",
+        utils_logger.log("task_scheduler_failed.upload_files",
                          list(set(self.upload_files)))
         error = {'message': message,
                  'task_name': self.task_session if self.task_session is not None else "None",

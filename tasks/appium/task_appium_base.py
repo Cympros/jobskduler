@@ -44,7 +44,7 @@ class AbsBasicAppiumTask(BaseTask):
         self.launch_activity = launch_activity
         self.upload_files = []  # 待上传至远端的文件列表
 
-    def wait_activity(self, driver, target, check_period=1, retry_count=10,
+    def wait_activity(self, driver, target, check_period=0, retry_count=10,
                       is_ignore_except_case=False):
         """activity等待时添加弹框过滤函数
         :param driver: 
@@ -77,7 +77,7 @@ class AbsBasicAppiumTask(BaseTask):
             return
         pgres = utils_appium.get_pg_source(self.driver)
         if pgres is not None:
-            utils_logger.log(">> page_resource write to file ")
+            utils_logger.debug(">> page_resource write to file ")
             file_page_resource = envs.get_out_dir() + "page_resource_" + suffix + ".txt"
             # 删除历史文件
             if os.path.exists(file_page_resource) is True:
@@ -96,7 +96,7 @@ class AbsBasicAppiumTask(BaseTask):
                                                  target_device=self.target_device_name,
                                                  file_path=scr_file_path)
         if scr_path is not None:
-            utils_logger.log("screen shot write to file ")
+            utils_logger.debug("screen shot write to file ")
             self.upload_files.append(scr_path)
 
     def task_scheduler_failed(self, message, email_title=u'异常信息', is_page_source=True,
@@ -231,7 +231,7 @@ class AbsBasicAppiumTask(BaseTask):
                 utils_logger.log("release_after_task caught failed")
 
     def is_in_target_page(self, target_page_file, compare_rule=100, retry_count=10,
-                          interval_time=1):
+                          interval_time=0):
 
         def wrapper(file):
             if os.path.exists(file):
@@ -267,8 +267,9 @@ class AbsBasicAppiumTask(BaseTask):
                                              hash_rule=compare_rule) is True:
             return True
         else:
-            utils_logger.log("is_in_target_page sleep:", interval_time)
-            time.sleep(interval_time)
+            if interval_time > 0:
+                utils_logger.log("is_in_target_page sleep:", interval_time)
+                time.sleep(interval_time)
             return self.is_in_target_page(target_page_file=target_page_file,
                                           compare_rule=compare_rule,
                                           retry_count=retry_count - 1, interval_time=interval_time)
@@ -371,8 +372,8 @@ class AbsBasicAppiumTask(BaseTask):
         # 屏蔽有时候页面还没有延迟刷新的问题
         if time_wait_page_completely_resumed > 0:
             # 该方法仅第一次执行是会被调用,递归中不执行
-            # utils_logger.log("query_ele_wrapper for sleep-time_wait_page_completely_resumed:",
-            #                  time_wait_page_completely_resumed)
+            utils_logger.debug("query_ele_wrapper for sleep-time_wait_page_completely_resumed:",
+                             time_wait_page_completely_resumed)
             time.sleep(time_wait_page_completely_resumed)
         query_res = self.__query_element(query_str=query_str)
         if query_res is not None:
@@ -401,12 +402,10 @@ class AbsBasicAppiumTask(BaseTask):
                             else:
                                 raise Exception(
                                     '[query_ele_wrapper]unknown click_mode:' + click_mode)
-                            utils_logger.log("[query_ele_wrapper] click for element:[",
-                                             query_res,
-                                             "] with location:", query_ele_location)
+                            utils_logger.debug("[query_ele_wrapper] click with location:", query_ele_location)
                             return query_res
                         except Exception as e:
-                            utils_logger.log("try to click failed ", e.message)
+                            utils_logger.log("try to click failed ", e)
                             utils_logger.log(traceback.format_exc())
                     else:
                         utils_logger.log("[query_ele_wrapper] location:", query_ele_location)
@@ -419,8 +418,8 @@ class AbsBasicAppiumTask(BaseTask):
         # utils_logger.log("--- >[task_appium_base.query_ele_wrapper]", query_str,
         #                  " with retry_count:", retry_count)
         # 若上面的判断逻辑失败，则表示还没有找到'可用'的element
-        period_checked = 0.2
-        # utils_logger.log("query_ele_wrapper sleep:", period_checked)
+        period_checked = 0
+        utils_logger.debug("query_ele_wrapper sleep:", period_checked)
         time.sleep(period_checked)  # 500毫秒重复执行一次
         if is_ignore_except_case is False and self.except_case_in_query_ele() is True:
             # except_case_in_query_ele为True表示处理生效
@@ -473,7 +472,8 @@ class AbsBasicAppiumTask(BaseTask):
             if file_screen_shot is None or utils_android.is_page_loging(file_screen_shot) is True:
                 utils_logger.log("[wait_view_layout_finish] sleep util is_page_loging true:",
                                  check_index)
-                time.sleep(1)
+                utils_logger.debug("wait_view_layout_finish sleep")
+                time.sleep(0)
                 file_screen_shot = utils_appium.get_screen_shots(driver=self.driver,
                                                                  target_device=self.target_device_name)
             else:
@@ -492,7 +492,7 @@ class AbsBasicAppiumTask(BaseTask):
         :return:
         """
         try:
-            utils_logger.log("safe_touch_action with retry_count:", retry_count)
+            utils_logger.debug("safe_touch_action with retry_count:", retry_count)
             utils_appium.touch_action(driver=self.driver,
                                       target_device_name=self.target_device_name, is_down=is_down,
                                       tab_center=tab_center, tab_interval=tab_interval,
@@ -502,7 +502,10 @@ class AbsBasicAppiumTask(BaseTask):
             except_name = exception.__class__.__name__
             # 屏蔽
             if retry_count <= 0 or except_name == "InvalidSessionIdException":
-                utils_logger.log('TouchError:safe_touch_action caught exception')
+                utils_logger.log('TouchError:safe_touch_action caught exception',
+                                 "retry_count:"+str(retry_count),
+                                 "except_name:"+except_name,
+                                 traceback.format_exc())
                 return False
             else:
                 return self.safe_touch_action(tab_interval=tab_interval,
@@ -512,7 +515,7 @@ class AbsBasicAppiumTask(BaseTask):
     def safe_tap_in_point(self, point, retry_count=3):
         """tap_in_point安全模式"""
         try:
-            utils_logger.log("safe_tap_in_point with retry_count:", retry_count)
+            utils_logger.debug("safe_tap_in_point with retry_count:", retry_count)
             utils_appium.tap_in_point(self.driver, point)
             return True
         except:
@@ -521,7 +524,7 @@ class AbsBasicAppiumTask(BaseTask):
             else:
                 return self.safe_tap_in_point(point=point, retry_count=retry_count - 1)
 
-    def _query_points_with_text_by_ocr(self, search_text, retry_count=2, interval_time=5,
+    def _query_points_with_text_by_ocr(self, search_text, retry_count=2, interval_time=0,
                                        cutted_rect=None,
                                        is_ignore_except_case=False, is_check_view_inflated=True):
         """
@@ -594,7 +597,8 @@ class AbsBasicAppiumTask(BaseTask):
                 utils_logger.log(
                     "--->[_query_points_with_text_by_ocr] '" + search_text + "' with retry_count:",
                     retry_count, " ,sleep for :", interval_time)
-                time.sleep(interval_time)
+                if interval_time >0 :
+                    time.sleep(interval_time)
                 if is_ignore_except_case is False and self.except_case_in_query_ele() is True:
                     # 指可能有其他外界因素打断此次查询
                     return self._query_points_with_text_by_ocr(search_text=search_text,
