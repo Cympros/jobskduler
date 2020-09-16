@@ -77,7 +77,7 @@ class TaskAppiumQtoutiaoYuedu(TaskAppiumQutoutiaoBase):
         if TaskAppiumQutoutiaoBase.run_task(self) is False:
             return False
         # 最多浏览15次，因为一次大约需要1分钟左右时间
-        for_each_size = int(random.randint(1, 15))
+        for_each_size = int(random.randint(5, 15))
         for index in range(for_each_size):
             # 观测是否直接抛异常导致回到桌面
             if utils_appium.get_cur_act(self.driver) == '.Launcher':
@@ -161,8 +161,14 @@ class TaskAppiumQtoutiaoYuedu(TaskAppiumQutoutiaoBase):
             # 判断是否有有效的进度条
             if self.query_ele_wrapper(
                     '//android.widget.FrameLayout[@resource-id="android:id/content"]/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.ImageView[3]',is_ignore_except_case=True) is None:
-                utils_logger.log("详情页无阅读积分进度框,是无效阅读")
-                return False
+                if self.query_ele_wrapper(
+                        '//android.widget.FrameLayout[@resource-id="android:id/content"]/android.widget.FrameLayout/android.widget.ImageView',is_ignore_except_case=True,click_mode='click') is not None:
+                    # 说明需要敲金蛋
+                    utils_logger.log("敲击金蛋领取奖励")
+                    return True
+                else:
+                    utils_logger.log("详情页无阅读积分进度框,是无效阅读")
+                    return False
 
             if cur_activity in news_activitys:
                 # 开始模拟阅读
