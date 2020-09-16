@@ -12,7 +12,7 @@ sys.path.insert(0, project_root_path)
 from tasks.appium.task_appium_base import AbsBasicAppiumTask
 from tasks.appium import utils_appium
 # from helper import envs
-# from helper import utils_logger
+from helper import utils_logger
 
 
 class TaskAppiumQutoutiaoBase(AbsBasicAppiumTask):
