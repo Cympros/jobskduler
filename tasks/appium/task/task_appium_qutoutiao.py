@@ -109,7 +109,7 @@ class TaskAppiumQtoutiaoYuedu(TaskAppiumQutoutiaoBase):
 
     def browser_news(self, main_activity):
         # 需要进入app手动设置关心的栏目：最多支持7个
-        module_text = random.choice([u'推荐', u'上海', u'娱乐', u'旅行', u'历史', u'汽车', u'军事'])
+        module_text = random.choice([u'关注',u'推荐', u'上海', u'娱乐', u'旅行', u'历史', u'汽车', u'军事',u'情感',u'游戏',u'军事'])
         utils_logger.log('--->module_text:', module_text)
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text(module_text), click_mode="click",
                                   retry_count=0) is None:
@@ -190,7 +190,7 @@ class TaskAppiumQtoutiaoYuedu(TaskAppiumQutoutiaoBase):
                         break
                 return True
             elif cur_activity in video_activitys:
-                video_play_time=random.randint(25, 45)
+                video_play_time=random.randint(15, 30)
                 utils_logger.log("等待视频播放完成："+str(video_play_time))
                 time.sleep(video_play_time)  # 休眠45秒
                 return True
