@@ -113,8 +113,7 @@ class TaskAppiumQtoutiaoYuedu(TaskAppiumQutoutiaoBase):
         utils_logger.log('--->module_text:', module_text)
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text(module_text), click_mode="click",
                                   retry_count=0) is None:
-            self.task_scheduler_failed('找不到\"' + module_text + '\"板块')
-            return False
+            utils_logger.log('找不到\"' + module_text + '\"板块,不过继续在当前栏目浏览')
         is_view_inflated, scr_shots = self.wait_view_layout_finish(True)
         if is_view_inflated is False:
             self.task_scheduler_failed('页面还未绘制完成，please check')
@@ -158,30 +157,37 @@ class TaskAppiumQtoutiaoYuedu(TaskAppiumQutoutiaoBase):
             return False
         # 根据页面调用指定阅读策略
         utils_logger.debug("cur_activity:", cur_activity)
-        if cur_activity in news_activitys:
-            # 开始模拟阅读
-            time_to_foreach = random.randint(10, 30)  # 5~10s，因为每30秒就可以获得10积分的奖励
-            period = 0.2  # 每次浏览间隔，单位：秒
-            for index in range(int(float(time_to_foreach) / period)):
-                if bool(random.getrandbits(1)) is True:
-                    tab_interval = [0.65, 0.35]
-                else:
-                    tab_interval = [0.25, 0.75]
-                utils_logger.debug("["+str(time_to_foreach)+ "] for tab_interval["+str(tab_interval)+"] with index:"+str(index))
-                if self.safe_touch_action(tab_interval=tab_interval, duration=int(float(period * 1000))) is False:
-                    utils_logger.log("----> safe_touch_action caught exception")
-                    break
-                #每滑动一次,均判断是否还在详情页
-                scroll_activity=utils_appium.get_cur_act(self.driver)
-                if scroll_activity not in news_activitys:
-                    utils_logger.log("浏览过程中退出新闻页: ",scroll_activity)
-                    break
-            return True
-        elif cur_activity in video_activitys:
-            video_play_time=random.randint(25, 45)
-            utils_logger.log("等待视频播放完成："+str(video_play_time))
-            time.sleep(video_play_time)  # 休眠45秒
-            return True
+        if cur_activity in news_activitys + video_activitys:
+            # 判断是否有有效的进度条
+            if self.query_ele_wrapper(
+                    '//android.widget.FrameLayout[@resource-id="android:id/content"]/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.ImageView[3]',is_ignore_except_case=True) is None:
+                utils_logger.log("详情页无阅读积分进度框,是无效阅读")
+                return False
+
+            if cur_activity in news_activitys:
+                # 开始模拟阅读
+                time_to_foreach = random.randint(10, 30)  # 5~10s，因为每30秒就可以获得10积分的奖励
+                period = 0.2  # 每次浏览间隔，单位：秒
+                for index in range(int(float(time_to_foreach) / period)):
+                    if bool(random.getrandbits(1)) is True:
+                        tab_interval = [0.65, 0.35]
+                    else:
+                        tab_interval = [0.25, 0.75]
+                    utils_logger.debug("["+str(time_to_foreach)+ "] for tab_interval["+str(tab_interval)+"] with index:"+str(index))
+                    if self.safe_touch_action(tab_interval=tab_interval, duration=int(float(period * 1000))) is False:
+                        utils_logger.log("----> safe_touch_action caught exception")
+                        break
+                    #每滑动一次,均判断是否还在详情页
+                    scroll_activity=utils_appium.get_cur_act(self.driver)
+                    if scroll_activity not in news_activitys:
+                        utils_logger.log("浏览过程中退出新闻页: ",scroll_activity)
+                        break
+                return True
+            elif cur_activity in video_activitys:
+                video_play_time=random.randint(25, 45)
+                utils_logger.log("等待视频播放完成："+str(video_play_time))
+                time.sleep(video_play_time)  # 休眠45秒
+                return True
         elif cur_activity in image_activitys + other_activitys:
             utils_logger.log("进入非指定详情页面，放弃此次浏览")
             return False
