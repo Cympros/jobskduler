@@ -149,7 +149,7 @@ class TaskAppiumTaoToutiaoYueDu(TaskAppiumTaoToutiaoBase):
             time_to_foreach = random.randint(5, 10)  # 5~10s，因为每30秒就可以获得10积分的奖励
             period = 0.2  # 每次浏览间隔，单位：秒
             for index in range(int(float(time_to_foreach) / period)):
-                if bool(random.getrandbits(1)) is True:
+                if utils_common.random_boolean_true(0.65) is True:
                     tab_interval = [0.65, 0.35]
                 else:
                     tab_interval = [0.25, 0.75]

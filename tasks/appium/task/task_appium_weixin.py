@@ -314,7 +314,7 @@ class TaskAppiumWeixinJimmieJDPeiyuchang(TaskAppiumWeixinBase):
                         continue
                     utils_logger.log("收获的同时再次点击以开启培养操作,延时操作------------end")
             # 滑动控件
-            if bool(random.getrandbits(1)) is True:
+            if utils_common.random_boolean_true(0.65) is True:
                 tab_interval = [0.3, 0.7]
             else:
                 tab_interval = [0.7, 0.3]

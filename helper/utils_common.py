@@ -29,8 +29,15 @@ import socket
 import traceback
 import colorsys
 from PIL import Image
-
+import numpy
 from helper import utils_logger, utils_file, utils_common
+
+
+def random_boolean_true(probability):
+    # 以指定概率返回boolean的True值
+    choice_result = numpy.random.choice([1, 0], p=([probability, 1.0 - probability]))
+    utils_logger.debug("random_boolean_true with probability:" + str(probability) + " to result:" + str(choice_result))
+    return int(choice_result) == 1
 
 
 def zip_msg_within_files(output_dir, file_name, message, files=None):
@@ -263,4 +270,10 @@ if __name__ == "__main__":
 
     # utils_logger.log(get_dominant_color('../out/ericp_600x1024.png')
     # get_point_range('../out/A.png', '../out/bb.png')
-    utils_logger.log(exec_shell_cmd("adb devices"))
+    # utils_logger.log(exec_shell_cmd("adb devices"))
+
+    result = 0
+    for i in range(1000):
+        if random_boolean_true(0.6) is True:
+            result += 1
+    print("概率比例:" + str(result))

@@ -13,6 +13,7 @@ from tasks.appium.task_appium_base import AbsBasicAppiumTask
 from tasks.appium import utils_appium
 from helper import utils_logger
 from helper import utils_android
+from helper import utils_common
 
 
 class TaskAppiumDongFangToutiaoBase(AbsBasicAppiumTask):
@@ -129,7 +130,8 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
                            '.PackageInstallerActivity']
         for tab_index in range(10):
             self.safe_tap_in_point([random.randint(100, 400), random.randint(200, 800)])
-            utils_logger.log("等待进入新闻详情界面[重试:" + str(tab_index) + "]", utils_android.get_resumed_activity(self.target_device_name))
+            utils_logger.log("等待进入新闻详情界面[重试:" + str(tab_index) + "]",
+                             utils_android.get_resumed_activity(self.target_device_name))
             # wait_activity有针对异常情况的处理，因此弃用'utils_appium.get_cur_act'方式
             if self.wait_activity(driver=self.driver, target=news_activitys + video_activitys + other_activitys,
                                   retry_count=1) is True:
@@ -147,7 +149,7 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
             time_to_foreach = random.randint(5, 10)  # 5~10s，因为每30秒就可以获得10积分的奖励
             period = 0.2  # 每次浏览间隔，单位：秒
             for index in range(int(float(time_to_foreach) / period)):
-                if bool(random.getrandbits(1)) is True:
+                if utils_common.random_boolean_true(0.75) is True:
                     tab_interval = [0.65, 0.35]
                 else:
                     tab_interval = [0.25, 0.75]
@@ -157,6 +159,11 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
                 if self.safe_touch_action(tab_interval=tab_interval,
                                           duration=int(float(period * 1000))) is False:
                     utils_logger.log("----> safe_touch_action caught exception")
+                    return False
+                # 东方头条有可能向下拖动的时候退出详情页,因此添加检测机制
+                if utils_android.get_resumed_activity(self.target_device_name) == main_activity:
+                    utils_logger.log("向下拖动太狠,已经退出详情页,结束浏览")
+                    return True
             return True
         elif cur_activity in video_activitys:
             random_play_time = random.randint(25, 90)

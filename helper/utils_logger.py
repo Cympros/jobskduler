@@ -35,7 +35,7 @@ logger.addHandler(ch)
 
 
 def debug(*log_infos):
-    is_debug = True  # 可以手动打开
+    is_debug = False  # 可以手动打开
     if is_debug is True:
         inspect_stack = inspect.stack()
         module_path = inspect_stack[1][1]
