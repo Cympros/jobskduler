@@ -70,7 +70,7 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
             if utils_appium.get_cur_act(self.driver) == '.Launcher':
                 utils_logger.log("运行过程中，软件回到了桌面程序，退出浏览任务")
                 return False
-            utils_logger.log("开启第(", index, "/", for_each_size, ")次浏览")
+            utils_logger.log("开启第(" + str(index) + "/" + str(for_each_size) + ")次浏览")
             # 循环回到首页
             def_main_activity = 'com.songheng.eastfirst.common.view.activity.MainActivity'
             try_count = 0
@@ -128,11 +128,9 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
                            '.PackageInstallerActivity']
         for tab_index in range(10):
             self.safe_tap_in_point([random.randint(100, 400), random.randint(200, 800)])
-            utils_logger.log("等待进入新闻详情界面[", tab_index, "]：",
-                             utils_appium.get_cur_act(self.driver))
+            utils_logger.log("等待进入新闻详情界面[重试:" + str(tab_index) + "]", utils_appium.get_cur_act(self.driver))
             # wait_activity有针对异常情况的处理，因此弃用'utils_appium.get_cur_act'方式
-            if self.wait_activity(driver=self.driver,
-                                  target=news_activitys + video_activitys + other_activitys,
+            if self.wait_activity(driver=self.driver, target=news_activitys + video_activitys + other_activitys,
                                   retry_count=1) is True:
                 utils_logger.log("成功进入某个详情页面")
                 break
@@ -159,8 +157,9 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
                     utils_logger.log("----> safe_touch_action caught exception")
             return True
         elif cur_activity in video_activitys:
-            utils_logger.log("等待视频播放完成：45")
-            time.sleep(random.randint(25, 90))  # 休眠45秒
+            random_play_time = random.randint(25, 90)
+            utils_logger.log("等待视频播放完成：" + str(random_play_time))
+            time.sleep(random_play_time)  # 等待视频播放
             return True
         elif cur_activity in other_activitys:
             utils_logger.log("进入非指定详情页面，放弃此次浏览")
@@ -193,4 +192,6 @@ if __name__ == '__main__':
             break
         task_name = tasks[task_index_selected]
         task = eval(task_name + '()')
-        task.run_task()
+        from handle_callback import HandleCallback
+
+        task.run_task(HandleCallback())

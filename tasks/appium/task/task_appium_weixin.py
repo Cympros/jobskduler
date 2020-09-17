@@ -402,13 +402,6 @@ class TaskAppiumWeixinWaziDashangchengBase(TaskAppiumWeixinBase):
         'mode:京东免单 or 天猫免单'
         self.mode = mode
 
-    def notify_task_success(self):
-        AbsBasicAppiumTask.notify_task_success(self)
-        utils_logger.log("更新上次check时间")
-        if self.task_session is not None:
-            conf_modify.put(task_tag=self.task_session, key="last_check_task_state_time",
-                            value=utils.get_shanghai_time('%Y%m%d%H%M'))
-
     def run_task(self, _handle_callback):
         if TaskAppiumWeixinBase.run_task(self, _handle_callback) is False:
             return False

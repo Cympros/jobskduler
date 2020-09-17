@@ -34,7 +34,7 @@ class BaseTask():
         return True
 
     def get_project_output_dir(self):
-        return self.handle_callback.read_config(None, "get_project_output_dir")
+        return self.handle_callback.read_config(None, None, "get_project_output_dir")
 
     def release_after_task(self):
         # 任务执行完后的释放资源

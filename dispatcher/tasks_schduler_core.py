@@ -126,9 +126,10 @@ class DispatcherThread(threading.Thread):
                 #                  "now:" + timestamp_to_date(now_time))
                 MyClass = getattr(module_dynamic_imported, name)
                 instance = MyClass()
-                if instance.run_task(HandleCallback()) is True:
+                handle_callback = HandleCallback()
+                if instance.run_task(handle_callback) is True:
                     utils_logger.log("成功执行任务", module_dynamic_imported, name)
-                    instance.notify_task_success()
+                    handle_callback.notify_task_success(module_name, name)
                 instance.release_after_task()  # 环境清理
 
                 # 添加任务管理

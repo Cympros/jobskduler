@@ -105,7 +105,7 @@ def touch_action(driver, target_device_name, is_down=True, tab_center=0.5, tab_i
 
 def start_appium_service(device, appium_port, access_appium_bp_port, retry_count=5,
                          interval_time=5):
-    '''启动appium服务,添加重试机制'''
+    """启动appium服务,添加重试机制"""
     # 检测appium是否安装
     check_res, check_error = utils_common.exec_shell_cmd('which appium')
     if not check_res:  # 空串表示未安装appium服务
@@ -126,7 +126,7 @@ def start_appium_service(device, appium_port, access_appium_bp_port, retry_count
         appium_start_cmd += " -bp " + str(access_appium_bp_port)
     if device is not None:
         appium_start_cmd += " -U " + str(device)
-    appium_start_cmd += " 1>/dev/null 2>&1 & "
+    appium_start_cmd += " 1>/dev/null 2>&1 &"
 
     res_apm, res_apm_error = utils_common.exec_shell_cmd(appium_state_check_cmd)
     # utils_logger.log("appium服务是否启动", appium_state_check_cmd, str(res_apm), str(res_apm_error))
@@ -136,9 +136,10 @@ def start_appium_service(device, appium_port, access_appium_bp_port, retry_count
         # 启动appium服务
         res, err = utils_common.exec_shell_cmd(appium_start_cmd)
         if interval_time > 0:
-            utils_logger.debug("#start_appium_service# sleep:[" + str(interval_time) + "],["
-                               + str(appium_start_cmd) + "]",
-                               "[" + str(res) + "]", "[" + str(err) + "]")
+            utils_logger.debug(
+                "sleep " + str(interval_time) + " to exec command [" + str(
+                    appium_start_cmd) + "] with response:[" + str(
+                    res) + "] and error:[" + str(err) + "]")
             time.sleep(interval_time)  # 等待appium服务完全启动
         return False if retry_count <= 0 else start_appium_service(device, appium_port,
                                                                    access_appium_bp_port,
@@ -176,7 +177,7 @@ def get_screen_shots(driver, file_directory, target_device=None, file_name=None,
     if file_directory is None:
         utils_logger.log("failed with no file_path")
         return None
-    utils_logger.debug("[get_screen_shots] screen shot with retry count:", retry_count)
+    utils_logger.debug("[get_screen_shots] screen shot with retry count:" + str(retry_count))
     if file_name is None:
         utils_logger.debug("[get_screen_shots] 构建默认截图存储路径")
         resolution_within_devices = utils_android.get_resolution_by_device(device=target_device)
@@ -379,13 +380,12 @@ def get_driver_by_launch_app(application_id, launch_activity, device_name_to_con
     if launch_activity is None:
         cmd = "adb shell dumpsys activity | grep -v bnds | grep 'android.intent.category.LAUNCHER'  " \
               + " | grep '" + application_id + "'"
-        utils_logger.log("#get_driver_by_launch_app# 打开应用，并执行\"" + cmd + "\"获取启动activity")
+        utils_logger.log("打开应用，并执行\"" + cmd + "\"获取启动activity")
         return None
 
     # 判断appium服务是否启动
     if start_appium_service(device_name_to_connected, appium_port, access_appium_bp_port) is False:
-        utils_logger.log(
-            "#get_driver_by_launch_app# start_appium_service失败[端口信息]：" + str(appium_port))
+        utils_logger.log("appium服务启动失败[端口信息]：" + str(appium_port))
         return None
 
     platform_version = utils_android.get_deivce_android_version(device=device_name_to_connected)
@@ -406,7 +406,7 @@ def get_driver_by_launch_app(application_id, launch_activity, device_name_to_con
         # 下面两项用于使键盘支持中文输入
         desired_caps['unicodeKeyboard'] = True
         desired_caps['resetKeyboard'] = True
-    utils_logger.log(desired_caps, appium_port)
+    utils_logger.log("Appium配置参数:", desired_caps, "端口:" + str(appium_port))
     driver = appium_webdriver.Remote("http://127.0.0.1:" + str(appium_port) + '/wd/hub',
                                      desired_caps)
     # driver.implicitly_wait(10)  # 设置全局隐性等待时间，单位秒

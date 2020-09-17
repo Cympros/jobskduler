@@ -187,8 +187,8 @@ class AbsBasicAppiumTask(BaseTask):
             self.task_scheduler_failed("未指定appium服务端口")
             return False
         self.appium_port_bp = utils_appium.query_avaiable_port(self.appium_port + 1, 9999)
-        utils_logger.log("指定端口", "appium_port:" + str(self.appium_port),
-                         "appium_port_bp:" + str(self.appium_port_bp))
+        utils_logger.log(
+            '指定端口:[appium_port:' + str(self.appium_port) + ',appium_port_bp:' + str(self.appium_port_bp) + "]")
 
         # 实例化该应用对应的driver对象
         try:
@@ -425,7 +425,8 @@ class AbsBasicAppiumTask(BaseTask):
         #                  " with retry_count:", retry_count)
         # 若上面的判断逻辑失败，则表示还没有找到'可用'的element
         period_checked = 0
-        utils_logger.debug("query_ele_wrapper sleep:", period_checked)
+        if period_checked > 0:
+            utils_logger.debug("query_ele_wrapper sleep:", period_checked)
         time.sleep(period_checked)  # 500毫秒重复执行一次
         if is_ignore_except_case is False and self.except_case_in_query_ele() is True:
             # except_case_in_query_ele为True表示处理生效
@@ -500,7 +501,7 @@ class AbsBasicAppiumTask(BaseTask):
         :return:
         """
         try:
-            utils_logger.debug("safe_touch_action with retry_count:", retry_count)
+            utils_logger.debug("safe_touch_action with retry_count: " + str(retry_count))
             utils_appium.touch_action(driver=self.driver,
                                       target_device_name=self.target_device_name, is_down=is_down,
                                       tab_center=tab_center, tab_interval=tab_interval,
@@ -523,7 +524,7 @@ class AbsBasicAppiumTask(BaseTask):
     def safe_tap_in_point(self, point, retry_count=3):
         """tap_in_point安全模式"""
         try:
-            utils_logger.debug("safe_tap_in_point with retry_count:", retry_count)
+            utils_logger.debug("safe_tap_in_point with retry_count:" + str(retry_count))
             utils_appium.tap_in_point(self.driver, point)
             return True
         except:

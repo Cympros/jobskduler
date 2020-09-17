@@ -84,7 +84,7 @@ class TaskWechat(Base):
         else:
             # 已经收到有效回复，停止循环监听
             self.need_still_listen = False
-            self.notify_task_success()
+            self.notify_task_success("", "")
             self.deal_reply_msg(msg=msg)
             # thread.start_new_thread(self.deal_reply_msg, (msg,))  # msg后必须添加逗号
 
@@ -110,7 +110,7 @@ class TaskWechat(Base):
     def check_reply(self, msg):
         return False
 
-    def run_task(self,_handle_callback):
+    def run_task(self, _handle_callback):
         global wechat_core
         wechat_core = self
 

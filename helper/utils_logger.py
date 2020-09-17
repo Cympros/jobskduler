@@ -35,9 +35,14 @@ logger.addHandler(ch)
 
 
 def debug(*log_infos):
-    is_debug=False  # 可以手动打开
+    is_debug = True  # 可以手动打开
     if is_debug is True:
-        log(log_infos)
+        inspect_stack = inspect.stack()
+        module_path = inspect_stack[1][1]
+        module = os.path.splitext(os.path.basename(module_path))[0]
+        method_name = inspect_stack[1][3]  # 所在方法名
+        log_preffix = "<" + str(module) + "#" + str(method_name) + ">         "
+        format_log_info(log_preffix, *log_infos)
 
 
 def log(*log_infos):
@@ -45,11 +50,15 @@ def log(*log_infos):
     module_path = inspect_stack[1][1]
     module = os.path.splitext(os.path.basename(module_path))[0]
     method_name = inspect_stack[1][3]  # 所在方法名
-    wrapper_log = ""
     log_preffix = "<" + str(module) + "#" + str(method_name) + ">         "
+    format_log_info(log_preffix, *log_infos)  # 这里注意加上*号,否则是以字典的形式作为参数传入
+
+
+def format_log_info(log_preffix, *log_infos):
+    wrapper_log = ''
     for log_item in log_infos:
         if log_item is None:
-            wrapper_log = wrapper_log + "[None]"
+            wrapper_log += '[None]'
         else:
-            wrapper_log = wrapper_log + " " + str(log_item) + " "
+            wrapper_log += ' ' + str(log_item) + ' '
     logger.warning(log_preffix + wrapper_log)
