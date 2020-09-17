@@ -7,6 +7,8 @@ project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0]
 sys.path.insert(0, project_root_path)
 
 from tasks.appium.task_appium_base import AbsBasicAppiumTask
+
+
 # from helper import utils_logger
 
 
@@ -18,8 +20,8 @@ class TaskAppiumYueyueShuaBase(AbsBasicAppiumTask):
 class TaskAppiumYueyueshuaSign(TaskAppiumYueyueShuaBase):
     '月月刷app-签到'
 
-    def run_task(self):
-        if TaskAppiumYueyueShuaBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumYueyueShuaBase.run_task(self, _handle_callback) is False:
             return False
         # 左上角'签到'按钮
         if self.query_ele_wrapper(self.get_query_str_by_viewid('com.weifu.yys:id/textView1'),
@@ -47,8 +49,12 @@ class TaskAppiumYueyueshuaSign(TaskAppiumYueyueShuaBase):
 if __name__ == '__main__':
     import inspect
 
-    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
-             if not left.startswith('AbsBasic')]
+
+    def is_class_member(member):
+        return inspect.isclass(member) and member.__module__ == __name__
+
+
+    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], is_class_member)]
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):

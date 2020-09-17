@@ -14,10 +14,11 @@ class AbsAbsBasicPCTask(BaseTask):
     def __init__(self):
         BaseTask.__init__(self)
 
-    def run_task(self):
-        return BaseTask.run_task(self)
+    def run_task(self, _handle_callback):
+        return BaseTask.run_task(self, _handle_callback)
 
-    def task_scheduler_failed(self, message="none message", email_title=u'异常信息', upload_files=None, exception_info=None):
+    def task_scheduler_failed(self, message="none message", email_title=u'异常信息', upload_files=None,
+                              exception_info=None):
         BaseTask.task_scheduler_failed(self, message, email_title, upload_files, exception_info)
 
     def whether_support_device_type(self, device_type):

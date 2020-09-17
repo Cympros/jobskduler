@@ -110,7 +110,7 @@ class TaskWechat(Base):
     def check_reply(self, msg):
         return False
 
-    def run_task(self):
+    def run_task(self,_handle_callback):
         global wechat_core
         wechat_core = self
 

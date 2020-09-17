@@ -10,8 +10,6 @@ try:
 except ImportError:
     os.system('pip install pyyaml')
     import yaml
-# from helper import utils_common
-# from config import envs
 
 
 def load_yaml(yaml_path):

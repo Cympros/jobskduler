@@ -5,14 +5,15 @@ import sys
 import random
 import time
 import traceback
+import inspect
 
 project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
 sys.path.insert(0, project_root_path)
 
 from tasks.appium.task_appium_base import AbsBasicAppiumTask
 from tasks.appium import utils_appium
-# from helper import envs
 from helper import utils_logger
+from handle_callback import HandleCallback
 
 
 class TaskAppiumQutoutiaoBase(AbsBasicAppiumTask):
@@ -46,8 +47,8 @@ class TaskAppiumQutoutiaoBase(AbsBasicAppiumTask):
                 return True
         return False
 
-    def run_task(self):
-        if AbsBasicAppiumTask.run_task(self) is False:
+    def run_task(self, handle_callback):
+        if AbsBasicAppiumTask.run_task(self, handle_callback) is False:
             return False
         # 延长重试次数，避免应用启动比较耗时的情况
         if self.wait_activity(self.driver, "com.jifen.qkbase.main.MainActivity", retry_count=50) is False:
@@ -56,7 +57,7 @@ class TaskAppiumQutoutiaoBase(AbsBasicAppiumTask):
         return True
 
 
-class TaskAppiumQtoutiaoYuedu(TaskAppiumQutoutiaoBase):
+class TaskAppiumQutoutiaoYuedu(TaskAppiumQutoutiaoBase):
     '趣头条浏览文章'
 
     def except_case_in_query_ele(self):
@@ -66,15 +67,16 @@ class TaskAppiumQtoutiaoYuedu(TaskAppiumQutoutiaoBase):
                                   is_ignore_except_case=True, retry_count=0) is not None:
             utils_logger.log("检测到'华为、vivo、oppo等机型，请勿选择“安全安装、官方推荐”选择“继续安装、取消”，否则将无法领取金币'")
             if self.query_ele_wrapper(
-                    '//android.widget.FrameLayout//android.widget.FrameLayout//android.widget.FrameLayout//android.widget.RelativeLayout//android.widget.RelativeLayout//android.view.View',
+                    '//android.widget.FrameLayout//android.widget.FrameLayout//android.widget.FrameLayout//android'
+                    '.widget.RelativeLayout//android.widget.RelativeLayout//android.view.View',
                     click_mode='click', is_ignore_except_case=True) is not None:
                 return True
             else:
                 self.task_scheduler_failed("检测到'华为、vivo、oppo等机型，请勿选择“安全安装、官方推荐”选择“继续安装、取消”，否则将无法领取金币',但是无法关闭")
         return False
 
-    def run_task(self):
-        if TaskAppiumQutoutiaoBase.run_task(self) is False:
+    def run_task(self, handle_callback):
+        if TaskAppiumQutoutiaoBase.run_task(self, handle_callback) is False:
             return False
         # 最多浏览15次，因为一次大约需要1分钟左右时间
         for_each_size = int(random.randint(5, 15))
@@ -83,7 +85,7 @@ class TaskAppiumQtoutiaoYuedu(TaskAppiumQutoutiaoBase):
             if utils_appium.get_cur_act(self.driver) == '.Launcher':
                 utils_logger.log("运行过程中，软件回到了桌面程序，退出浏览任务")
                 return False
-            utils_logger.log("开启第("+str(index)+ "/"+str(for_each_size)+ ")次浏览")
+            utils_logger.log("开启第(" + str(index) + "/" + str(for_each_size) + ")次浏览")
             # 循环回到首页
             def_main_activity = 'com.jifen.qkbase.main.MainActivity'
             try_count = 0
@@ -109,7 +111,7 @@ class TaskAppiumQtoutiaoYuedu(TaskAppiumQutoutiaoBase):
 
     def browser_news(self, main_activity):
         # 需要进入app手动设置关心的栏目：最多支持7个
-        module_text = random.choice([u'关注',u'推荐', u'上海', u'娱乐', u'旅行', u'历史', u'汽车', u'军事',u'情感',u'游戏',u'军事'])
+        module_text = random.choice([u'关注', u'推荐', u'上海', u'娱乐', u'旅行', u'历史', u'汽车', u'军事', u'情感', u'游戏', u'军事'])
         utils_logger.log('--->module_text:', module_text)
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text(module_text), click_mode="click",
                                   retry_count=0) is None:
@@ -143,7 +145,7 @@ class TaskAppiumQtoutiaoYuedu(TaskAppiumQutoutiaoBase):
         # 随便点击，选择指定文章开始读取
         for tab_index in range(10):
             self.safe_tap_in_point([random.randint(100, 400), random.randint(200, 800)])
-            utils_logger.log("等待进入详情界面[重试:"+ str(tab_index)+ "]：", utils_appium.get_cur_act(self.driver))
+            utils_logger.log("等待进入详情界面[重试:" + str(tab_index) + "]：", utils_appium.get_cur_act(self.driver))
             # wait_activity有针对异常情况的处理，因此弃用'utils_appium.get_cur_act'方式
             if self.wait_activity(driver=self.driver,
                                   target=news_activitys + video_activitys + image_activitys + other_activitys,
@@ -160,9 +162,13 @@ class TaskAppiumQtoutiaoYuedu(TaskAppiumQutoutiaoBase):
         if cur_activity in news_activitys + video_activitys:
             # 判断是否有有效的进度条
             if self.query_ele_wrapper(
-                    '//android.widget.FrameLayout[@resource-id="android:id/content"]/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.ImageView[3]',is_ignore_except_case=True) is None:
+                    '//android.widget.FrameLayout[@resource-id="android:id/content"]/android.widget.FrameLayout'
+                    '/android.widget.FrameLayout/android.widget.ImageView[3]',
+                    is_ignore_except_case=True) is None:
                 if self.query_ele_wrapper(
-                        '//android.widget.FrameLayout[@resource-id="android:id/content"]/android.widget.FrameLayout/android.widget.ImageView',is_ignore_except_case=True,click_mode='click') is not None:
+                        '//android.widget.FrameLayout[@resource-id="android:id/content"]/android.widget.FrameLayout'
+                        '/android.widget.ImageView',
+                        is_ignore_except_case=True, click_mode='click') is not None:
                     # 说明需要敲金蛋
                     utils_logger.log("敲击金蛋领取奖励")
                     return True
@@ -179,19 +185,21 @@ class TaskAppiumQtoutiaoYuedu(TaskAppiumQutoutiaoBase):
                         tab_interval = [0.65, 0.35]
                     else:
                         tab_interval = [0.25, 0.75]
-                    utils_logger.debug("["+str(time_to_foreach)+ "] for tab_interval["+str(tab_interval)+"] with index:"+str(index))
+                    utils_logger.debug(
+                        "[" + str(time_to_foreach) + "] for tab_interval[" + str(tab_interval) + "] with index:" + str(
+                            index))
                     if self.safe_touch_action(tab_interval=tab_interval, duration=int(float(period * 1000))) is False:
                         utils_logger.log("----> safe_touch_action caught exception")
                         break
-                    #每滑动一次,均判断是否还在详情页
-                    scroll_activity=utils_appium.get_cur_act(self.driver)
+                    # 每滑动一次,均判断是否还在详情页
+                    scroll_activity = utils_appium.get_cur_act(self.driver)
                     if scroll_activity not in news_activitys:
-                        utils_logger.log("浏览过程中退出新闻页: ",scroll_activity)
+                        utils_logger.log("浏览过程中退出新闻页: ", scroll_activity)
                         break
                 return True
             elif cur_activity in video_activitys:
-                video_play_time=random.randint(15, 30)
-                utils_logger.log("等待视频播放完成："+str(video_play_time))
+                video_play_time = random.randint(15, 30)
+                utils_logger.log("等待视频播放完成：" + str(video_play_time))
                 time.sleep(video_play_time)  # 休眠45秒
                 return True
         elif cur_activity in image_activitys + other_activitys:
@@ -202,7 +210,7 @@ class TaskAppiumQtoutiaoYuedu(TaskAppiumQutoutiaoBase):
             return False
 
 
-class TaskAppiumQtoutiaoCoreShiduanJiangli(TaskAppiumQutoutiaoBase):
+class TaskAppiumQutoutiaoCoreShiduanJiangli(TaskAppiumQutoutiaoBase):
     """首页-右上角-时段奖励"""
 
     def except_case_in_query_ele(self):
@@ -222,8 +230,8 @@ class TaskAppiumQtoutiaoCoreShiduanJiangli(TaskAppiumQutoutiaoBase):
                 return False
         return False
 
-    def run_task(self):
-        if TaskAppiumQutoutiaoBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumQutoutiaoBase.run_task(self, _handle_callback) is False:
             return False
         # 注释:可能第一次点击会是成功签到，但是此时中间弹框会快速消失，因此再启用第二次尝试点击以检测弹框
         btn_ele_xpath = '//android.widget.FrameLayout//android.widget.LinearLayout//android.widget.FrameLayout' \
@@ -253,9 +261,9 @@ class TaskAppiumQtoutiaoCoreShiduanJiangli(TaskAppiumQutoutiaoBase):
         return False
 
 
-class TaskAppiumQtoutiaoTaskCenter(TaskAppiumQutoutiaoBase):
-    def run_task(self):
-        if TaskAppiumQutoutiaoBase.run_task(self) is False:
+class TaskAppiumQutoutiaoTaskCenter(TaskAppiumQutoutiaoBase):
+    def run_task(self, _handle_callback):
+        if TaskAppiumQutoutiaoBase.run_task(self, _handle_callback) is False:
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('任务', view_type='android.widget.Button'),
                                   click_mode="click", time_wait_page_completely_resumed=5) is None:
@@ -268,11 +276,11 @@ class TaskAppiumQtoutiaoTaskCenter(TaskAppiumQutoutiaoBase):
         return True
 
 
-class TaskAppiumQtoutiaoSign(TaskAppiumQtoutiaoTaskCenter):
+class TaskAppiumQutoutiaoSign(TaskAppiumQutoutiaoTaskCenter):
     """任务中心-签到：进入这个页面即表示领取成功"""
 
-    def run_task(self):
-        if TaskAppiumQtoutiaotask_baseCenter.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumQutoutiaoTaskCenter.run_task(self, _handle_callback) is False:
             return False
         if self.query_ele_wrapper(
                 self.get_query_str_within_xpath_only_text(text='明天签到可领', view_type='android.view.View')) is not None \
@@ -291,31 +299,23 @@ class TaskAppiumQtoutiaoSign(TaskAppiumQtoutiaoTaskCenter):
             return False
 
 
-class TaskAppiumQtoutiaoOpenBaoxiang(TaskAppiumQtoutiaoTaskCenter):
+class TaskAppiumQutoutiaoOpenBaoxiang(TaskAppiumQutoutiaoTaskCenter):
     '任务中心-开宝箱分享-开宝箱'
     '签到'
 
-    def run_task(self):
-        if TaskAppiumQtoutiaoTaskCenter.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumQutoutiaoTaskCenter.run_task(self, _handle_callback) is False:
             return False
         # 循环滚动直至搜索到元素
         upload_files = []
-        for index in range(10):
+        for i in range(10):
             if self.query_ele_wrapper("//android.view.View[@content-desc='开宝箱分享']") is not None:
                 utils_logger.log("检测到\"开启宝箱成功\"")
                 break
 
             utils_logger.log('未找到开宝箱的按钮')
-            utils_logger.log("TaskAppiumQtoutiaoOpenBaoxiang swipe of index：", index)
+            utils_logger.log("TaskAppiumQtoutiaoOpenBaoxiang swipe of index：", i)
             self.safe_touch_action(tab_center=0.4, is_down=True, tab_interval=[0.65, 0.35])
-            # 保留每次的page_resource以及截图文件
-            upload_files.append(
-                utils_appium.write_page_resource(self.driver,
-                                                 envs.get_out_dir() + "page_resource_while_" + str(index) + ".txt"))
-            upload_files.append(
-                utils_appium.get_screen_shots(driver=self.driver, target_device=self.target_device_name,
-                                              file_path=envs.get_out_dir() + "screen_shot_while_" + str(
-                                                  index) + ".png"))
             continue
         # 检测到
         if self.query_ele_wrapper("//android.view.View[@content-desc='开启宝箱']", click_mode="click") is not None:
@@ -343,7 +343,7 @@ class TaskAppiumQtoutiaoOpenBaoxiang(TaskAppiumQtoutiaoTaskCenter):
         return False
 
 
-class TaskAppiumQtoutiaoGrandTotalJiangli(TaskAppiumQtoutiaoTaskCenter):
+class TaskAppiumQutoutiaoGrandTotalJiangli(TaskAppiumQutoutiaoTaskCenter):
     '''
         任务中心-累计阅读时长达到60分钟
         由于该任务需要新闻浏览任务执行足够多次，所以让该任务稍微晚点指定
@@ -355,8 +355,8 @@ class TaskAppiumQtoutiaoGrandTotalJiangli(TaskAppiumQtoutiaoTaskCenter):
             "True" if is_run_support else "False"))
         return is_run_support
 
-    def run_task(self):
-        if TaskAppiumQtoutiaoTaskCenter.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumQutoutiaoTaskCenter.run_task(self, _handle_callback) is False:
             return False
         for index in range(10):
             utils_logger.log("TaskAppiumQtoutiaoGrandTotalJiangli for-each:", index)
@@ -379,8 +379,8 @@ class TaskAppiumQtoutiaoGrandTotalJiangli(TaskAppiumQtoutiaoTaskCenter):
 
 
 class TaskAppiumQtoutiaoLogin(TaskAppiumQutoutiaoBase):
-    def run_task(self):
-        if TaskAppiumQutoutiaoBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumQutoutiaoBase.run_task(self, _handle_callback) is False:
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text(text='我的')) is None:
             self.task_scheduler_failed('未检测到\"我的\"')
@@ -396,10 +396,11 @@ class TaskAppiumQtoutiaoLogin(TaskAppiumQutoutiaoBase):
 
 
 if __name__ == '__main__':
-    import inspect
+    def is_class_member(member):
+        return inspect.isclass(member) and member.__module__ == __name__
 
-    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
-             if not left.startswith('AbsBasic')]
+
+    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], is_class_member)]
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):
@@ -414,4 +415,5 @@ if __name__ == '__main__':
             break
         task_name = tasks[task_index_selected]
         task = eval(task_name + '()')
-        task.run_task()
+
+        task.run_task(HandleCallback())

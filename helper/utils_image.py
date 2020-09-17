@@ -10,7 +10,6 @@ sys.path.insert(0, project_root_path)
 from helper import utils_logger
 
 from helper import utils_file as FileOperate
-from helper import envs
 
 
 def get_rect_formated(raw_file_path, cutted_scale=[0, 1, 0, 1]):

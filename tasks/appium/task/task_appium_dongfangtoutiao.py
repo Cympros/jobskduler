@@ -26,8 +26,8 @@ class TaskAppiumDongFangToutiaoBase(AbsBasicAppiumTask):
             sys.exit()
         return AbsBasicAppiumTask.except_case_in_query_ele(self)
 
-    def run_task(self):
-        if AbsBasicAppiumTask.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if AbsBasicAppiumTask.run_task(self, _handle_callback) is False:
             return False
         if self.wait_activity(self.driver,
                               "com.songheng.eastfirst.common.view.activity.MainActivity") is False:
@@ -36,8 +36,8 @@ class TaskAppiumDongFangToutiaoBase(AbsBasicAppiumTask):
 
 
 class TaskAppiumDongFangtoutiaoCoreShiduanJiangli(TaskAppiumDongFangToutiaoBase):
-    def run_task(self):
-        if TaskAppiumDongFangToutiaoBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumDongFangToutiaoBase.run_task(self, _handle_callback) is False:
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("领取"),
                                   click_mode="click") is not None:
@@ -61,8 +61,8 @@ class TaskAppiumDongFangtoutiaoCoreShiduanJiangli(TaskAppiumDongFangToutiaoBase)
 
 
 class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
-    def run_task(self):
-        if TaskAppiumDongFangToutiaoBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumDongFangToutiaoBase.run_task(self, _handle_callback) is False:
             return False
         for_each_size = int(random.randint(1, 15))
         for index in range(for_each_size):
@@ -173,8 +173,12 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
 if __name__ == '__main__':
     import inspect
 
-    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
-             if not left.startswith('AbsBasic')]
+
+    def is_class_member(member):
+        return inspect.isclass(member) and member.__module__ == __name__
+
+
+    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], is_class_member)]
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):

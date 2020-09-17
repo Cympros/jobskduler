@@ -31,8 +31,8 @@ class TaskAppiumSinaWeiboDailyClockOnBase(TaskAppiumSinaWeiboBase):
     微博每日打卡主页面-Base类
     """
 
-    def run_task(self):
-        if TaskAppiumSinaWeiboBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumSinaWeiboBase.run_task(self, _handle_callback) is False:
             return False
         if self.wait_activity(driver=self.driver, target=['.MainTabActivity'],
                               retry_count=20) is False:
@@ -87,8 +87,8 @@ class TaskAppiumSinaWeiboDailyClockOn(TaskAppiumSinaWeiboDailyClockOnBase):
                                                                   is_scr_shot=is_scr_shot,
                                                                   upload_files=upload_files)
 
-    def run_task(self):
-        if TaskAppiumSinaWeiboDailyClockOnBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumSinaWeiboDailyClockOnBase.run_task(self, _handle_callback) is False:
             return False
         # 判断打卡状态
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('打卡倒计时',
@@ -173,8 +173,8 @@ class TaskAppiumSinaWeiboReceiverDakaReward(TaskAppiumSinaWeiboDailyClockOnBase)
     领取微博打卡每日奖励
     """
 
-    def run_task(self):
-        if TaskAppiumSinaWeiboDailyClockOnBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumSinaWeiboDailyClockOnBase.run_task(self, _handle_callback) is False:
             return False
         if self.query_ele_wrapper(
                 "//android.view.View[contains(@content-desc,'其余奖金自获得当日起30天内有效')]") is not None:
@@ -224,12 +224,12 @@ class TaskAppiumSinaWeiboReceiverDakaReward(TaskAppiumSinaWeiboDailyClockOnBase)
 if __name__ == '__main__':
     import inspect
 
-    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
-             if not left.startswith('AbsAbsBasic')]
-    import inspect
 
-    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
-             if not left.startswith('AbsBasic')]
+    def is_class_member(member):
+        return inspect.isclass(member) and member.__module__ == __name__
+
+
+    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], is_class_member)]
 
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"

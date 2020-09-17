@@ -29,8 +29,8 @@ class TaskAppiumJingDongBase(AbsBasicAppiumTask):
             return True
         return False
 
-    def run_task(self):
-        if  AbsBasicAppiumTask.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if AbsBasicAppiumTask.run_task(self, _handle_callback) is False:
             return False
 
 
@@ -63,8 +63,8 @@ class TaskAppiumJingDongEarnJingDou(TaskAppiumJingDongBase):
         else:
             return True
 
-    def run_task(self):
-        if TaskAppiumJingDongBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumJingDongBase.run_task(self, _handle_callback) is False:
             return False
         status = self.wait_activity(self.driver, '.MainFrameActivity')
         if not status:
@@ -86,8 +86,8 @@ class TaskAppiumJingDongEarnJingDou(TaskAppiumJingDongBase):
 
 # task:正常签到程序
 class TaskAppiumJingDongSignNormal(TaskAppiumJingDongEarnJingDou):
-    def run_task(self):
-        if TaskAppiumJingDongEarnJingDou.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumJingDongEarnJingDou.run_task(self, _handle_callback) is False:
             return False
         # 点击签到按钮
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('已连续签到'), click_mode="click") is None \
@@ -107,8 +107,8 @@ class TaskAppiumJingDongSignNormal(TaskAppiumJingDongEarnJingDou):
 
 # task:京东签到后补充领取的弹框处理
 class TaskAppiumJingDongSignAdditional(TaskAppiumJingDongSignNormal):
-    def run_task(self):
-        if TaskAppiumJingDongSignNormal.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumJingDongSignNormal.run_task(self, _handle_callback) is False:
             utils_logger.log("run_task for TaskAppiumJingDongSignAdditional failed")
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('今日已翻1张牌')) \
@@ -139,8 +139,8 @@ class TaskAppiumJingDongSignAdditional(TaskAppiumJingDongSignNormal):
 
 # task:进店领豆
 class TaskAppiumJingDongEnterShopGotJD(TaskAppiumJingDongEarnJingDou):
-    def run_task(self):
-        if TaskAppiumJingDongEarnJingDou.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumJingDongEarnJingDou.run_task(self, _handle_callback) is False:
             return False
         # 可能会进入'换流量'页面，因此添加延时
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('进店领豆'), click_mode="click",
@@ -177,8 +177,8 @@ class TaskAppiumJingDongEnterShopGotJD(TaskAppiumJingDongEarnJingDou):
 
 # task:转福利
 class TaskAppiumJingDongZhuanFuli(TaskAppiumJingDongEarnJingDou):
-    def run_task(self):
-        if TaskAppiumJingDongEarnJingDou.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumJingDongEarnJingDou.run_task(self, _handle_callback) is False:
             return False
         # 可能会进入'购物返豆'页面，故而添加延时
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('转福利'), click_mode="click",
@@ -211,8 +211,8 @@ class TaskAppiumJingDongZhuanFuli(TaskAppiumJingDongEarnJingDou):
 class TaskAppiumJingDongUserMeiriFuli(TaskAppiumJingDongEarnJingDou):
     """task：京东用户每日福利"""
 
-    def run_task(self):
-        if TaskAppiumJingDongEarnJingDou.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumJingDongEarnJingDou.run_task(self, _handle_callback) is False:
             return False
         if self.query_only_point_within_text('^京东用户每日福利$', is_auto_click=True, cutted_rect=[0.65, 1, 0, 1]) is None:
             self.task_scheduler_failed("进入转福利页面失败")
@@ -232,8 +232,8 @@ class TaskAppiumJingDongUserMeiriFuli(TaskAppiumJingDongEarnJingDou):
 class TaskAppiumJingDongUserMeiriFuliAddition(TaskAppiumJingDongUserMeiriFuli):
     """京东用户每日福利-每日签到"""
 
-    def run_task(self):
-        if TaskAppiumJingDongUserMeiriFuli.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumJingDongUserMeiriFuli.run_task(self, _handle_callback) is False:
             return False
         if self.query_only_point_within_text(search_text='^签到领取$', is_auto_click=True,
                                              cutted_rect=[0, 1, 0.4, 1]) is not None:
@@ -253,8 +253,8 @@ class TaskAppiumJingDongUserMeiriFuliAddition(TaskAppiumJingDongUserMeiriFuli):
 class TaskAppiumJingDongVoucherCenter(TaskAppiumJingDongBase):
     """首页领卷中心内部的签到"""
 
-    def run_task(self):
-        if TaskAppiumJingDongBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumJingDongBase.run_task(self, _handle_callback) is False:
             return False
         status = self.wait_activity(self.driver, '.MainFrameActivity')
         if not status:
@@ -295,13 +295,14 @@ class TaskAppiumJingDongSignDoubleSign(TaskAppiumJingDongEarnJingDou):
     def get_dependence_task(self):
         return ["task_appium_jingdong.TaskAppiumJingDongSignNormal", "task_appium_jdjr.TaskAppiumJDJRSign"]
 
-    def run_task(self):
-        if TaskAppiumJingDongEarnJingDou.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumJingDongEarnJingDou.run_task(self, _handle_callback) is False:
             return False
 
         # 双签按钮
-        if self.query_only_match_part_with_click(project_root_path+'/tasks/appium/task/img/jingdong_double_sign_enterence.png',
-                                                 part_rect_scale=[0.82, 0.98, 0.47, 0.568], is_auto_click=True) is None \
+        if self.query_only_match_part_with_click(
+                project_root_path + '/tasks/appium/task/img/jingdong_double_sign_enterence.png',
+                part_rect_scale=[0.82, 0.98, 0.47, 0.568], is_auto_click=True) is None \
                 and self.query_only_point_within_text(r'^双签京豆$', is_auto_click=True, retry_count=0) is None:
             utils_logger.log("找不到领取双签入口")
             self.task_scheduler_failed('找不到领取双签入口')
@@ -330,8 +331,12 @@ class TaskAppiumJingDongSignDoubleSign(TaskAppiumJingDongEarnJingDou):
 if __name__ == '__main__':
     import inspect
 
-    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
-             if not left.startswith('AbsBasic')]
+
+    def is_class_member(member):
+        return inspect.isclass(member) and member.__module__ == __name__
+
+
+    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], is_class_member)]
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):

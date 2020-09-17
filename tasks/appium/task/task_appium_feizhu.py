@@ -10,6 +10,8 @@ from tasks.appium.task_appium_base import AbsBasicAppiumTask
 from tasks.appium import utils_appium
 # from helper import utils_logger
 from helper import utils_yaml
+
+
 # from config import envs
 
 
@@ -17,8 +19,8 @@ class TaskAppiumFeizhu(AbsBasicAppiumTask):
     def __init__(self):
         AbsBasicAppiumTask.__init__(self, "com.taobao.trip", "com.alipay.mobile.quinox.LauncherActivity")
 
-    def run_task(self):
-        if AbsBasicAppiumTask.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if AbsBasicAppiumTask.run_task(self, _handle_callback) is False:
             return False
         wait_status = self.wait_activity(self.driver, ".home.HomeActivity")
         if not wait_status:
@@ -95,8 +97,12 @@ class TaskAppiumFeizhu(AbsBasicAppiumTask):
 if __name__ == '__main__':
     import inspect
 
-    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
-             if not left.startswith('AbsBasic')]
+
+    def is_class_member(member):
+        return inspect.isclass(member) and member.__module__ == __name__
+
+
+    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], is_class_member)]
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):

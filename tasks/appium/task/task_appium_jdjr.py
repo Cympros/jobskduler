@@ -7,6 +7,8 @@ project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0]
 sys.path.insert(0, project_root_path)
 
 from tasks.appium.task_appium_base import AbsBasicAppiumTask
+
+
 # from helper import utils_logger
 
 
@@ -89,8 +91,8 @@ class TaskAppiumJDJRSignBase(AbsBasicAppiumTask):
             return True
         return False
 
-    def run_task(self):
-        if AbsBasicAppiumTask.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if AbsBasicAppiumTask.run_task(self, _handle_callback) is False:
             return False
         search_fliter = ['.ver2.main.MainActivity', '.ver2.account.security.GestureLockActivity',
                          '.bm.zhyy.account.security.GestureLockActivity']
@@ -107,8 +109,8 @@ class TaskAppiumJDJRQuanyiCenter(TaskAppiumJDJRSignBase):
         路径：京东支付-支付-京东支付权益中心
     """
 
-    def run_task(self):
-        if TaskAppiumJDJRSignBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumJDJRSignBase.run_task(self, _handle_callback) is False:
             return False
         if self.query_ele_wrapper(self.get_query_str_by_viewid('com.jd.jrapp:id/secondLayout'),
                                   click_mode="click") is None \
@@ -158,8 +160,8 @@ class TaskAppiumJDJRSign(TaskAppiumJDJRSignBase):
         路径：首页-我-早起打卡
     '''
 
-    def run_task(self):
-        if TaskAppiumJDJRSignBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumJDJRSignBase.run_task(self, _handle_callback) is False:
             return False
         # 有可能此时还未登录，因此需要手动触发整个页面进入'登录'模块：'Hi，我们为你准备了新手礼'部分作为入口
         if self.query_ele_wrapper("//android.widget.TextView[@text='登录' and @resource-id='com.jd.jrapp:id/tv_btn']",
@@ -205,13 +207,13 @@ class TaskAppiumJDJRDailyClockOn(TaskAppiumJDJRSignBase):
     '''
 
     def task_scheduler_failed(self, message, email_title=u'Error', is_page_source=True, is_scr_shot=True,
-                             upload_files=[]):
+                              upload_files=[]):
         TaskAppiumJDJRSignBase.task_scheduler_failed(self, message=message, email_title=email_title,
-                                                   is_page_source=is_page_source, is_scr_shot=is_scr_shot,
-                                                   upload_files=upload_files)
+                                                     is_page_source=is_page_source, is_scr_shot=is_scr_shot,
+                                                     upload_files=upload_files)
 
-    def run_task(self):
-        if TaskAppiumJDJRSignBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumJDJRSignBase.run_task(self, _handle_callback) is False:
             return False
         # 这里避免多层次class精准定位：响应慢
         if self.query_ele_wrapper(self.get_query_str_by_viewid('com.jd.jrapp:id/home_title_portrait'),
@@ -285,8 +287,12 @@ class TaskAppiumJDJRDailyClockOn(TaskAppiumJDJRSignBase):
 if __name__ == '__main__':
     import inspect
 
-    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
-             if not left.startswith('AbsBasic')]
+
+    def is_class_member(member):
+        return inspect.isclass(member) and member.__module__ == __name__
+
+
+    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], is_class_member)]
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):

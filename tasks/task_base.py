@@ -14,17 +14,12 @@ sys.path.insert(0, project_root_path)
 
 from helper import utils_logger
 from helper import utils_common
-from helper import envs
 
 
 class BaseTask():
     def __init__(self):
         self.upload_files = []  # 用于存储待上传的文件列表
         self.task_session = None
-
-    def is_time_support(self, curent_time=None):
-        """在curent_time时刻是否允许执行该任务"""
-        return True
 
     def get_dependence_task(self):
         """判断当前任务对应的依赖项是否已经全部完成"""
@@ -34,19 +29,15 @@ class BaseTask():
         """任务是否支持device_type"""
         return False if device_type is None else True
 
-    def register_config(self, xargs_dict=None):
-        utils_logger.log("***************任务配置信息[register_config]:", xargs_dict)
-        self.task_session = xargs_dict.get('taskcmd')
-
-    def run_task(self):
+    def run_task(self, _handle_callback):
+        self.handle_callback = _handle_callback
         return True
+
+    def get_project_output_dir(self):
+        return self.handle_callback.read_config(None, "get_project_output_dir")
 
     def release_after_task(self):
         # 任务执行完后的释放资源
-        pass
-
-    def notify_task_success(self):
-        """更新任务状态"""
         pass
 
     def task_scheduler_failed(self, message="none message", email_title=u'异常信息', upload_files=None,
@@ -66,7 +57,7 @@ class BaseTask():
                  }
 
         send_content = json.dumps(error, ensure_ascii=False).encode('utf8')
-        envs.zip_msg_within_files(email_title,
-                                  send_content.decode() + "\n堆栈信息：\n"
-                                  + ("None" if exception_info is None else exception_info),
-                                  list(set(self.upload_files)))
+        utils_common.zip_msg_within_files(self.get_project_output_dir(), email_title,
+                                          send_content.decode() + "\n堆栈信息：\n"
+                                          + ("None" if exception_info is None else exception_info),
+                                          list(set(self.upload_files)))

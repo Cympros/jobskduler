@@ -16,7 +16,6 @@ except:
     import appium
 import time
 import traceback
-from helper import envs
 from helper import utils_common
 from helper import utils_logger
 from helper import utils_image as image_utils
@@ -78,7 +77,7 @@ class AbsBasicAppiumTask(BaseTask):
         pgres = utils_appium.get_pg_source(self.driver)
         if pgres is not None:
             utils_logger.debug(">> page_resource write to file ")
-            file_page_resource = envs.get_out_dir() + "page_resource_" + suffix + ".txt"
+            file_page_resource = self.get_project_output_dir() + "/page_resource_" + suffix + ".txt"
             # 删除历史文件
             if os.path.exists(file_page_resource) is True:
                 os.remove(file_page_resource)
@@ -91,10 +90,10 @@ class AbsBasicAppiumTask(BaseTask):
         """将截图文件写入待上传列表"""
         if self.driver is None:
             return
-        scr_file_path = os.path.abspath(envs.get_out_dir() + "/screen_shot_" + suffix + ".png")
         scr_path = utils_appium.get_screen_shots(driver=self.driver,
+                                                 file_directory=self.get_project_output_dir(),
                                                  target_device=self.target_device_name,
-                                                 file_path=scr_file_path)
+                                                 file_name="screen_shot_" + suffix + ".png")
         if scr_path is not None:
             utils_logger.debug("screen shot write to file ")
             self.upload_files.append(scr_path)
@@ -151,8 +150,11 @@ class AbsBasicAppiumTask(BaseTask):
     def is_need_setting_input_manager(self):
         return False
 
-    def run_task(self):
-        if BaseTask.run_task(self) is False:
+    def run_task(self, handle_callback):
+        if BaseTask.run_task(self, handle_callback) is False:
+            return False
+        if self.target_application_id is None or self.launch_activity is None:
+            utils_logger.log("缺失必要参数")
             return False
         # 检查设备在线状态
         if self.target_device_name is not None:
@@ -260,7 +262,7 @@ class AbsBasicAppiumTask(BaseTask):
             return False
         # 获取target_file的file_name,不要后缀以及父目录相关
         shot_name = os.path.splitext(os.path.split(wrapper_file)[1])[0]
-        scr_shot_pic = utils_appium.get_screen_shots(driver=self.driver,
+        scr_shot_pic = utils_appium.get_screen_shots(driver=self.driver, file_directory=self.get_project_output_dir(),
                                                      target_device=self.target_device_name)
         if scr_shot_pic is not None and \
                 utils_common.is_img_similary(file_first=wrapper_file, file_second=scr_shot_pic,
@@ -348,7 +350,11 @@ class AbsBasicAppiumTask(BaseTask):
 
     def get_path_in_appium_img_dir(self, file_name):
         '返回file_name对应的全路径'
-        return os.path.abspath(envs.get_appium_img_dir() + "/" + file_name)
+        'appium下存放img的目录'
+        appium_img_dir = os.path.abspath(get_module_root_path() + "/tasks/appium/img")
+        if not os.path.exists(appium_img_dir):
+            return None
+        return os.path.abspath(appium_img_dir + "/" + file_name)
 
     def query_ele_wrapper(self, query_str, is_ignore_except_case=False, click_mode=None,
                           retry_count=2,
@@ -373,7 +379,7 @@ class AbsBasicAppiumTask(BaseTask):
         if time_wait_page_completely_resumed > 0:
             # 该方法仅第一次执行是会被调用,递归中不执行
             utils_logger.debug("query_ele_wrapper for sleep-time_wait_page_completely_resumed:",
-                             time_wait_page_completely_resumed)
+                               time_wait_page_completely_resumed)
             time.sleep(time_wait_page_completely_resumed)
         query_res = self.__query_element(query_str=query_str)
         if query_res is not None:
@@ -461,6 +467,7 @@ class AbsBasicAppiumTask(BaseTask):
         @:return <页面是否绘制完成，屏幕截图>
         """
         file_screen_shot = utils_appium.get_screen_shots(driver=self.driver,
+                                                         file_directory=self.get_project_output_dir(),
                                                          target_device=self.target_device_name)
         if is_check_view_inflated is False:
             utils_logger.log("[wait_view_layout_finish] 不需要检查当前页面是否加载完")
@@ -475,6 +482,7 @@ class AbsBasicAppiumTask(BaseTask):
                 utils_logger.debug("wait_view_layout_finish sleep")
                 time.sleep(0)
                 file_screen_shot = utils_appium.get_screen_shots(driver=self.driver,
+                                                                 file_directory=self.get_project_output_dir(),
                                                                  target_device=self.target_device_name)
             else:
                 is_view_layout_finished = True
@@ -503,8 +511,8 @@ class AbsBasicAppiumTask(BaseTask):
             # 屏蔽
             if retry_count <= 0 or except_name == "InvalidSessionIdException":
                 utils_logger.log('TouchError:safe_touch_action caught exception',
-                                 "retry_count:"+str(retry_count),
-                                 "except_name:"+except_name,
+                                 "retry_count:" + str(retry_count),
+                                 "except_name:" + except_name,
                                  traceback.format_exc())
                 return False
             else:
@@ -597,7 +605,7 @@ class AbsBasicAppiumTask(BaseTask):
                 utils_logger.log(
                     "--->[_query_points_with_text_by_ocr] '" + search_text + "' with retry_count:",
                     retry_count, " ,sleep for :", interval_time)
-                if interval_time >0 :
+                if interval_time > 0:
                     time.sleep(interval_time)
                 if is_ignore_except_case is False and self.except_case_in_query_ele() is True:
                     # 指可能有其他外界因素打断此次查询

@@ -11,6 +11,8 @@ sys.path.insert(0, project_root_path)
 
 from tasks.appium.task_appium_base import AbsBasicAppiumTask
 from tasks.appium import utils_appium
+
+
 # from helper import utils_logger
 
 
@@ -26,8 +28,8 @@ class TaskAppiumTaoToutiaoBase(AbsBasicAppiumTask):
             return True
         return False
 
-    def run_task(self):
-        if AbsBasicAppiumTask.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if AbsBasicAppiumTask.run_task(self, _handle_callback) is False:
             return False
         if self.wait_activity(self.driver, ".view.activity.MainActivity") is False:
             self.task_scheduler_failed("未进入淘头条首页")
@@ -35,8 +37,8 @@ class TaskAppiumTaoToutiaoBase(AbsBasicAppiumTask):
 
 
 class TaskAppiumTaotoutiaoCoreShiduanJiangli(TaskAppiumTaoToutiaoBase):
-    def run_task(self):
-        if TaskAppiumTaoToutiaoBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumTaoToutiaoBase.run_task(self, _handle_callback) is False:
             return False
         if self.query_ele_wrapper(self.get_query_str_by_viewid("com.ly.taotoutiao:id/tv_time_countdown"),
                                   click_mode="click") is not None:
@@ -62,8 +64,8 @@ class TaskAppiumTaotoutiaoCoreShiduanJiangli(TaskAppiumTaoToutiaoBase):
 
 
 class TaskAppiumTaoToutiaoYueDu(TaskAppiumTaoToutiaoBase):
-    def run_task(self):
-        if TaskAppiumTaoToutiaoBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumTaoToutiaoBase.run_task(self, _handle_callback) is False:
             return False
         for_each_size = int(random.randint(1, 15))
         for index in range(for_each_size):
@@ -170,8 +172,12 @@ class TaskAppiumTaoToutiaoYueDu(TaskAppiumTaoToutiaoBase):
 if __name__ == '__main__':
     import inspect
 
-    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
-             if not left.startswith('AbsAbsBasic')]
+
+    def is_class_member(member):
+        return inspect.isclass(member) and member.__module__ == __name__
+
+
+    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], is_class_member)]
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):

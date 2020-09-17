@@ -13,6 +13,7 @@ sys.path.insert(0, project_root_path)
 from helper import utils_logger
 from helper import utils_android
 from helper import utils_common
+from handle_callback import HandleCallback
 
 
 # 查找指定目录下的所有.py类型的modules文件
@@ -73,7 +74,7 @@ class DispatcherThread(threading.Thread):
                 exec_state = self.exec_single_loop_task()
             except Exception:
                 import traceback
-                print ("exec_single_loop_task catch exception", traceback.format_exc())
+                print("exec_single_loop_task catch exception", traceback.format_exc())
             if exec_state is not None and exec_state is True:
                 fail_count = 0
             else:
@@ -125,7 +126,7 @@ class DispatcherThread(threading.Thread):
                 #                  "now:" + timestamp_to_date(now_time))
                 MyClass = getattr(module_dynamic_imported, name)
                 instance = MyClass()
-                if instance.run_task() is True:
+                if instance.run_task(HandleCallback()) is True:
                     utils_logger.log("成功执行任务", module_dynamic_imported, name)
                     instance.notify_task_success()
                 instance.release_after_task()  # 环境清理

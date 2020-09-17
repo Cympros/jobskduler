@@ -9,8 +9,6 @@ import collections as clc
 project_root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
 sys.path.insert(0, project_root_path)
 
-from config import email_send
-from config import envs
 from tasks.appium.utils import utils_android
 from helper import utils_config_parser, utils_logger, utils_common
 from tasks.task_pc_base import AbsAbsBasicPCTask
@@ -19,7 +17,7 @@ from tasks.task_pc_base import AbsAbsBasicPCTask
 class TaskBrowserDeviceTimelyInfo(AbsAbsBasicPCTask):
     """即时浏览设备信息"""
 
-    def run_task(self):
+    def run_task(self, _handle_callback):
         connected_device_info = "\n"
         disconected_device_info = "\n"
         device_conf_path = os.path.abspath(envs.get_out_dir() + "/conf_device.ini")
@@ -36,7 +34,7 @@ class TaskBrowserDeviceTimelyInfo(AbsAbsBasicPCTask):
 class TaskCheckerAllTaskRunState(AbsAbsBasicPCTask):
     '检查所有task的执行状态'
 
-    def run_task(self):
+    def run_task(self, _handle_callback):
         unrunnable_task_list = []
 
         email_content = "<目标执行成功次数-实际执行成功次数>/<目标执行成功次数>,执行成功率:<实际执行成功次数>/<实际执行次数>，[<脚本描述信息>]:<脚本路径>\n"
@@ -147,7 +145,7 @@ class TaskCheckerAllTaskRunState(AbsAbsBasicPCTask):
 class TaskResetRunRetryModel(AbsAbsBasicPCTask):
     """用于解决超过重试次数的任务"""
 
-    def run_task(self):
+    def run_task(self, _handle_callback):
         while True:
             task_sessions = conf_modify.query_tasks()
             # 筛选出超出重试次数的任务
@@ -188,7 +186,7 @@ class TaskResetRunRetryModel(AbsAbsBasicPCTask):
 
 
 class TaskClearUnUseDevice(AbsAbsBasicPCTask):
-    def run_task(self):
+    def run_task(self, _handle_callback):
         """以设备为维度，清空不再使用的设备下对应的所有任务"""
         device_dict = clc.defaultdict(list)
         for item_task in conf_modify.query_tasks():
@@ -201,7 +199,7 @@ class TaskClearUnUseDevice(AbsAbsBasicPCTask):
         while True:
             input_tips = "设备对应的设备号："
             device_list = list(device_dict.iterkeys())
-            print device_list
+            print(device_list)
             for index, device_tag in enumerate(device_list):
                 input_tips += "\n" + str(index) + "：" + device_tag
             device_index_selected = input(input_tips + "\n请选择设备对应索引以删除任务(索引下标越界触发程序退出)：")
@@ -246,4 +244,5 @@ if __name__ == "__main__":
             break
         task_name = tasks[task_index_selected]
         task = eval(task_name + '()')
-        task.run_task()
+        from tasks.handle_callback import HandleCallback
+        task.run_task(HandleCallback())

@@ -8,10 +8,8 @@ import random
 project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
 sys.path.insert(0, project_root_path)
 
-# from config import conf_modify
-# from helper import utils_image as image_utils, utils_logger
-# from helper import utils_file as file_utils
-# from config import envs
+from helper import utils_image as image_utils, utils_logger
+from helper import utils_file as file_utils
 from x_aircv.core import Template
 from tasks.appium import utils_appium
 
@@ -31,8 +29,8 @@ class TaskAppiumWeixinExit(AbsBasicAppiumTask):
             "True" if is_run_support else "False"))
         return is_run_support
 
-    def run_task(self):
-        if AbsBasicAppiumTask.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if AbsBasicAppiumTask.run_task(self, _handle_callback) is False:
             return False
         if self.wait_activity(self.driver, '.plugin.account.ui.LoginPasswordUI') is True:
             utils_logger.log("是登录页面")
@@ -115,19 +113,19 @@ class TaskAppiumWeixinBase(AbsBasicAppiumTask):
                 self.task_scheduler_failed("无法关闭被踢下线的弹框")
         return False
 
-    def run_task(self):
-        if AbsBasicAppiumTask.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if AbsBasicAppiumTask.run_task(self, _handle_callback) is False:
             return False
         if self.wait_activity(self.driver, '.ui.LauncherUI') is False:
             self.task_scheduler_failed('why not in main page of weixin')
             return False
 
 
-class TaskAppiumJimmieJDJingdonghuiyuan(TaskAppiumWeixinBase):
+class TaskAppiumWeixinJimmieJDJingdonghuiyuan(TaskAppiumWeixinBase):
     '微信-京东会员'
 
-    def run_task(self):
-        if TaskAppiumWeixinBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumWeixinBase.run_task(self, _handle_callback) is False:
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('我'), click_mode="click") is None:
             self.task_scheduler_failed('not found \"我\"')
@@ -151,11 +149,11 @@ class TaskAppiumJimmieJDJingdonghuiyuan(TaskAppiumWeixinBase):
         return False
 
 
-class TaskAppiumJimmieJDCaiYunlianlianfan(TaskAppiumWeixinBase):
+class TaskAppiumWeixinJimmieJDCaiYunlianlianfan(TaskAppiumWeixinBase):
     '微信-Jimmie-财运连连翻'
 
-    def run_task(self):
-        if TaskAppiumWeixinBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumWeixinBase.run_task(self, _handle_callback) is False:
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('我'), click_mode="click") is None:
             self.task_scheduler_failed('not found \"我\"')
@@ -175,11 +173,11 @@ class TaskAppiumJimmieJDCaiYunlianlianfan(TaskAppiumWeixinBase):
         return False
 
 
-class TaskAppiumJimmieJDJingdouleyuan(TaskAppiumWeixinBase):
+class TaskAppiumWeixinJimmieJDJingdouleyuan(TaskAppiumWeixinBase):
     '微信-Jimmie-京豆乐园'
 
-    def run_task(self):
-        if TaskAppiumWeixinBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumWeixinBase.run_task(self, _handle_callback) is False:
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('我'), click_mode="click") is None:
             self.task_scheduler_failed('not found \"我\"')
@@ -208,11 +206,11 @@ class TaskAppiumJimmieJDJingdouleyuan(TaskAppiumWeixinBase):
         return False
 
 
-class TaskAppiumJimmieJDPeiyuchang(TaskAppiumWeixinBase):
+class TaskAppiumWeixinJimmieJDPeiyuchang(TaskAppiumWeixinBase):
     '微信-Jimmie-京豆培育舱'
 
-    def run_task(self):
-        if TaskAppiumWeixinBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumWeixinBase.run_task(self, _handle_callback) is False:
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('我'), click_mode="click") is None:
             self.task_scheduler_failed('not found \"我\"')
@@ -253,7 +251,8 @@ class TaskAppiumJimmieJDPeiyuchang(TaskAppiumWeixinBase):
         # 循环滑动20次，识别待收获的按钮
         for index in range(10):  # 随机滑动十次
             # 截图
-            scr_path = utils_appium.get_screen_shots(driver=self.driver, target_device=self.target_device_name)
+            scr_path = utils_appium.get_screen_shots(driver=self.driver, file_directory=self.get_project_output_dir(),
+                                                     target_device=self.target_device_name)
             parent_template = Template(scr_path)  # 这里的parenr_template一般使用截图文件
             # 收获京豆
             finish_matchs = Template(image_path_finish).results_within_match_in(parent_template)
@@ -323,11 +322,11 @@ class TaskAppiumJimmieJDPeiyuchang(TaskAppiumWeixinBase):
         return True
 
 
-class TaskAppiumShenqianxiaozhushou(TaskAppiumWeixinBase):
+class TaskAppiumWeixinShenqianxiaozhushou(TaskAppiumWeixinBase):
     '''省钱小助手签到'''
 
-    def run_task(self):
-        if TaskAppiumWeixinBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumWeixinBase.run_task(self, _handle_callback) is False:
             return False
         "//android.view.View[@text='']"
         # 需要设置备注为"淘宝省钱小助手"
@@ -360,11 +359,11 @@ class TaskAppiumShenqianxiaozhushou(TaskAppiumWeixinBase):
         # return False
 
 
-class TaskAppiumZhaohangXinyongkaSign(TaskAppiumWeixinBase):
+class TaskAppiumWeixinZhaohangXinyongkaSign(TaskAppiumWeixinBase):
     '招商信用卡签到领取积分'
 
-    def run_task(self):
-        if TaskAppiumWeixinBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumWeixinBase.run_task(self, _handle_callback) is False:
             return False
         if self.query_ele_wrapper("//android.view.View[@text='招商银行信用卡']", click_mode="click") is None \
                 and self.query_only_point_within_text('^招商银行信用卡$', is_auto_click=True) is None:
@@ -393,7 +392,7 @@ class TaskAppiumZhaohangXinyongkaSign(TaskAppiumWeixinBase):
         return True
 
 
-class TaskAppiumWaziDashangchengBase(TaskAppiumWeixinBase):
+class TaskAppiumWeixinWaziDashangchengBase(TaskAppiumWeixinBase):
     '''
        微信-首页-袜子大商城-领取任务-京东免单/天猫免单
    '''
@@ -410,8 +409,8 @@ class TaskAppiumWaziDashangchengBase(TaskAppiumWeixinBase):
             conf_modify.put(task_tag=self.task_session, key="last_check_task_state_time",
                             value=utils.get_shanghai_time('%Y%m%d%H%M'))
 
-    def run_task(self):
-        if TaskAppiumWeixinBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumWeixinBase.run_task(self, _handle_callback) is False:
             return False
         if self.query_ele_wrapper("//android.view.View[@text='袜子大商城']", click_mode="click") is None \
                 and self.query_only_point_within_text('^袜子大商城$', is_auto_click=True) is None:
@@ -434,24 +433,24 @@ class TaskAppiumWaziDashangchengBase(TaskAppiumWeixinBase):
             return True
         elif self.query_point_size_within_text('^领取此任务$') > 0:
             self.task_scheduler_failed(message="TaskAppiumWaziDashangchengBase:" + self.mode,
-                                      email_title=u'Maybe收到一笔新的袜子商城的任务')
+                                       email_title=u'Maybe收到一笔新的袜子商城的任务')
             return True
         else:
             self.task_scheduler_failed('获取新任务失败')
             return False
 
 
-class TaskAppiumWaziDashangchengJingDong(TaskAppiumWaziDashangchengBase):
+class TaskAppiumWeixinWaziDashangchengJingDong(TaskAppiumWeixinWaziDashangchengBase):
     def __init__(self):
-        TaskAppiumWaziDashangchengBase.__init__(self, '京东免单')
+        TaskAppiumWeixinWaziDashangchengBase.__init__(self, '京东免单')
 
 
-class TaskAppiumWaziDashangchengTaobao(TaskAppiumWaziDashangchengBase):
+class TaskAppiumWeixinWaziDashangchengTaobao(TaskAppiumWeixinWaziDashangchengBase):
     def __init__(self):
-        TaskAppiumWaziDashangchengBase.__init__(self, '天猫免单')
+        TaskAppiumWeixinWaziDashangchengBase.__init__(self, '天猫免单')
 
 
-class TaskAppiumJDJRQuanyiCenter(TaskAppiumWeixinBase):
+class TaskAppiumWeixinJDJRQuanyiCenter(TaskAppiumWeixinBase):
     """
         用于领取使用京东支付后的京豆奖励
         由于京豆有效期为48小时，因此采用每天执行一次
@@ -481,8 +480,8 @@ class TaskAppiumJDJRQuanyiCenter(TaskAppiumWeixinBase):
                 self.task_scheduler_failed("使用绑定的京东账号登陆失败")
         return False
 
-    def run_task(self):
-        if TaskAppiumWeixinBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumWeixinBase.run_task(self, _handle_callback) is False:
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('我'), click_mode="click") is None:
             self.task_scheduler_failed('not found \"我\"')
@@ -536,8 +535,12 @@ class TaskAppiumJDJRQuanyiCenter(TaskAppiumWeixinBase):
 if __name__ == '__main__':
     import inspect
 
-    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
-             if not left.startswith('AbsBasic')]
+
+    def is_class_member(member):
+        return inspect.isclass(member) and member.__module__ == __name__
+
+
+    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], is_class_member)]
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):

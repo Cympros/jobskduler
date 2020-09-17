@@ -7,6 +7,8 @@ project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0]
 sys.path.insert(0, project_root_path)
 
 from tasks.appium.task_appium_base import AbsBasicAppiumTask
+
+
 # from helper import utils_logger
 
 
@@ -39,18 +41,19 @@ class TaskAppiumHuiSuoPingBase(AbsBasicAppiumTask):
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('网络出错了，请待会再试吧', is_force_match=False),
                                   is_ignore_except_case=True, retry_count=0) is not None:
             utils_logger.log("TaskAppiumHuiSuoPingBase.task_scheduler_failed:网络出错，调整邮件提醒类别")
-            AbsBasicAppiumTask.task_scheduler_failed(self, email_title='网络异常', message=message, is_page_source=is_page_source,
-                                               is_scr_shot=is_scr_shot)
+            AbsBasicAppiumTask.task_scheduler_failed(self, email_title='网络异常', message=message,
+                                                     is_page_source=is_page_source,
+                                                     is_scr_shot=is_scr_shot)
         else:
             AbsBasicAppiumTask.task_scheduler_failed(self, email_title=email_title, message=message,
-                                               is_page_source=is_page_source, is_scr_shot=is_scr_shot)
+                                                     is_page_source=is_page_source, is_scr_shot=is_scr_shot)
 
 
 class TaskAppiumHuiSuoPingHourCredit(TaskAppiumHuiSuoPingBase):
     '每小时的红包'
 
-    def run_task(self):
-        if TaskAppiumHuiSuoPingBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumHuiSuoPingBase.run_task(self, _handle_callback) is False:
             return False
         if self.wait_activity(driver=self.driver, target='.account.ui.main.MainTabActivity', retry_count=20) is False:
             self.task_scheduler_failed('not in .account.ui.main.MainTabActivity')
@@ -75,8 +78,8 @@ class TaskAppiumHuiSuoPingHourCredit(TaskAppiumHuiSuoPingBase):
 class TaskAppiumHuiSuoPingDailySign(TaskAppiumHuiSuoPingBase):
     '每日签到'
 
-    def run_task(self):
-        if TaskAppiumHuiSuoPingBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumHuiSuoPingBase.run_task(self, _handle_callback) is False:
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text(text="每日签到"), click_mode="position",
                                   rect_scale_check_element_region=[0.5, 0.75, 0, 1]) is not None:
@@ -102,8 +105,8 @@ class TaskAppiumHuiSuoPingDailySign(TaskAppiumHuiSuoPingBase):
 class TaskAppiumHuiSuoPingMoreMakeMoneyBase(TaskAppiumHuiSuoPingBase):
     """更多赚钱入口基类"""
 
-    def run_task(self):
-        if TaskAppiumHuiSuoPingBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumHuiSuoPingBase.run_task(self, _handle_callback) is False:
             return False
         if self.wait_activity(self.driver, target=['.account.ui.main.MainTabActivity']) is False:
             self.task_scheduler_failed('why not in 首页')
@@ -137,10 +140,11 @@ class TaskAppiumHuiSuoPingDailyClockOn(TaskAppiumHuiSuoPingMoreMakeMoneyBase):
     def task_scheduler_failed(self, message, email_title=u'Error', is_page_source=True, is_scr_shot=True):
         # clockon任务失败影响超级严重，特殊处理
         TaskAppiumHuiSuoPingMoreMakeMoneyBase.task_scheduler_failed(self, message=message, email_title=email_title,
-                                                           is_page_source=is_page_source, is_scr_shot=is_scr_shot)
+                                                                    is_page_source=is_page_source,
+                                                                    is_scr_shot=is_scr_shot)
 
-    def run_task(self):
-        if TaskAppiumHuiSuoPingMoreMakeMoneyBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumHuiSuoPingMoreMakeMoneyBase.run_task(self, _handle_callback) is False:
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('早起打卡'), click_mode="click") is None:
             self.task_scheduler_failed('\"早起打卡\"找不到')
@@ -158,15 +162,15 @@ class TaskAppiumHuiSuoPingDailyClockOn(TaskAppiumHuiSuoPingMoreMakeMoneyBase):
             self.task_scheduler_failed('TODO:解析结果')
             return False
         self.task_scheduler_failed(message='---> TaskAppiumHuiSuoPingDailyClockOn failed',
-                                  email_title='TaskAppiumHuiSuoPingDailyClockOn.FoundEmptyError')
+                                   email_title='TaskAppiumHuiSuoPingDailyClockOn.FoundEmptyError')
         return False
 
 
 class TaskAppiumHuiSuoPingActiveRedPkg(TaskAppiumHuiSuoPingMoreMakeMoneyBase):
     """更多赚钱-活跃红包"""
 
-    def run_task(self):
-        if TaskAppiumHuiSuoPingMoreMakeMoneyBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumHuiSuoPingMoreMakeMoneyBase.run_task(self, _handle_callback) is False:
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('活跃红包'), click_mode="click") is None:
             self.task_scheduler_failed('\"活跃红包\"找不到')
@@ -213,8 +217,8 @@ class TaskAppiumHuiSuoPingActiveRedPkg(TaskAppiumHuiSuoPingMoreMakeMoneyBase):
 class TaskAppiumHuiSuoPingLuckyPan(TaskAppiumHuiSuoPingMoreMakeMoneyBase):
     '幸运转盘'
 
-    def run_task(self):
-        if TaskAppiumHuiSuoPingMoreMakeMoneyBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumHuiSuoPingMoreMakeMoneyBase.run_task(self, _handle_callback) is False:
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('幸运转盘'), click_mode="click") is None:
             return False
@@ -231,8 +235,12 @@ class TaskAppiumHuiSuoPingLuckyPan(TaskAppiumHuiSuoPingMoreMakeMoneyBase):
 if __name__ == "__main__":
     import inspect
 
-    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
-             if not left.startswith('AbsBasic')]
+
+    def is_class_member(member):
+        return inspect.isclass(member) and member.__module__ == __name__
+
+
+    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], is_class_member)]
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):

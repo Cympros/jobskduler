@@ -6,8 +6,7 @@ import sys
 project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
 sys.path.insert(0, project_root_path)
 
-# from helper import utils_common, utils_logger
-from helper import envs
+from helper import utils_common, utils_logger
 from tasks.appium.task_appium_base import AbsBasicAppiumTask
 
 '需要重新绑定账号：13651968735'
@@ -17,8 +16,8 @@ class TaskAppiumZhuankeBase(AbsBasicAppiumTask):
     def __init__(self):
         AbsBasicAppiumTask.__init__(self)
 
-    def run_task(self):
-        return AbsBasicAppiumTask.run_task(self)
+    def run_task(self, _handle_callback):
+        return AbsBasicAppiumTask.run_task(self, _handle_callback)
 
     def except_case_in_query_ele(self):
         if AbsBasicAppiumTask.except_case_in_query_ele(self) is True:
@@ -46,8 +45,8 @@ class TaskAppiumZhuankeSign(TaskAppiumZhuankeBase):
     def __init__(self):
         TaskAppiumZhuankeBase.__init__(self)
 
-    def run_task(self):
-        if TaskAppiumZhuankeBase.run_task(self) is False:
+    def run_task(self, _handle_callback):
+        if TaskAppiumZhuankeBase.run_task(self, _handle_callback) is False:
             return False
         # 首页点击"每日抽奖"入口，进入抽奖界面
         # "每日抽奖"还有个空格，因此基于xpath
@@ -101,7 +100,7 @@ class TaskAppiumZhuankeTrial(TaskAppiumZhuankeBase):
     def __init__(self):
         TaskAppiumZhuankeBase.__init__(self)
         # 管理试玩任务新增的apk资源
-        self.file_installed_pkg = envs.get_out_dir() + "/new_installed.txt"
+        self.file_installed_pkg = self.get_project_output_dir() + "/new_installed.txt"
         if os.path.exists(self.file_installed_pkg) is False:
             file = open(self.file_installed_pkg, 'w')
             file.close()
@@ -131,9 +130,9 @@ class TaskAppiumZhuankeTrial(TaskAppiumZhuankeBase):
             "adb shell pm list packages | awk -F ':' '{print $2}'").splitlines()
         return installed_response
 
-    def run_task(self):
+    def run_task(self, _handle_callback):
         return True
-        # if TaskAppiumZhuankeBase.run_task(self) is False:
+        # if TaskAppiumZhuankeBase.run_task(self, _handle_callback) is False:
         #     return False
         # if self.query_only_point_within_text('试玩任务',is_auto_click=True,is_output_event_tract=True) is None:
         #     utils_logger.log("进入'试玩任务'失败"
@@ -285,8 +284,12 @@ class TaskAppiumZhuankeTrial(TaskAppiumZhuankeBase):
 if __name__ == "__main__":
     import inspect
 
-    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], inspect.isclass)
-             if not left.startswith('AbsBasic')]
+
+    def is_class_member(member):
+        return inspect.isclass(member) and member.__module__ == __name__
+
+
+    tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], is_class_member)]
     while True:
         input_info = "------------------------执行任务列表-----------------------\n"
         for index, task_item in enumerate(tasks):
