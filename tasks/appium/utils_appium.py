@@ -433,5 +433,24 @@ def query_avaiable_port(start_port, end_port, finish_if_found=True):
     return None
 
 
+def back_to_target_activity(driver, target_activity, retry_count=5):
+    # 回退至指定页
+    try_count = 0
+    while get_cur_act(driver) != target_activity:
+        if try_count > retry_count:
+            break
+        try:
+            utils_logger.log("返回键返回至首页:", try_count)
+            driver.keyevent(4)
+        except Exception:
+            utils_logger.log("返回键事件响应异常")
+        finally:
+            try_count = try_count + 1
+    if get_cur_act(driver) == target_activity:
+        return True
+    else:
+        return False
+
+
 if __name__ == '__main__':
     utils_logger.log(query_avaiable_port(0, 99999, False))

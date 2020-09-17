@@ -100,7 +100,6 @@ class TaskAppiumZhuankeTrial(TaskAppiumZhuankeBase):
     def __init__(self):
         TaskAppiumZhuankeBase.__init__(self)
         # 管理试玩任务新增的apk资源
-        self.file_installed_pkg = self.get_project_output_dir() + "/new_installed.txt"
         if os.path.exists(self.file_installed_pkg) is False:
             file = open(self.file_installed_pkg, 'w')
             file.close()
@@ -131,9 +130,9 @@ class TaskAppiumZhuankeTrial(TaskAppiumZhuankeBase):
         return installed_response
 
     def run_task(self, _handle_callback):
-        return True
-        # if TaskAppiumZhuankeBase.run_task(self, _handle_callback) is False:
-        #     return False
+        if TaskAppiumZhuankeBase.run_task(self, _handle_callback) is False:
+            return False
+        self.file_installed_pkg = self.get_project_output_dir() + "/new_installed.txt"
         # if self.query_only_point_within_text('试玩任务',is_auto_click=True,is_output_event_tract=True) is None:
         #     utils_logger.log("进入'试玩任务'失败"
         #     self.task_scheduler_failed("进入'试玩任务'失败")
@@ -153,7 +152,7 @@ class TaskAppiumZhuankeTrial(TaskAppiumZhuankeBase):
         # if len(elements) <=0:
         #     utils_logger.log("试玩任务已抢光，退出"
         #     return True
-        # 
+        #
         # click_index=int(random.randint(0,len(elements)-1))
         # utils_logger.log("当前共有任务数量：",len(elements),",index:",click_index,",选中元素坐标：",elements[click_index].location
         # elements[click_index].click()
@@ -165,7 +164,7 @@ class TaskAppiumZhuankeTrial(TaskAppiumZhuankeBase):
         #         utils_logger.log("未进入任务详情界面，检查是否有未完成的任务失败"
         #         self.task_scheduler_failed('检查是否有未完成的任务失败')
         #         return False
-        #         
+        #
         # # 校验'安装' - 应用安装逻辑
         # if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('已安装')) is None:
         #     # 若判断试玩应用还未安装，则先执行安装程序

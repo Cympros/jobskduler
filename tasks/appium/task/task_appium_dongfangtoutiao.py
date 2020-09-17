@@ -75,17 +75,7 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
             utils_logger.log("开启第(" + str(index) + "/" + str(for_each_size) + ")次浏览")
             # 循环回到首页
             def_main_activity = 'com.songheng.eastfirst.common.view.activity.MainActivity'
-            try_count = 0
-            while utils_android.get_resumed_activity(self.target_device_name) != def_main_activity:
-                if try_count > 15:
-                    break
-                try:
-                    utils_logger.log("返回键返回至首页:", try_count)
-                    self.driver.keyevent(4)
-                except Exception:
-                    utils_logger.log("返回键事件响应异常")
-                try_count = try_count + 1
-            if utils_android.get_resumed_activity(self.target_device_name) == def_main_activity:
+            if utils_appium.back_to_target_activity(self.driver, def_main_activity) is True:
                 try:
                     self.browser_news(def_main_activity)
                 except Exception as e:
@@ -94,6 +84,7 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
                         traceback.format_exc())
             else:
                 utils_logger.log("不再首页，没办法执行新闻浏览任务")
+                break
 
     def browser_news(self, main_activity):
         # TODO: 不要指定具体的tab

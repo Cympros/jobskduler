@@ -92,17 +92,7 @@ class TaskAppiumHuiToutiaoYueDu(TaskAppiumHuiToutiaoBase):
             utils_logger.log("开启第(", index, "/", for_each_size, ")次浏览")
             # 循环回到首页
             def_main_activity = '.account.ui.main.MainTabActivity'
-            try_count = 0
-            while utils_appium.get_cur_act(self.driver) != def_main_activity:
-                if try_count > 15:
-                    break
-                try:
-                    utils_logger.log("返回键返回至首页:", try_count)
-                    self.driver.keyevent(4)
-                except Exception:
-                    utils_logger.log("返回键事件响应异常")
-                try_count = try_count + 1
-            if utils_appium.get_cur_act(self.driver) == def_main_activity:
+            if utils_appium.back_to_target_activity(self.driver, def_main_activity) is True:
                 try:
                     self.browser_news(def_main_activity)
                 except Exception as e:
@@ -110,6 +100,7 @@ class TaskAppiumHuiToutiaoYueDu(TaskAppiumHuiToutiaoBase):
                                      traceback.format_exc())
             else:
                 utils_logger.log("不再首页，没办法执行新闻浏览任务")
+                break
 
     def browser_news(self, main_activity):
         # 至多7个tab
