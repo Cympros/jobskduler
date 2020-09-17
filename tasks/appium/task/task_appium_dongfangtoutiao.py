@@ -22,10 +22,6 @@ class TaskAppiumDongFangToutiaoBase(AbsBasicAppiumTask):
                                     'com.oa.eastfirst.activity.WelcomeActivity')
 
     def except_case_in_query_ele(self):
-        resume_act = utils_android.get_resumed_activity(self.target_device_name)
-        if (resume_act is not None and resume_act.startswith('com.') and not resume_act.startswith(
-                'com.songheng.')):
-            sys.exit()
         return AbsBasicAppiumTask.except_case_in_query_ele(self)
 
     def run_task(self, _handle_callback):
@@ -105,20 +101,17 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
             # 滑动以选择文章开启阅读任务
             self.safe_touch_action(tab_interval=[float(random.uniform(0.65, 0.35)), 0.35])
         # 随便点击，选择指定文章开始读取
-        news_activitys = [
-            'com.songheng.eastfirst.business.newsdetail.view.activity.NewsDetailH5Activity',
-            'com.songheng.eastfirst.business.newsdetail.view.activity.NewsDetailHardwareActivity']
+        news_activitys = ['com.songheng.eastfirst.business.newsdetail.view.activity.NewsDetailH5Activity',
+                          'com.songheng.eastfirst.business.newsdetail.view.activity.NewsDetailHardwareActivity']
         video_activitys = ['.alivideodetail.AliVideoDetailActivity',
                            'com.songheng.eastfirst.business.video.view.activity.VideoDetailActivity']
         other_activitys = ['com.bdtt.sdk.wmsdk.activity.TTLandingPageActivity', '.EastNewActivity',
-                           '.lightbrowser.LightBrowserActivity',
-                           'com.tencent.mtt.MainActivity', 'com.qq.e.ads.ADActivity',
-                           'com.jd.lib.unification.view.ImageActivity',
+                           '.lightbrowser.LightBrowserActivity', 'com.tencent.mtt.MainActivity',
+                           'com.qq.e.ads.ADActivity', 'com.jd.lib.unification.view.ImageActivity',
                            'com.jd.lib.productdetail.ProductDetailActivity',
                            'com.songheng.eastfirst.business.newsdetail.view.activity.NewsDetailImageGalleryActivity',
                            'com.songheng.eastfirst.common.view.activity.WebViewActivity',
-                           'com.uc.browser.InnerUCMobile', '.WebActivity',
-                           '.PackageInstallerActivity']
+                           'com.uc.browser.InnerUCMobile', '.WebActivity', '.PackageInstallerActivity']
         for tab_index in range(10):
             self.safe_tap_in_point([random.randint(100, 400), random.randint(200, 800)])
             utils_logger.log("等待进入新闻详情界面[重试:" + str(tab_index) + "]",
@@ -128,9 +121,15 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
                                   retry_count=1) is True:
                 utils_logger.debug("成功进入某个详情页面")
                 break
+            else:
+                # 进入详情页失败,则先回退至首页
+                if utils_appium.back_to_target_activity(self.driver, main_activity) is False:
+                    utils_logger.log("等待进入详情页失败,且无法回退至首页,则直接退出浏览")
+                    return False
         # 判断是否在详情页面
         cur_activity = utils_android.get_resumed_activity(self.target_device_name)
         if cur_activity == main_activity:
+            utils_logger.log('why 还在首页 cur_activity:' + str(cur_activity) + ",main_activity:" + str(main_activity))
             self.task_scheduler_failed('why 还在首页')
             return False
         # 根据页面调用指定阅读策略
@@ -140,7 +139,7 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
             time_to_foreach = random.randint(5, 10)  # 5~10s，因为每30秒就可以获得10积分的奖励
             period = 0.2  # 每次浏览间隔，单位：秒
             for index in range(int(float(time_to_foreach) / period)):
-                if utils_common.random_boolean_true(0.75) is True:
+                if utils_common.random_boolean_true(0.65) is True:
                     tab_interval = [0.65, 0.35]
                 else:
                     tab_interval = [0.25, 0.75]

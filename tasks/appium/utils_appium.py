@@ -323,8 +323,7 @@ def wait_activity_with_status(driver, target, check_period=1):
             return False
 
         search_status = False
-        # utils_logger.log(
-        #     "wait_activity_with_status.is_in_fliter<" + search_fliter + "> in <" + str(lists) + ">")
+        # utils_logger.debug("wait_activity_with_status.is_in_fliter<" + search_fliter + "> in <" + str(lists) + ">")
         for item in lists:
             if item.endswith(search_fliter) is True:
                 search_status = True
@@ -349,7 +348,7 @@ def wait_activity_with_status(driver, target, check_period=1):
     show_activity = None
     while count < 10:
         show_activity = get_cur_act(driver=driver)
-        # utils_logger.log("wangjun:", count, str(show_activity), str(fliters))
+        # utils_logger.debug("重试:" + str(count), str(show_activity), str(fliters))
         if is_in_fliter(fliters, show_activity) is True:
             res_status = True
             break
