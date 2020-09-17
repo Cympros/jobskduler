@@ -12,6 +12,7 @@ sys.path.insert(0, project_root_path)
 from tasks.appium.task_appium_base import AbsBasicAppiumTask
 from tasks.appium import utils_appium
 from helper import utils_logger
+from helper import utils_android
 
 
 class TaskAppiumDongFangToutiaoBase(AbsBasicAppiumTask):
@@ -20,7 +21,7 @@ class TaskAppiumDongFangToutiaoBase(AbsBasicAppiumTask):
                                     'com.oa.eastfirst.activity.WelcomeActivity')
 
     def except_case_in_query_ele(self):
-        resume_act = utils_appium.get_cur_act(self.driver)
+        resume_act = utils_android.get_resumed_activity(self.target_device_name)
         if (resume_act is not None and resume_act.startswith('com.') and not resume_act.startswith(
                 'com.songheng.')):
             sys.exit()
@@ -67,14 +68,14 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
         for_each_size = int(random.randint(1, 15))
         for index in range(for_each_size):
             # 观测是否直接抛异常导致回到桌面
-            if utils_appium.get_cur_act(self.driver) == '.Launcher':
+            if utils_android.get_resumed_activity(self.target_device_name) == '.Launcher':
                 utils_logger.log("运行过程中，软件回到了桌面程序，退出浏览任务")
                 return False
             utils_logger.log("开启第(" + str(index) + "/" + str(for_each_size) + ")次浏览")
             # 循环回到首页
             def_main_activity = 'com.songheng.eastfirst.common.view.activity.MainActivity'
             try_count = 0
-            while utils_appium.get_cur_act(self.driver) != def_main_activity:
+            while utils_android.get_resumed_activity(self.target_device_name) != def_main_activity:
                 if try_count > 15:
                     break
                 try:
@@ -83,7 +84,7 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
                 except Exception:
                     utils_logger.log("返回键事件响应异常")
                 try_count = try_count + 1
-            if utils_appium.get_cur_act(self.driver) == def_main_activity:
+            if utils_android.get_resumed_activity(self.target_device_name) == def_main_activity:
                 try:
                     self.browser_news(def_main_activity)
                 except Exception as e:
@@ -107,7 +108,7 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
             return False
         # 搜索应该阅读的文章
         scroll_size = int(random.randint(0, 10))
-        utils_logger.log("页面滚动次数：", scroll_size)
+        utils_logger.debug("页面滚动次数：", scroll_size)
         for index in range(scroll_size):
             # 滑动以选择文章开启阅读任务
             self.safe_touch_action(tab_interval=[float(random.uniform(0.65, 0.35)), 0.35])
@@ -128,19 +129,19 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
                            '.PackageInstallerActivity']
         for tab_index in range(10):
             self.safe_tap_in_point([random.randint(100, 400), random.randint(200, 800)])
-            utils_logger.log("等待进入新闻详情界面[重试:" + str(tab_index) + "]", utils_appium.get_cur_act(self.driver))
+            utils_logger.log("等待进入新闻详情界面[重试:" + str(tab_index) + "]", utils_android.get_resumed_activity(self.target_device_name))
             # wait_activity有针对异常情况的处理，因此弃用'utils_appium.get_cur_act'方式
             if self.wait_activity(driver=self.driver, target=news_activitys + video_activitys + other_activitys,
                                   retry_count=1) is True:
-                utils_logger.log("成功进入某个详情页面")
+                utils_logger.debug("成功进入某个详情页面")
                 break
         # 判断是否在详情页面
-        cur_activity = utils_appium.get_cur_act(self.driver)
+        cur_activity = utils_android.get_resumed_activity(self.target_device_name)
         if cur_activity == main_activity:
             self.task_scheduler_failed('why 还在首页')
             return False
         # 根据页面调用指定阅读策略
-        utils_logger.log("cur_activity:", cur_activity)
+        utils_logger.debug("cur_activity:", cur_activity)
         if cur_activity in news_activitys:
             # 开始模拟阅读
             time_to_foreach = random.randint(5, 10)  # 5~10s，因为每30秒就可以获得10积分的奖励
@@ -150,8 +151,9 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
                     tab_interval = [0.65, 0.35]
                 else:
                     tab_interval = [0.25, 0.75]
-                utils_logger.log("[", time_to_foreach, "] for tab_interval[", tab_interval,
-                                 "] with index:", index)
+                utils_logger.debug(
+                    "[" + str(time_to_foreach) + "] for tab_interval[" + str(tab_interval) + "] with index:" + str(
+                        index))
                 if self.safe_touch_action(tab_interval=tab_interval,
                                           duration=int(float(period * 1000))) is False:
                     utils_logger.log("----> safe_touch_action caught exception")
@@ -165,6 +167,7 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
             utils_logger.log("进入非指定详情页面，放弃此次浏览")
             return False
         else:
+            utils_logger.log("进入未知页面:" + str(cur_activity))
             self.task_scheduler_failed(message='未知页面:' + cur_activity, email_title="UnknownPage")
             return False
 

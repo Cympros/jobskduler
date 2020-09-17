@@ -19,7 +19,7 @@ from helper import utils_common
 from helper import utils_logger
 
 
-def lock_off_screen_if_need(device):
+def lock_off_screen_if_need(device=None):
     '解锁当前屏幕'
     cmd_check_screen_off = "adb -s " + device + " shell dumpsys window policy | grep \'mShowingLockscreen=true\'"
     lock_status, lock_status_error = _check_adb_command_result(cmd_check_screen_off)
@@ -47,7 +47,7 @@ def lock_off_screen_if_need(device):
     return True
 
 
-def get_resolution_by_device(device):
+def get_resolution_by_device(device=None):
     '''
         Desc:获取手机的分辨率
         这里涉及到原始分辨率以及当前正在使用的分辨率的区别 
@@ -77,7 +77,7 @@ def get_resolution_by_device(device):
         return None
 
 
-def kill_process_by_pkg_name(pkg_name, device):
+def kill_process_by_pkg_name(pkg_name):
     '通过包名杀掉进程'
     if pkg_name is None:
         return
@@ -86,7 +86,7 @@ def kill_process_by_pkg_name(pkg_name, device):
     _check_adb_command_result(cmd)
 
 
-def get_device_tag(device):
+def get_device_tag(device=None):
     """获取android设备的唯一标识"""
     # 在第一次启用设备的时候随机生成，并且在用户使用设备时不会发生改变
     cmd = "adb" \
@@ -96,7 +96,27 @@ def get_device_tag(device):
     return response
 
 
-def get_deivce_android_version(device):
+def get_resumed_activity(device=None):
+    cmd = "echo \"$(adb " + (" " if device is None else " -s " + str(device) + " ") \
+          + "shell dumpsys activity activities | grep 'ResumedActivity') \\n $(adb " \
+          + (" " if device is None else " -s " + str(device) + " ") \
+          + "shell dumpsys window | grep 'mCurrentFocus')\" | head -n 1 | awk -F ' |{|}' '{for(i=1;i<=NF;i++){if($i ~ " \
+            "\"'/'\"){print $i;}}}' "
+    response, response_error = _check_adb_command_result(cmd)
+    utils_logger.debug("exec结果:", response, response_error)
+    if response is None:
+        return None
+    texts = response.split("/")
+    if len(texts) != 2:
+        return None
+    utils_logger.debug("分解结果:", texts[0], texts[1])
+    if texts[1].startswith("."):
+        return texts[0] + texts[1]
+    else:
+        return texts[1]
+
+
+def get_deivce_android_version(device=None):
     # utils_logger.log("get_deivce_android_version within default:", device)
     cmd = "adb" + (" " if device is None else " -s " + str(device) + " ") \
           + "shell getprop ro.build.version.release"
@@ -111,7 +131,7 @@ def get_package_path_in_phone_within_applicationid(application_id):
     """通过包名解析出系统目录的apk文件路径"""
     if application_id is None:
         return None
-    utils_logger.log("get_package_path_within_applicationid:", application_id)
+    utils_logger.debug("get_package_path_within_applicationid:", application_id)
     cmd = "adb shell pm list packages -f | grep \"" + application_id + "\" | awk -F 'package:|=' '{print $2}'"
     response, response_error = _check_adb_command_result(cmd)
     return response
@@ -128,7 +148,7 @@ def get_app_version_by_applicaionid(device, application_id):
     return None if response is None else response
 
 
-def get_battery_status_by_device(device):
+def get_battery_status_by_device(device=None):
     """读取电源状态
     2:充电状态
     """
@@ -142,7 +162,7 @@ def get_battery_status_by_device(device):
     return battery_status
 
 
-def get_brand_by_device(device):
+def get_brand_by_device(device=None):
     """设备型号"""
     cmd = "adb " \
           + (" " if device is None else " -s " + str(device) + " ") \
@@ -157,7 +177,7 @@ def get_brand_by_device(device):
     return response_vender
 
 
-def get_model_by_device(device):
+def get_model_by_device(device=None):
     """设备版本"""
     cmd = "adb " \
           + (" " if device is None else " -s " + str(device) + " ") \
@@ -184,7 +204,7 @@ def pull_file_from_phone(file_path_in_phone, target_dir_in_mac):
     return None
 
 
-def get_top_focuse_activity(device):
+def get_top_focuse_activity(device=None):
     """获取当前打开应用的信息"""
     cmd = "adb " \
           + (" " if device is None else " -s " + str(device) + " ") \
@@ -259,7 +279,7 @@ def get_start_activity_by_application_id(application_id):
     return launcher_activity
 
 
-def get_device_statue(device):
+def get_device_statue(device=None):
     """读取设备在线状态"""
     device_infos, device_infos_errror = _check_adb_command_result("adb devices")
     if device_infos is None:
@@ -346,7 +366,7 @@ def is_page_loging(check_file, x_cut_count=5, y_cut_count=10):
         max_solid_count = max(solid_dict.values())  # 纯色区域中占用最大色块的色块数
         is_solid = (5 * max_solid_count > 3 * (x_cut_count * y_cut_count))
         utils_logger.debug("max_solid_count:", max_solid_count,
-                         ",max_solid_count/total_size>约定阈值:", is_solid)
+                           ",max_solid_count/total_size>约定阈值:", is_solid)
         # 最大的纯色区域占据2/3以上的部分则表示页面还在加载中
         if is_solid:
             utils_logger.log("纯色区域比例大于阈值，认为页面还未加载完成")
@@ -357,4 +377,4 @@ def is_page_loging(check_file, x_cut_count=5, y_cut_count=10):
 
 
 if __name__ == '__main__':
-    get_connected_devcies()
+    print(get_resumed_activity())

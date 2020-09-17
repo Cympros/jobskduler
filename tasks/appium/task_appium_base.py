@@ -187,7 +187,7 @@ class AbsBasicAppiumTask(BaseTask):
             self.task_scheduler_failed("未指定appium服务端口")
             return False
         self.appium_port_bp = utils_appium.query_avaiable_port(self.appium_port + 1, 9999)
-        utils_logger.log(
+        utils_logger.debug(
             '指定端口:[appium_port:' + str(self.appium_port) + ',appium_port_bp:' + str(self.appium_port_bp) + "]")
 
         # 实例化该应用对应的driver对象
@@ -510,7 +510,7 @@ class AbsBasicAppiumTask(BaseTask):
         except Exception as exception:
             except_name = exception.__class__.__name__
             # 屏蔽
-            if retry_count <= 0 or except_name == "InvalidSessionIdException":
+            if retry_count <= 0 or except_name == 'InvalidSessionIdException' or except_name == 'WebDriverException':
                 utils_logger.log('TouchError:safe_touch_action caught exception',
                                  "retry_count:" + str(retry_count),
                                  "except_name:" + except_name,

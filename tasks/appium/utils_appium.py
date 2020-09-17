@@ -195,7 +195,7 @@ def get_screen_shots(driver, file_directory, target_device=None, file_name=None,
     except Exception as exception:
         except_name = exception.__class__.__name__  # exception的名称
         utils_logger.log("[get_screen_shots] caught exception:", retry_count)
-        if retry_count > 0 and except_name != "InvalidSessionIdException":
+        if retry_count > 0 and except_name != "InvalidSessionIdException" and except_name != 'WebDriverException':
             return get_screen_shots(driver=driver, file_directory=file_directory, target_device=target_device,
                                     file_name=file_name, retry_count=retry_count - 1)
         else:
