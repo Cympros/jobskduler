@@ -111,14 +111,14 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
                            'com.jd.lib.productdetail.ProductDetailActivity',
                            'com.songheng.eastfirst.business.newsdetail.view.activity.NewsDetailImageGalleryActivity',
                            'com.songheng.eastfirst.common.view.activity.WebViewActivity',
-                           'com.uc.browser.InnerUCMobile', '.WebActivity', '.PackageInstallerActivity']
+                           'com.uc.browser.InnerUCMobile', '.WebActivity', '.PackageInstallerActivity',
+                           'com.bytedance.sdk.openadsdk.activity.TTVideoLandingPageActivity']
         for tab_index in range(10):
+            if utils_android.get_resumed_activity(self.target_device_name) != main_activity:
+                utils_logger.log("尝试进入文章时发现不在新闻列表页,直接退出")
+                return False
             self.safe_tap_in_point([random.randint(100, 400), random.randint(200, 800)])
-            utils_logger.log("等待进入新闻详情界面[重试:" + str(tab_index) + "]",
-                             utils_android.get_resumed_activity(self.target_device_name))
-            # wait_activity有针对异常情况的处理，因此弃用'utils_appium.get_cur_act'方式
-            if self.wait_activity(driver=self.driver, target=news_activitys + video_activitys + other_activitys,
-                                  retry_count=1) is True:
+            if self.wait_activity(driver=self.driver, target=news_activitys + video_activitys, retry_count=1) is True:
                 utils_logger.debug("成功进入某个详情页面")
                 break
             else:
@@ -161,7 +161,7 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
             time.sleep(random_play_time)  # 等待视频播放
             return True
         elif cur_activity in other_activitys:
-            utils_logger.log("进入非指定详情页面，放弃此次浏览")
+            utils_logger.debug("进入非指定详情页面，放弃此次浏览")
             return False
         else:
             utils_logger.log("进入未知页面:" + str(cur_activity))

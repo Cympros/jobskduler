@@ -131,13 +131,18 @@ class TaskAppiumHuiToutiaoYueDu(TaskAppiumHuiToutiaoBase):
                            'com.baidu.mobads.AppActivity', 'com.huawei.hwvplayer.service.player.FullscreenActivity',
                            'com.jingdong.common.babel.view.activity.BabelActivity', '.accounts.SyncSettingsActivity']
         for tab_index in range(10):
+            if utils_appium.get_cur_act(self.driver) != main_activity:
+                utils_logger.log("尝试进入文章时发现不在新闻列表页,直接退出")
+                return False
             self.safe_tap_in_point([random.randint(100, 400), random.randint(200, 800)])
-            utils_logger.log("等待进入新闻详情界面[", tab_index, "]：", utils_appium.get_cur_act(self.driver))
-            # wait_activity有针对异常情况的处理，因此弃用'utils_appium.get_cur_act'方式
-            if self.wait_activity(driver=self.driver, target=news_activitys + video_activitys + other_activitys,
-                                  retry_count=1) is True:
-                utils_logger.log("成功进入某个详情页面")
+            if self.wait_activity(driver=self.driver, target=news_activitys + video_activitys, retry_count=1) is True:
+                utils_logger.debug("成功进入某个详情页面")
                 break
+            else:
+                # 进入详情页失败,则先回退至首页
+                if utils_appium.back_to_target_activity(self.driver, main_activity) is False:
+                    utils_logger.log("等待进入详情页失败,且无法回退至首页,则直接退出浏览")
+                    return False
         # 判断是否在详情页面
         cur_activity = utils_appium.get_cur_act(self.driver)
         if cur_activity == main_activity:
