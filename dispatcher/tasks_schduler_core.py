@@ -41,6 +41,20 @@ def timestamp_to_date(time_stamp, format_string="%Y%m%d %H:%M:%S"):
     return str_date
 
 
+# 查看是否是某个类的子类(包含非直接继承关系)
+def is_child_of(obj, cls):
+    try:
+        for i in obj.__bases__:
+            if i is cls or isinstance(i, cls):
+                return True
+        for i in obj.__bases__:
+            if is_child_of(i, cls):
+                return True
+    except AttributeError:
+        return is_child_of(obj.__class__, cls)
+    return False
+
+
 # 任务对应的状态管理
 class TaskState():
     def __init__(self):
@@ -112,9 +126,9 @@ class DispatcherThread(threading.Thread):
                 # 判断是否是具体的任务:
                 if not inspect.isclass(obj) or abc.ABC in obj.__bases__:
                     continue
-                # if not isinstance(obj, BaseTask):
-                #     utils_logger.log("goova", obj)
-                #     continue
+                if is_child_of(obj, BaseTask) is False:
+                    utils_logger.debug("is_child_of[BaseTask子类判断]:", obj)
+                    continue
                 # 判断是否到执行时间
                 global task_maps
                 task_state = task_maps.get(self.get_task_key(name))
@@ -128,8 +142,7 @@ class DispatcherThread(threading.Thread):
                     continue
 
                 # 反射执行task
-                # utils_logger.log("instance to exec task", timestamp_to_date(task_state.next_exec_time),
-                #                  "now:" + timestamp_to_date(now_time))
+                utils_logger.log("instance to exec task", obj)
                 my_class = getattr(module_dynamic_imported, name)
                 instance = my_class()
                 handle_callback = HandleCallback()
