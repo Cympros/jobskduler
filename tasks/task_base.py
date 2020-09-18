@@ -3,6 +3,7 @@
 import json
 import os
 import sys
+import abc
 import threading
 
 # 添加python运行环境检测
@@ -16,7 +17,7 @@ from helper import utils_logger
 from helper import utils_common
 
 
-class BaseTask():
+class BaseTask(abc.ABC):
     def __init__(self):
         self.upload_files = []  # 用于存储待上传的文件列表
         self.task_session = None

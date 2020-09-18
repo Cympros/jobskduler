@@ -4,6 +4,7 @@
 
 import os
 import sys
+import abc
 
 project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../')
 sys.path.insert(0, project_root_path)
@@ -31,7 +32,7 @@ PATH = lambda p: os.path.abspath(
 )
 
 
-class AbsBasicAppiumTask(BaseTask):
+class AbsBasicAppiumTask(BaseTask, abc.ABC):
     def __init__(self, target_application_id=None, launch_activity=None):
         BaseTask.__init__(self)
         self.driver = None

@@ -4,6 +4,7 @@ import os
 import sys
 import time
 import random
+import abc
 
 project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
 sys.path.insert(0, project_root_path)
@@ -58,7 +59,7 @@ class TaskAppiumWeixinExit(AbsBasicAppiumTask):
                 self.task_scheduler_failed("未检测到'设置'入口")
 
 
-class TaskAppiumWeixinBase(AbsBasicAppiumTask):
+class TaskAppiumWeixinBase(AbsBasicAppiumTask, abc.ABC):
     """进入首页的基类"""
 
     def __init__(self):
@@ -392,7 +393,7 @@ class TaskAppiumWeixinZhaohangXinyongkaSign(TaskAppiumWeixinBase):
         return True
 
 
-class TaskAppiumWeixinWaziDashangchengBase(TaskAppiumWeixinBase):
+class TaskAppiumWeixinWaziDashangchengBase(TaskAppiumWeixinBase, abc.ABC):
     '''
        微信-首页-袜子大商城-领取任务-京东免单/天猫免单
    '''
@@ -530,7 +531,13 @@ if __name__ == '__main__':
 
 
     def is_class_member(member):
-        return inspect.isclass(member) and member.__module__ == __name__
+        if inspect.isclass(member) and member.__module__ == __name__:
+            # 判断是否是abc.ABC的直接子类
+            if abc.ABC not in member.__bases__:
+                return True
+            else:
+                print("goova", member, member.__bases__, issubclass(member, abc.ABC))
+        return False
 
 
     tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], is_class_member)]

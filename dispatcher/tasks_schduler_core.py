@@ -1,11 +1,13 @@
 # coding=utf-8
 
 import os
+import abc
 import sys
 import time
 import random
 import inspect
 import threading
+import traceback
 import importlib
 
 project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../')
@@ -15,6 +17,7 @@ from helper import utils_logger
 from helper import utils_android
 from helper import utils_common
 from handle_callback import HandleCallback
+from tasks.task_base import BaseTask
 
 
 # 查找指定目录下的所有.py类型的modules文件
@@ -76,7 +79,6 @@ class DispatcherThread(threading.Thread):
             try:
                 exec_state = self.exec_single_loop_task()
             except Exception:
-                import traceback
                 print("exec_single_loop_task catch exception", traceback.format_exc())
             if exec_state is not None and exec_state is True:
                 fail_count = 0
@@ -94,10 +96,9 @@ class DispatcherThread(threading.Thread):
         for py_module_path in find_all_modules(project_root_path + "/tasks/appium"):
             (module_dir, tempt) = os.path.split(py_module_path)
             (module_name, extension) = os.path.splitext(tempt)
-            if module_name is None \
-                    or not module_name.startswith("task_") \
-                    or module_name.find("base") > -1:
-                continue
+            # if module_name is None or not module_name.startswith("task_") or module_name.find("base") > -1:
+            #     utils_logger.debug("exec_single_loop_task continue: " + str(module_name))
+            #     continue
             # 动态导入模块
             if not module_dir in sys.path:
                 utils_logger.debug("> sys.path.append: " + module_dir)
@@ -108,10 +109,12 @@ class DispatcherThread(threading.Thread):
             if class_results is None:
                 continue
             for name, obj in class_results:
-                if not inspect.isclass(obj):
+                # 判断是否是具体的任务:
+                if not inspect.isclass(obj) or abc.ABC in obj.__bases__:
                     continue
-                if name.startswith('AbsBasic') is True:  # Abs开头的基类不参与task执行
-                    continue
+                # if not isinstance(obj, BaseTask):
+                #     utils_logger.log("goova", obj)
+                #     continue
                 # 判断是否到执行时间
                 global task_maps
                 task_state = task_maps.get(self.get_task_key(name))
@@ -127,8 +130,8 @@ class DispatcherThread(threading.Thread):
                 # 反射执行task
                 # utils_logger.log("instance to exec task", timestamp_to_date(task_state.next_exec_time),
                 #                  "now:" + timestamp_to_date(now_time))
-                MyClass = getattr(module_dynamic_imported, name)
-                instance = MyClass()
+                my_class = getattr(module_dynamic_imported, name)
+                instance = my_class()
                 handle_callback = HandleCallback()
                 if instance.run_task(handle_callback) is True:
                     utils_logger.log("成功执行任务", module_dynamic_imported, name)

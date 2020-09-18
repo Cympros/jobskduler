@@ -2,6 +2,7 @@
 """惠头条"""
 import os
 import sys
+import abc
 import random
 import time
 import traceback
@@ -16,7 +17,7 @@ from tasks.appium import utils_appium
 # from helper import utils_logger
 
 
-class TaskAppiumTaoToutiaoBase(AbsBasicAppiumTask):
+class TaskAppiumTaoToutiaoBase(AbsBasicAppiumTask, abc.ABC):
     def __init__(self):
         AbsBasicAppiumTask.__init__(self, 'com.ly.taotoutiao', 'com.ly.taotoutiao.view.activity.WelComeActivity')
 
@@ -171,7 +172,13 @@ if __name__ == '__main__':
 
 
     def is_class_member(member):
-        return inspect.isclass(member) and member.__module__ == __name__
+        if inspect.isclass(member) and member.__module__ == __name__:
+            # 判断是否是abc.ABC的直接子类
+            if abc.ABC not in member.__bases__:
+                return True
+            else:
+                print("goova", member, member.__bases__, issubclass(member, abc.ABC))
+        return False
 
 
     tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], is_class_member)]

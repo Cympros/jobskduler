@@ -2,6 +2,7 @@
 
 import os
 import sys
+import abc
 
 project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
 sys.path.insert(0, project_root_path)
@@ -12,7 +13,7 @@ from helper import utils_logger
 
 # apk下载链接：http://sj.qq.com/myapp/detail.htm?apkName=com.sina.weibo
 
-class TaskAppiumSinaWeiboBase(AbsBasicAppiumTask):
+class TaskAppiumSinaWeiboBase(AbsBasicAppiumTask, abc.ABC):
     def __init__(self):
         AbsBasicAppiumTask.__init__(self, "com.sina.weibo", "com.sina.weibo.MainTabActivity")
 
@@ -226,7 +227,13 @@ if __name__ == '__main__':
 
 
     def is_class_member(member):
-        return inspect.isclass(member) and member.__module__ == __name__
+        if inspect.isclass(member) and member.__module__ == __name__:
+            # 判断是否是abc.ABC的直接子类
+            if abc.ABC not in member.__bases__:
+                return True
+            else:
+                print("goova", member, member.__bases__, issubclass(member, abc.ABC))
+        return False
 
 
     tasks = [left for left, right in inspect.getmembers(sys.modules[__name__], is_class_member)]
