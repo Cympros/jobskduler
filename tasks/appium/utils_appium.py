@@ -134,6 +134,8 @@ def start_appium_service(device, appium_port, access_appium_bp_port, retry_count
     if res_apm is not None:
         return True
     else:
+        # 关闭appium服务,保证同一时刻仅有唯一服务
+        utils_common.exec_shell_cmd("ps -ef | grep appium | grep -v \"$$\" | awk  '{print \"kill -9 \" $2}' | sh")
         # 启动appium服务
         res, err = utils_common.exec_shell_cmd(appium_start_cmd)
         if interval_time > 0:
