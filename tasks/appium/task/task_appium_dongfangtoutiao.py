@@ -134,32 +134,46 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
             return False
         # 根据页面调用指定阅读策略
         utils_logger.debug("cur_activity:", cur_activity)
-        if cur_activity in news_activitys:
-            # 开始模拟阅读
-            time_to_foreach = random.randint(5, 10)  # 5~10s，因为每30秒就可以获得10积分的奖励
-            period = 0.2  # 每次浏览间隔，单位：秒
-            for index in range(int(float(time_to_foreach) / period)):
-                if utils_common.random_boolean_true(0.65) is True:
-                    tab_interval = [0.65, 0.35]
-                else:
-                    tab_interval = [0.25, 0.75]
-                utils_logger.debug(
-                    "[" + str(time_to_foreach) + "] for tab_interval[" + str(tab_interval) + "] with index:" + str(
-                        index))
-                if self.safe_touch_action(tab_interval=tab_interval,
-                                          duration=int(float(period * 1000))) is False:
-                    utils_logger.log("----> safe_touch_action caught exception")
-                    return False
-                # 东方头条有可能向下拖动的时候退出详情页,因此添加检测机制
-                if utils_android.get_resumed_activity(self.target_device_name) == main_activity:
-                    utils_logger.log("向下拖动太狠,已经退出详情页,结束浏览")
-                    return True
-            return True
-        elif cur_activity in video_activitys:
-            random_play_time = random.randint(25, 90)
-            utils_logger.log("等待视频播放完成：" + str(random_play_time))
-            time.sleep(random_play_time)  # 等待视频播放
-            return True
+        if cur_activity in news_activitys + video_activitys:
+            # 判断是否有进度条
+            if self.query_ele_wrapper(
+                    '//android.support.v4.widget.SlidingPaneLayout/android.widget.RelativeLayout/android.widget'
+                    '.LinearLayout[3]/android.widget.RelativeLayout/android.widget.RelativeLayout/android.widget'
+                    '.RelativeLayout/android.widget.RelativeLayout/android.view.View',
+                    is_ignore_except_case=True, retry_count=0) is None:
+                utils_logger.log("详情页无阅读积分进度框,是无效阅读")
+                return False
+
+            if cur_activity in news_activitys:
+                # 开始模拟阅读
+                time_to_foreach = random.randint(5, 10)  # 5~10s，因为每30秒就可以获得10积分的奖励
+                period = 0.2  # 每次浏览间隔，单位：秒
+                for index in range(int(float(time_to_foreach) / period)):
+                    if utils_common.random_boolean_true(0.65) is True:
+                        tab_interval = [0.65, 0.35]
+                    else:
+                        tab_interval = [0.25, 0.75]
+                    utils_logger.debug(
+                        "[" + str(time_to_foreach) + "] for tab_interval[" + str(tab_interval) + "] with index:" + str(
+                            index))
+                    if self.safe_touch_action(tab_interval=tab_interval,
+                                              duration=int(float(period * 1000))) is False:
+                        utils_logger.log("----> safe_touch_action caught exception")
+                        return False
+                    # 东方头条有可能向下拖动的时候退出详情页,因此添加检测机制
+                    if utils_android.get_resumed_activity(self.target_device_name) == main_activity:
+                        utils_logger.log("向下拖动太狠,已经退出详情页,结束浏览")
+                        return True
+                    # 检测是否存在"点击阅读全文"的文案
+                    if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("点击阅读全文"),
+                                              click_mode="click") is not None:
+                        utils_logger.log("监测到'点击阅读全文',触发单击事件")
+                return True
+            elif cur_activity in video_activitys:
+                random_play_time = random.randint(25, 90)
+                utils_logger.log("等待视频播放完成：" + str(random_play_time))
+                time.sleep(random_play_time)  # 等待视频播放
+                return True
         elif cur_activity in other_activitys:
             utils_logger.debug("进入非指定详情页面，放弃此次浏览")
             return False
