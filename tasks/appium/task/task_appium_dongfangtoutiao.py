@@ -148,6 +148,7 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
                 # 开始模拟阅读
                 time_to_foreach = random.randint(5, 10)  # 5~10s，因为每30秒就可以获得10积分的奖励
                 period = 0.2  # 每次浏览间隔，单位：秒
+                is_click_read_all_article = False  # 是否已经点击过阅读全文
                 for index in range(int(float(time_to_foreach) / period)):
                     if utils_common.random_boolean_true(0.75) is True:
                         tab_interval = [0.65, 0.35]
@@ -165,9 +166,11 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
                         utils_logger.log("向下拖动太狠,已经退出详情页,结束浏览")
                         return True
                     # 检测是否存在"点击阅读全文"的文案
-                    if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("点击阅读全文"), retry_count=0,
-                                              click_mode="click", is_ignore_except_case=True) is not None:
-                        utils_logger.log("监测到'点击阅读全文',触发单击事件")
+                    if is_click_read_all_article is False:
+                        if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("点击阅读全文"), retry_count=0,
+                                                  click_mode="click", is_ignore_except_case=True) is not None:
+                            utils_logger.log("监测到'点击阅读全文',触发单击事件")
+                            is_click_read_all_article = True
                 return True
             elif cur_activity in video_activitys:
                 random_play_time = random.randint(25, 90)
