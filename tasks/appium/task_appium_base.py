@@ -465,25 +465,27 @@ class AbsBasicAppiumTask(BaseTask):
         file_screen_shot = utils_appium.get_screen_shots(driver=self.driver,
                                                          file_directory=self.get_project_output_dir(),
                                                          target_device=self.target_device_name)
+        if file_screen_shot is None:  # 截图获取失败,此时认为页面已经加载完成
+            return True, None
         if is_check_view_inflated is False:
             utils_logger.log("[wait_view_layout_finish] 不需要检查当前页面是否加载完")
             return True, file_screen_shot
         # 使用图片空白区域识别页面是否加载完成
         is_view_layout_finished = False
-        for check_index in range(20):  # 最多重试20次，每次时间间隔为1秒
+        for check_index in range(3):  # 最多重试3次，每次时间间隔为2秒
             # 基于图片识别纯色图片范围判断页面是否加载完成
-            if file_screen_shot is None or utils_android.is_page_loging(file_screen_shot) is True:
-                utils_logger.log("[wait_view_layout_finish] sleep util is_page_loging true:",
-                                 check_index)
+            if utils_android.is_page_loging(file_screen_shot) is True:
+                utils_logger.log("[wait_view_layout_finish] sleep util is_page_loging true:", check_index)
                 utils_logger.debug("wait_view_layout_finish sleep")
-                time.sleep(0)
+                time.sleep(2)
                 file_screen_shot = utils_appium.get_screen_shots(driver=self.driver,
                                                                  file_directory=self.get_project_output_dir(),
                                                                  target_device=self.target_device_name)
-            else:
-                is_view_layout_finished = True
-                break
-        return is_view_layout_finished, file_screen_shot
+                if file_screen_shot is None:  # 截图失败
+                    return True, None
+            else:  # 页面已经加载完成
+                return True, file_screen_shot
+        return False, file_screen_shot
 
     def safe_touch_action(self, tab_interval, retry_count=3, is_down=True, tab_center=0.5,
                           duration=300):
