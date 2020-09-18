@@ -70,16 +70,16 @@ def is_element_region_right(element, region_rect=None):
 
 
 def touch_action(driver, target_device_name, is_down=True, tab_center=0.5, tab_interval=[0, 1],
-                 duration=300):
-    '''
-    :param driver: 
-    :param target_device_name: 
-    :param is_down: 
-    :param tab_center: 
+                 duration=100):
+    """
+    :param driver:
+    :param target_device_name:
+    :param is_down:
+    :param tab_center:
     :param tab_interval: 从0-1，亦可1-0
     :param duration: 滑动的时长
-    :return: 
-    '''
+    :return:
+    """
     utils_logger.debug(
         "[touch_action] tab_interval=" + str(tab_interval) + ",is_down=" + str(is_down) + ",tab_center=" + str(
             tab_center))
@@ -87,6 +87,7 @@ def touch_action(driver, target_device_name, is_down=True, tab_center=0.5, tab_i
     resolution = utils_android.get_resolution_by_device(target_device_name).split('x')
     screen_width = float(resolution[0])
     screen_heigh = float(resolution[1])
+    time.sleep(1)  # driver.swipe经常崩溃,添加延时任务
     if is_down:
         # utils_logger.log("touch_action:","上下滑动"
         t_tab_center = int(tab_center * screen_width)
@@ -194,12 +195,12 @@ def get_screen_shots(driver, file_directory, target_device=None, file_name=None,
         return file_path
     except Exception as exception:
         except_name = exception.__class__.__name__  # exception的名称
-        utils_logger.log("[get_screen_shots] caught exception:", retry_count)
+        utils_logger.log("get_screen_shots caught exception[" + str(except_name) + "]:", retry_count)
         if retry_count > 0 and except_name != "InvalidSessionIdException" and except_name != 'WebDriverException':
             return get_screen_shots(driver=driver, file_directory=file_directory, target_device=target_device,
                                     file_name=file_name, retry_count=retry_count - 1)
         else:
-            utils_logger.log(traceback.format_exc())
+            utils_logger.log("get_screen_shots", traceback.format_exc())
             return None
 
 

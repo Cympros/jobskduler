@@ -100,13 +100,14 @@ class TaskAppiumZhuankeTrial(TaskAppiumZhuankeBase):
     def __init__(self):
         TaskAppiumZhuankeBase.__init__(self)
         # 管理试玩任务新增的apk资源
-        if os.path.exists(self.file_installed_pkg) is False:
-            file = open(self.file_installed_pkg, 'w')
-            file.close()
-        else:
-            for line in open(self.file_installed_pkg):
-                utils_logger.log("start to uninstall apk:", line)
-                utils_common.exec_shell_cmd('adb uninstall ' + line)
+        # self.file_installed_pkg = None
+        # if os.path.exists(self.file_installed_pkg) is False:
+        #     file = open(self.file_installed_pkg, 'w')
+        #     file.close()
+        # else:
+        #     for line in open(self.file_installed_pkg):
+        #         utils_logger.log("start to uninstall apk:", line)
+        #         utils_common.exec_shell_cmd('adb uninstall ' + line)
 
     def except_case_in_query_ele(self):
         if TaskAppiumZhuankeBase.except_case_in_query_ele(self) is True:

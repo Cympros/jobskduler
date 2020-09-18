@@ -149,7 +149,7 @@ class AbsBasicAppiumTask(BaseTask):
         if BaseTask.run_task(self, handle_callback) is False:
             return False
         if self.target_application_id is None or self.launch_activity is None:
-            utils_logger.log("缺失必要参数")
+            utils_logger.debug("缺失必要参数")
             return False
         # 检查设备在线状态
         if self.target_device_name is not None:
@@ -174,7 +174,7 @@ class AbsBasicAppiumTask(BaseTask):
             self.target_device_name,
             self.target_application_id)
         if response_errror is None and check_installed_response is None:
-            utils_logger.log("应用未安装", self.target_application_id)
+            utils_logger.debug("应用未安装", self.target_application_id)
             return False
         # 分配appium服务端口
         self.appium_port = utils_appium.query_avaiable_port(4273, 9999)
@@ -504,12 +504,10 @@ class AbsBasicAppiumTask(BaseTask):
             return True
         except Exception as exception:
             except_name = exception.__class__.__name__
+            utils_logger.log("TouchError:safe_touch_action caught exception[" + str(except_name) + "]:", retry_count)
             # 屏蔽
             if retry_count <= 0 or except_name == 'InvalidSessionIdException' or except_name == 'WebDriverException':
-                utils_logger.log('TouchError:safe_touch_action caught exception',
-                                 "retry_count:" + str(retry_count),
-                                 "except_name:" + except_name,
-                                 traceback.format_exc())
+                utils_logger.log("safe_touch_action", traceback.format_exc())
                 return False
             else:
                 return self.safe_touch_action(tab_interval=tab_interval,

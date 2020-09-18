@@ -3,6 +3,7 @@
 import os
 import sys
 import time
+import random
 import inspect
 import threading
 import importlib
@@ -45,7 +46,7 @@ class TaskState():
     def update_time(self, taskdesc):
         now_hour = time.localtime().tm_hour
         self.next_exec_time = time.time() + 1000 * utils_common.exponential_decay(1 + now_hour, 24)
-        utils_logger.log("更新next_exec_time", taskdesc, timestamp_to_date(self.next_exec_time))
+        utils_logger.debug("更新next_exec_time", taskdesc, timestamp_to_date(self.next_exec_time))
 
     def __str__(self):
         return 'next_exec_time：%s' % timestamp_to_date(self.next_exec_time)
@@ -58,7 +59,9 @@ class DispatcherThread(threading.Thread):
         return self.name + "@" + task_name
 
     def thread_sleep(self):
-        time.sleep(15 * 60)  # 参数为秒
+        thred_sleep_time = random.randint(5 * 60, 10 * 60)
+        utils_logger.log("线程休眠(秒):" + str(thred_sleep_time))
+        time.sleep(thred_sleep_time)  # 参数为秒
 
     def run(self):
         fail_count = 0
@@ -97,7 +100,7 @@ class DispatcherThread(threading.Thread):
                 continue
             # 动态导入模块
             if not module_dir in sys.path:
-                utils_logger.log("> sys.path.append: " + module_dir)
+                utils_logger.debug("> sys.path.append: " + module_dir)
                 sys.path.append(module_dir)
             # utils_logger.log("> dynamic import: " + module_name)
             module_dynamic_imported = importlib.import_module(module_name)
@@ -149,7 +152,7 @@ if __name__ == '__main__':
     for android_device in utils_android.get_connected_devcies():
         choice = input("确认添加Android线程(yes/y)：" + str(android_device) + "\n")
         if choice in yes:
-            utils_logger.log("android_device", android_device)
+            utils_logger.debug("android_device", android_device)
             thread_names.append(android_device)
         else:
             sys.stdout.write("Please respond with 'yes' or 'no'")
