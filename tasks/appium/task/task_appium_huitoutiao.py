@@ -96,8 +96,7 @@ class TaskAppiumHuiToutiaoYueDu(TaskAppiumHuiToutiaoBase):
                 try:
                     self.browser_news(def_main_activity)
                 except Exception as e:
-                    utils_logger.log("TaskAppiumHuiToutiaoYueDu.browser_news caught exception:",
-                                     traceback.format_exc())
+                    utils_logger.log("browser_news caught exception:", traceback.format_exc())
             else:
                 utils_logger.log("不再首页，没办法执行新闻浏览任务")
                 break
@@ -143,6 +142,7 @@ class TaskAppiumHuiToutiaoYueDu(TaskAppiumHuiToutiaoBase):
                 if utils_appium.back_to_target_activity(self.driver, main_activity) is False:
                     utils_logger.log("等待进入详情页失败,且无法回退至首页,则直接退出浏览")
                     return False
+                self.safe_touch_action(tab_interval=[float(random.uniform(0.65, 0.35)), 0.35])
         # 判断是否在详情页面
         cur_activity = utils_appium.get_cur_act(self.driver)
         if cur_activity == main_activity:

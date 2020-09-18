@@ -75,9 +75,7 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
                 try:
                     self.browser_news(def_main_activity)
                 except Exception as e:
-                    utils_logger.log(
-                        "--->TaskAppiumDongFangToutiaoYueDu.browser_news caught exception:",
-                        traceback.format_exc())
+                    utils_logger.log("browser_news caught exception:", traceback.format_exc())
             else:
                 utils_logger.log("不再首页，没办法执行新闻浏览任务")
                 break
@@ -126,6 +124,8 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
                 if utils_appium.back_to_target_activity(self.driver, main_activity) is False:
                     utils_logger.log("等待进入详情页失败,且无法回退至首页,则直接退出浏览")
                     return False
+                # 回退至首页时,增加随机滚动,避免又点入同一份广告
+                self.safe_touch_action(tab_interval=[float(random.uniform(0.65, 0.35)), 0.35])
         # 判断是否在详情页面
         cur_activity = utils_android.get_resumed_activity(self.target_device_name)
         if cur_activity == main_activity:
@@ -149,7 +149,7 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
                 time_to_foreach = random.randint(5, 10)  # 5~10s，因为每30秒就可以获得10积分的奖励
                 period = 0.2  # 每次浏览间隔，单位：秒
                 for index in range(int(float(time_to_foreach) / period)):
-                    if utils_common.random_boolean_true(0.65) is True:
+                    if utils_common.random_boolean_true(0.75) is True:
                         tab_interval = [0.65, 0.35]
                     else:
                         tab_interval = [0.25, 0.75]
@@ -165,8 +165,8 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
                         utils_logger.log("向下拖动太狠,已经退出详情页,结束浏览")
                         return True
                     # 检测是否存在"点击阅读全文"的文案
-                    if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("点击阅读全文"),
-                                              click_mode="click") is not None:
+                    if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("点击阅读全文"), retry_count=0,
+                                              click_mode="click", is_ignore_except_case=True) is not None:
                         utils_logger.log("监测到'点击阅读全文',触发单击事件")
                 return True
             elif cur_activity in video_activitys:
