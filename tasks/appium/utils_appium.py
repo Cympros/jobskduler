@@ -261,10 +261,10 @@ def find_element_by_content_desc(driver, content_desc, retry_count=2, interval_t
         element = driver.find_element_by_accessibility_id(content_desc)
     finally:
         if element is not None:
-            utils_logger.log(content_desc, "retry_count:" + str(retry_count))
+            utils_logger.debug(content_desc, "retry_count:" + str(retry_count))
             return element
         elif retry_count <= 0:
-            utils_logger.log(" failed with no chance", content_desc)
+            utils_logger.debug(" failed with no chance", content_desc)
             return None
         else:
             if interval_time > 0:
@@ -304,7 +304,7 @@ def find_element_by_xpath(driver, xpath, retry_count=2, interval_time=0):
             utils_logger.debug(xpath, "retry_count:" + str(retry_count))
             return element
         elif retry_count <= 0:
-            utils_logger.log("failed with no chance", xpath)
+            utils_logger.debug("failed with no chance", xpath)
             return None
         else:
             if interval_time > 0:
