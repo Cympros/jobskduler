@@ -13,8 +13,7 @@ sys.path.insert(0, project_root_path)
 from tasks.appium.task_appium_base import AbsBasicAppiumTask
 from tasks.appium import utils_appium
 
-
-# from helper import utils_logger
+from helper import utils_logger
 
 
 class TaskAppiumHuiToutiaoBase(AbsBasicAppiumTask, abc.ABC):
@@ -27,22 +26,22 @@ class TaskAppiumHuiToutiaoBase(AbsBasicAppiumTask, abc.ABC):
         if self.query_ele_wrapper(
                 "//android.widget.LinearLayout//android.widget.FrameLayout//android.widget.RelativeLayout"
                 + "//android.widget.LinearLayout//android.widget.ImageView[@resource-id='com.cashtoutiao:id/img_close']",
-                click_mode="click", is_ignore_except_case=True) is True:
+                click_mode="click", is_ignore_except_case=True, retry_count=0) is True:
             utils_logger.log("检测到弹框部分，搜索弹框右上角的关闭按钮")
             return True
         elif self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("安全升级"),
-                                    is_ignore_except_case=True) is not None:
+                                    is_ignore_except_case=True, retry_count=0) is not None:
             if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("以后再说"), click_mode='click',
-                                      is_ignore_except_case=True) is None:
+                                      is_ignore_except_case=True, retry_count=0) is None:
                 self.task_scheduler_failed("检测到'安全升级'按钮,但没办法'关闭更新'弹框")
                 return False
             else:
                 return True
         # 检测到信息流页面直接弹出"您当前处于WIFI网络环境下，可安全下载，不消耗您的数据流量。"的"下载提示"弹框
         elif self.query_ele_wrapper(self.get_query_str_by_viewid("com.cashtoutiao:id/dialog_custom_style_double_btns"),
-                                    is_ignore_except_case=True) is not None:
+                                    is_ignore_except_case=True, retry_count=0) is not None:
             if self.query_ele_wrapper(self.get_query_str_by_viewid("com.cashtoutiao:id/confirm_cancel"),
-                                      click_mode="click", is_ignore_except_case=True) is not None:
+                                      click_mode="click", is_ignore_except_case=True, retry_count=0) is not None:
                 return True
             else:
                 self.task_scheduler_failed("检测到'下载提示弹框'，但无法关闭")
@@ -62,7 +61,9 @@ class TaskAppiumHuitoutiaoCoreShiduanJiangli(TaskAppiumHuiToutiaoBase):
         if TaskAppiumHuiToutiaoBase.run_task(self, _handle_callback) is False:
             return False
         if self.query_ele_wrapper(self.get_query_str_by_viewid("com.cashtoutiao:id/count_down_tv"),
-                                  click_mode="click") is not None:
+                                  click_mode="click") is not None \
+                or self.query_ele_wrapper(self.get_query_str_by_viewid("com.cashtoutiao:id/receive_layout"),
+                                          click_mode="click") is not None:
             if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("时段奖励领取成功"),
                                       click_mode="click") is not None:
                 utils_logger.log("时段奖励领取成功")
@@ -72,8 +73,7 @@ class TaskAppiumHuitoutiaoCoreShiduanJiangli(TaskAppiumHuiToutiaoBase):
                 utils_logger.log("正在倒计时当中")
                 return True
             else:
-                # 没有弹框提示
-                # self.task_scheduler_failed("没有时段奖励领取成功提示")
+                utils_logger.debug("点击后没有反应")
                 return False
         else:
             self.task_scheduler_failed("没找到时段奖励")
@@ -205,4 +205,7 @@ if __name__ == '__main__':
             break
         task_name = tasks[task_index_selected]
         task = eval(task_name + '()')
-        task.run_task()
+
+        from handle_callback import HandleCallback
+
+        task.run_task(HandleCallback())

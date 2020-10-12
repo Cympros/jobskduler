@@ -10,7 +10,7 @@ import threading
 import traceback
 import importlib
 
-project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../')
+project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0])
 sys.path.insert(0, project_root_path)
 
 from helper import utils_logger

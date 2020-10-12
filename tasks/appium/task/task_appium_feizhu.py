@@ -124,4 +124,6 @@ if __name__ == '__main__':
             break
         task_name = tasks[task_index_selected]
         task = eval(task_name + '()')
-        task.run_task()
+        from handle_callback import HandleCallback
+
+        task.run_task(HandleCallback())

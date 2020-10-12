@@ -185,8 +185,10 @@ def get_screen_shots(driver, file_directory, target_device=None, file_name=None,
     if file_name is None:
         utils_logger.debug("[get_screen_shots] 构建默认截图存储路径")
         resolution_within_devices = utils_android.get_resolution_by_device(device=target_device)
-        file_name = "screen_tmp_" + \
-                    (resolution_within_devices if resolution_within_devices is not None else "none") \
+        file_name = "screen_shot" \
+                    + "_" + str(utils_common.get_shanghai_time()) \
+                    + "_" + (target_device if target_device is not None else "none") \
+                    + "_" + (resolution_within_devices if resolution_within_devices is not None else "none") \
                     + ".png"
     file_path = os.path.abspath(file_directory + file_name)
     # 删除缓存
@@ -274,28 +276,28 @@ def find_element_by_content_desc(driver, content_desc, retry_count=2, interval_t
                                                 interval_time)
 
 
-def find_element_by_viewid(driver, viewid, retry_count=2, interval_time=0.1):
-    return None
-    # '根据id寻找资源'
-    # utils_logger.log("find_element_by_viewid with viewid:[" + viewid + "] with retry_count:", retry_count)
-    # element = None
-    # try:
-    #     element = driver.find_element_by_id(viewid)
-    # finally:
-    #     if element is not None:
-    #         return element
-    #     elif retry_count <= 0:
-    #         utils_logger.log("find_element_by_viewid[" + viewid + "] failed with no chance")
-    #         return None
-    #     else:
-    #         utils_logger.log("find_element_by_viewid sleep:", interval_time)
-    #         time.sleep(interval_time)
-    #         return find_element_by_viewid(driver=driver, viewid=viewid, retry_count=retry_count - 1,
-    #                                       interval_time=interval_time)
+def find_element_by_viewid(driver, viewid, retry_count=2, interval_time=0):
+    """根据id寻找资源"""
+    element = None
+    try:
+        element = driver.find_element_by_id(viewid)
+    finally:
+        if element is not None:
+            utils_logger.debug(viewid, "retry_count:" + str(retry_count))
+            return element
+        elif retry_count <= 0:
+            utils_logger.debug("failed with no chance", viewid)
+            return None
+        else:
+            if interval_time > 0:
+                utils_logger.log("find_element_by_viewid sleep:", interval_time)
+                time.sleep(interval_time)
+            return find_element_by_viewid(driver=driver, viewid=viewid, retry_count=retry_count - 1,
+                                          interval_time=interval_time)
 
 
 def find_element_by_xpath(driver, xpath, retry_count=2, interval_time=0):
-    '基于xpath寻找控件'
+    """基于xpath寻找控件"""
     element = None
     try:
         element = driver.find_element_by_xpath(xpath)
@@ -443,12 +445,12 @@ def back_to_target_activity(driver, target_activity, retry_count=5):
         if try_count > retry_count:
             break
         try:
-            utils_logger.log("返回键返回至首页:", try_count)
             driver.keyevent(4)
         except Exception:
             utils_logger.log("返回键事件响应异常")
         finally:
             try_count = try_count + 1
+    utils_logger.log("返回键返回至首页,实际重试次数:" + str(try_count))
     if get_cur_act(driver) == target_activity:
         return True
     else:

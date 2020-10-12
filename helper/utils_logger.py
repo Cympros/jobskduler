@@ -12,9 +12,11 @@ from logging.handlers import RotatingFileHandler
 project_root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
 sys.path.insert(0, project_root_path)
 
+import handle_callback
+
 
 def get_log_file():
-    log_dir = project_root_path + "/out"
+    log_dir = handle_callback.get_out_dir()
     if os.path.exists(log_dir) is False:
         os.makedirs(log_dir)
     return os.path.abspath(log_dir + "/logger_" + str(threading.currentThread().getName()) + ".txt")
@@ -35,13 +37,13 @@ logger.addHandler(ch)
 
 
 def debug(*log_infos):
-    is_debug = False  # 可以手动打开
+    is_debug = True  # 可以手动打开
     if is_debug is True:
         inspect_stack = inspect.stack()
         module_path = inspect_stack[1][1]
         module = os.path.splitext(os.path.basename(module_path))[0]
         method_name = inspect_stack[1][3]  # 所在方法名
-        log_preffix = "<" + str(module) + "#" + str(method_name) + ">         "
+        log_preffix = ":D<" + str(module) + "#" + str(method_name) + ">    "
         format_log_info(log_preffix, *log_infos)
 
 
@@ -50,7 +52,7 @@ def log(*log_infos):
     module_path = inspect_stack[1][1]
     module = os.path.splitext(os.path.basename(module_path))[0]
     method_name = inspect_stack[1][3]  # 所在方法名
-    log_preffix = "<" + str(module) + "#" + str(method_name) + ">         "
+    log_preffix = ":I<" + str(module) + "#" + str(method_name) + ">    "
     format_log_info(log_preffix, *log_infos)  # 这里注意加上*号,否则是以字典的形式作为参数传入
 
 

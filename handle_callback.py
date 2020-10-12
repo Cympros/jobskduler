@@ -11,8 +11,8 @@ from helper import utils_logger
 
 
 def get_out_dir():
-    '临时文件的存放跟目录'
-    outer_dir = project_root_path + "/out/"
+    """临时文件的存放跟目录"""
+    outer_dir = project_root_path + "/../out/sub.daily-task/"
     if not os.path.exists(outer_dir):
         os.makedirs(outer_dir)
     return outer_dir
@@ -20,8 +20,11 @@ def get_out_dir():
 
 class HandleCallback(metaclass=ABCMeta):
 
+    def __init__(self):
+        pass
+
     def read_config(self, module_name, task_name, config_key):
-        utils_logger.log("HandleCallback.read_config", module_name, task_name, config_key)
+        utils_logger.debug("HandleCallback.read_config", module_name, task_name, config_key)
         if config_key == 'get_project_output_dir':
             return get_out_dir()
 

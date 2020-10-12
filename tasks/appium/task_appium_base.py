@@ -35,36 +35,36 @@ PATH = lambda p: os.path.abspath(
 class AbsBasicAppiumTask(BaseTask, abc.ABC):
     def __init__(self, target_application_id=None, launch_activity=None):
         BaseTask.__init__(self)
-        self.driver = None
-        self.target_device_name = None
-        self.appium_port = None
-        self.appium_port_bp = None
 
+        # 外部参数依赖
+        self.target_device_name = None
         self.target_application_id = target_application_id
         self.launch_activity = launch_activity
+
+        # 本地实例化参数
+        self.driver = None
+        self.appium_port = None
+        self.appium_port_bp = None
         self.upload_files = []  # 待上传至远端的文件列表
 
-    def wait_activity(self, driver, target, check_period=0, retry_count=10,
+    def wait_activity(self, driver, target, check_period=2, retry_count=10,
                       is_ignore_except_case=False):
         """activity等待时添加弹框过滤函数
         :param driver: 
-        :param target: 
+        :param target: 若给定的不包含包名,则手动匹配包名
         :param check_period: 
         :param retry_count: 
         :param is_ignore_except_case: 
         :return: boolean
         """
-        # utils_logger.log("AbsBasicAppiumTask wait_activity")
-        # query_activity_status: true or false
         # 第一次搜索时retry_count设置为1次(即一秒)，以避免wait_activity_with_status的重试时间内权限弹框被系统倒计时逻辑关闭
-        if utils_appium.wait_activity_with_status(driver=driver, target=target, check_period=check_period) is True:
-            return True
         for index in range(20):
-            if is_ignore_except_case is False and self.except_case_in_query_ele() is True:
-                utils_logger.log("重复执行：" + str(index))
-            else:
-                break
-        return utils_appium.wait_activity_with_status(driver=driver, target=target, check_period=check_period)
+            utils_logger.log("重复执行：" + str(index))
+            if utils_appium.wait_activity_with_status(driver=driver, target=target, check_period=check_period) is True:
+                return True
+            if is_ignore_except_case is False:
+                self.except_case_in_query_ele()
+        return False
 
     def write_page_resource_into_file(self, suffix="normal"):
         """将pageresource写入文件"""
@@ -88,8 +88,7 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
             return
         scr_path = utils_appium.get_screen_shots(driver=self.driver,
                                                  file_directory=self.get_project_output_dir(),
-                                                 target_device=self.target_device_name,
-                                                 file_name="screen_shot_" + suffix + ".png")
+                                                 target_device=self.target_device_name)
         if scr_path is not None:
             utils_logger.debug("screen shot write to file ")
             self.upload_files.append(scr_path)
@@ -97,7 +96,7 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
     def task_scheduler_failed(self, message, email_title=u'异常信息', is_page_source=True,
                               is_scr_shot=True, upload_files=[],
                               exception_info=None):
-        'upload_files：可以允许自定义添加待上传的文件'
+        """upload_files：可以允许自定义添加待上传的文件"""
         self.upload_files.extend(upload_files)
         if message is not None:
             utils_logger.log(message)
@@ -105,17 +104,14 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
             utils_logger.log("task_scheduler_failed in AbsBasicAppiumTask with upload_files:",
                              list(set(self.upload_files)))
         msgs = {'device_name': self.target_device_name,
-                'device_version': utils_android.get_deivce_android_version(
-                    device=self.target_device_name),
+                'device_version': utils_android.get_deivce_android_version(device=self.target_device_name),
                 'device_brand': utils_android.get_brand_by_device(self.target_device_name),
                 'device_model': utils_android.get_model_by_device(self.target_device_name),
-                'device_resolution': utils_android.get_resolution_by_device(
-                    self.target_device_name),
+                'device_resolution': utils_android.get_resolution_by_device(self.target_device_name),
                 'app_version': utils_android.get_app_version_by_applicaionid(
                     self.target_device_name,
                     self.target_application_id),
-                'raw_message': message,
-                }
+                'raw_message': message, }
         if self.driver is not None:
             msgs['current_activity'] = utils_appium.get_cur_act(self.driver)
         # 截取日志并上传
@@ -185,7 +181,6 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         self.appium_port_bp = utils_appium.query_avaiable_port(self.appium_port + 1, 9999)
         utils_logger.debug(
             '指定端口:[appium_port:' + str(self.appium_port) + ',appium_port_bp:' + str(self.appium_port_bp) + "]")
-
         # 实例化该应用对应的driver对象
         try:
             self.driver = utils_appium.get_driver_by_launch_app(self.target_application_id,
@@ -209,9 +204,7 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
 
         if self.driver is None or self.target_device_name is None:
             self.task_scheduler_failed(
-                "cureent env not right:["
-                + str(self.driver) + ","
-                + str(self.target_device_name) + "]")
+                "cureent env not right:[" + str(self.driver) + "," + str(self.target_device_name) + "]")
             return False
 
         # 检查是否锁屏
@@ -298,8 +291,8 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         if query_str.startswith("#viewid#"):  # 针对可以拿到id的情况
             viewid = query_str.replace('#viewid#', '')  # strip('abc')表示会删除收尾的a、b、c字母，而不是只删除'abc'
             ele_viewid = utils_appium.find_element_by_viewid(self.driver, viewid=viewid)
-            # if ele_viewid is None:
-            #     utils_logger.log("not found element by find_element_by_viewid for " + str(viewid)
+            if ele_viewid is None:
+                utils_logger.debug("not found element by find_element_by_viewid for " + str(viewid))
             return ele_viewid
         elif query_str.startswith("#content_desc#"):
             content_desc = query_str.strip('#content_desc#').strip()
@@ -370,60 +363,55 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         # TODO:添加element限制区域
         'query_ele_wrapper包装器'
         if query_str is None:
-            utils_logger.log("query_ele_wrapper failed with no query_str:")
+            utils_logger.log("failed with no query_str:")
             return None
         # 屏蔽有时候页面还没有延迟刷新的问题
         if time_wait_page_completely_resumed > 0:
             # 该方法仅第一次执行是会被调用,递归中不执行
-            utils_logger.debug("query_ele_wrapper for sleep-time_wait_page_completely_resumed:",
-                               time_wait_page_completely_resumed)
+            utils_logger.debug("sleep-time_wait_page_completely_resumed:" + str(time_wait_page_completely_resumed))
             time.sleep(time_wait_page_completely_resumed)
         query_res = self.__query_element(query_str=query_str)
         if query_res is not None:
             # 若找打的对象不为空的时候，还要判断找到的数据类型
-            if isinstance(query_res, appium.webdriver.webelement.WebElement):
+            if isinstance(query_res, appium.webdriver.webelement.WebElement) is False:
+                utils_logger.log("unsupport type of element: ", type(query_res))
+            else:
                 if utils_appium.is_element_region_right_with_scale(element=query_res,
                                                                    device=self.target_device_name,
-                                                                   region_rect_scale=rect_scale_check_element_region) is True:
-                    query_ele_location = utils_appium.get_appium_element_position(query_res)
-                    # 尝试捕获click事件
-                    if click_mode is not None:
-                        try:
-                            del self.upload_files[:]
-                            if click_mode == 'position' and query_ele_location is not None:
-                                utils_logger.log("[query_ele_wrapper] 基于坐标响应单击事件")
-                                if self.safe_tap_in_point(
-                                        point=(
-                                                query_ele_location['x'],
-                                                query_ele_location['y'])) is False:
-                                    self.task_scheduler_failed('safe_tap_in_point failed')
-                                    return None
-                            elif click_mode == 'click':
-                                # 只有当click_mode是"position"且坐标可用时使用tab方式，其他默认使用element.click()方式
-                                # utils_logger.log("[query_ele_wrapper] 基于element.click()响应单击事件")
-                                query_res.click()
-                            else:
-                                raise Exception(
-                                    '[query_ele_wrapper]unknown click_mode:' + click_mode)
-                            utils_logger.debug("[query_ele_wrapper] click with location:", query_ele_location)
-                            return query_res
-                        except Exception as e:
-                            utils_logger.log("try to click failed ", e)
-                            utils_logger.log(traceback.format_exc())
-                    else:
-                        utils_logger.log("[query_ele_wrapper] location:", query_ele_location)
-                        return query_res
+                                                                   region_rect_scale=rect_scale_check_element_region) is False:
+                    utils_logger.log("--->校验element坐标失败，启用重试机制")
                 else:
-                    utils_logger.log(
-                        "--->[query_ele_wrapper.is_element_region_right_with_scale] 校验element坐标失败，启用重试机制")
-            else:
-                utils_logger.log("unsupport type of element: ", type(query_res))
-        # utils_logger.log("--- >[task_appium_base.query_ele_wrapper]", query_str,
-        #                  " with retry_count:", retry_count)
+                    try:
+                        del self.upload_files[:]
+                        if click_mode is None:
+                            utils_logger.debug("不相应点击事件,直接返回元素")
+                            return query_res
+                        else:
+                            if query_res.is_displayed() is False:
+                                utils_logger.log("元素不可见")
+                            else:
+                                if click_mode == 'click':
+                                    clickable = query_res.get_attribute("clickable")
+                                    if clickable != "true":
+                                        utils_logger.log("元素不可点击,自动切换为position方式")
+                                    else:
+                                        utils_logger.debug("基于element.click()响应单击事件")
+                                        query_res.click()
+                                        return query_res
+                                # default:采用position方式触发点击事件
+                                query_ele_location = utils_appium.get_appium_element_position(query_res)
+                                if query_ele_location is not None:
+                                    utils_logger.debug("基于坐标响应单击事件")
+                                    if self.safe_tap_in_point(
+                                            point=(query_ele_location['x'], query_ele_location['y'])) is True:
+                                        utils_logger.debug("click with location:", query_ele_location)
+                                        return query_res
+                    except Exception as e:
+                        utils_logger.log(traceback.format_exc())
         # 若上面的判断逻辑失败，则表示还没有找到'可用'的element
         period_checked = 0
         if period_checked > 0:
-            utils_logger.debug("query_ele_wrapper sleep:", period_checked)
+            utils_logger.debug("sleep:", period_checked)
         time.sleep(period_checked)  # 500毫秒重复执行一次
         if is_ignore_except_case is False and self.except_case_in_query_ele() is True:
             # except_case_in_query_ele为True表示处理生效
@@ -509,7 +497,7 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         except Exception as exception:
             except_name = exception.__class__.__name__
             utils_logger.log("TouchError:safe_touch_action caught exception[" + str(except_name) + "]:", retry_count)
-            # 屏蔽
+            # 屏蔽常规异常
             if retry_count <= 0 or except_name == 'InvalidSessionIdException' or except_name == 'WebDriverException':
                 utils_logger.log("safe_touch_action", traceback.format_exc())
                 return False
