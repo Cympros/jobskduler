@@ -19,8 +19,21 @@ from helper import utils_common
 from helper import utils_logger
 
 
+def close_heads_up_notifycations(device=None):
+    """禁用抬头通知"""
+    close_cmd = "adb " \
+                + ("" if device is None else "-s " + str(device) + " ") \
+                + "shell settings put global heads_up_notifications_enabled 0"
+    close_status, close_status_error = _check_adb_command_result(close_cmd)
+    if close_status_error is not None:
+        return False
+    else:
+        utils_logger.debug(close_status, close_status_error)
+        return True
+
+
 def lock_off_screen_if_need(device=None):
-    '解锁当前屏幕'
+    """解锁当前屏幕"""
     cmd_check_screen_off = "adb -s " + device + " shell dumpsys window policy | grep \'mShowingLockscreen=true\'"
     lock_status, lock_status_error = _check_adb_command_result(cmd_check_screen_off)
     if lock_status_error is not None:
@@ -228,7 +241,7 @@ def get_connected_devcies(target_device=None, except_emulater=False):
         参数：except_emulater是否排除模拟器
             
     '''
-    device_infos, device_infos_errror = _check_adb_command_result("adb devices")
+    device_infos, device_infos_errror = _check_adb_command_result("adb devices | grep -v 'List of devices attached'")
     if device_infos is None:
         utils_logger.log("> get_connected_devcies:device_infos is None")
         return None
@@ -281,7 +294,7 @@ def get_start_activity_by_application_id(application_id):
 
 def get_device_statue(device=None):
     """读取设备在线状态"""
-    device_infos, device_infos_errror = _check_adb_command_result("adb devices")
+    device_infos, device_infos_errror = _check_adb_command_result("adb devices | grep -v 'List of devices attached'")
     if device_infos is None:
         return None
     for device_info in device_infos.split("\n"):
@@ -299,7 +312,7 @@ def is_app_installed(device, application_id):
         return None, None
     # "-3"参数表示仅过滤第三方应用
     cmd = "adb " \
-          + (" " if device is None else " -s " + device + " ") \
+          + ("" if device is None else "-s " + device + " ") \
           + " shell pm list packages -3 | grep '" + str(application_id) + "'"
     check_installed_response, response_errror = _check_adb_command_result(cmd)
     # utils_logger.log(check_installed_response, response_errror)
@@ -310,20 +323,16 @@ def _check_adb_command_result(adb_cmd, retry_count=3):
     # 用于针对adb命令的异常处理
     res_adb, error_adb = utils_common.exec_shell_cmd(adb_cmd)
     if retry_count <= 0:
-        # utils_logger.log("命令[" + str(adb_cmd) + "],"
-        #                  + "retry_count[" + str(retry_count) + "]")
-        # utils_logger.log("response:[" + str(res_adb) + "],"
-        #                  + "error:[" + str(error_adb) + "]")
+        # utils_logger.debug("命令[" + str(adb_cmd) + "]," + "retry_count[" + str(retry_count) + "]")
+        # utils_logger.debug("response:[" + str(res_adb) + "]," + "error:[" + str(error_adb) + "]")
         return res_adb, error_adb
     if error_adb is not None:  # 表示有异常
         if "error: device " in error_adb and " not found" in error_adb:
             # 重启adb服务
-            # utils_common.exec_shell_cmd("adb kill-server && adb start-server")
+            utils_common.exec_shell_cmd("adb kill-server && adb start-server")
             return _check_adb_command_result(adb_cmd, retry_count - 1)
-    # utils_logger.log("命令[" + str(adb_cmd) + "],"
-    #                  + "retry_count[" + str(retry_count) + "]")
-    # utils_logger.log("response:[" + str(res_adb) + "],"
-    #                  + "error:[" + str(error_adb) + "]")
+    # utils_logger.debug("命令[" + str(adb_cmd) + "]," + "retry_count[" + str(retry_count) + "]")
+    # utils_logger.debug("response:[" + str(res_adb) + "]," + "error:[" + str(error_adb) + "]")
     return res_adb, error_adb
 
 

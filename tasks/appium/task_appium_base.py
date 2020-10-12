@@ -173,6 +173,10 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         if response_errror is None and check_installed_response is None:
             utils_logger.debug("应用未安装", self.target_application_id)
             return False
+        # 关闭应用从顶部弹出的通知框
+        if utils_android.close_heads_up_notifycations(self.target_device_name) is False:
+            utils_logger.log("禁用抬头通知失败")
+            return False
         # 分配appium服务端口
         self.appium_port = utils_appium.query_avaiable_port(4273, 9999)
         if self.appium_port is None:
