@@ -271,7 +271,8 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         # 获取target_file的file_name,不要后缀以及父目录相关
         shot_name = os.path.splitext(os.path.split(wrapper_file)[1])[0]
         scr_shot_pic = utils_appium.get_screen_shots(driver=self.driver, file_directory=self.get_project_output_dir(),
-                                                     target_device=self.target_device_name)
+                                                     target_device=self.target_device_name,
+                                                     file_name="screen_shot_tmp_is_in_target_page.png")
         if scr_shot_pic is not None and \
                 utils_common.is_img_similary(file_first=wrapper_file, file_second=scr_shot_pic,
                                              hash_rule=compare_rule) is True:
@@ -472,7 +473,8 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         """
         file_screen_shot = utils_appium.get_screen_shots(driver=self.driver,
                                                          file_directory=self.get_project_output_dir(),
-                                                         target_device=self.target_device_name)
+                                                         target_device=self.target_device_name,
+                                                         file_name="screen_shot_tmp_wait_view_layout_finish.png")
         if file_screen_shot is None:  # 截图获取失败,此时认为页面已经加载完成
             return True, None
         if is_check_view_inflated is False:
@@ -488,7 +490,8 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
                 time.sleep(2)
                 file_screen_shot = utils_appium.get_screen_shots(driver=self.driver,
                                                                  file_directory=self.get_project_output_dir(),
-                                                                 target_device=self.target_device_name)
+                                                                 target_device=self.target_device_name,
+                                                                 file_name="screen_shot_tmp_wait_view_layout_finish.png")
                 if file_screen_shot is None:  # 截图失败
                     return True, None
             else:  # 页面已经加载完成
