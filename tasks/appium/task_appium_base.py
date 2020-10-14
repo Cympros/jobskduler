@@ -9,12 +9,9 @@ import abc
 project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../')
 sys.path.insert(0, project_root_path)
 
-try:
-    import appium
-except:
-    # https://github.com/appium/python-client#getting-the-appium-python-client
-    os.system('pip install Appium-Python-Client')
-    import appium
+#https: // github.com / appium / python - client  # getting-the-appium-python-client
+import appium  # pip install Appium-Python-Client
+
 import time
 import traceback
 from helper import utils_common

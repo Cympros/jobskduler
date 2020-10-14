@@ -10,21 +10,12 @@ import subprocess
 import re
 import json
 
-try:
-    import imagehash
-except:
-    os.system('pip install imagehash')
-    import imagehash
 import time
+import imagehash
 import datetime
 import hashlib
 import zipfile
-
-try:
-    import pytz
-except:
-    os.system('sudo pip install pytz')
-    import pytz
+import pytz
 import socket
 import traceback
 import colorsys

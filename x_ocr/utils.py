@@ -13,12 +13,7 @@ import urllib
 import hashlib
 import urllib.request
 import traceback
-
-try:
-    from aip import AipOcr
-except:
-    os.system('pip install baidu_aip')
-    from aip import AipOcr
+from aip import AipOcr  # pip install baidu_aip
 
 project_root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
 sys.path.insert(0, project_root_path)

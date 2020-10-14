@@ -3,11 +3,8 @@
 import os
 import sys
 
-# try:
-#     import aircv as aircv
-# except:
-#     os.system('pip install opencv-python --default-timeout=10000')
-#     import aircv as aircv
+
+import aircv as aircv
 import traceback
 
 project_root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'

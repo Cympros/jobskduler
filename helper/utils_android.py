@@ -4,12 +4,7 @@
 import sys
 import os
 import re
-
-try:
-    from PIL import Image
-except:
-    os.system('pip install imagehash')
-    from PIL import Image
+from PIL import Image  #pip install imagehash
 
 project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../')
 sys.path.insert(0, project_root_path)
