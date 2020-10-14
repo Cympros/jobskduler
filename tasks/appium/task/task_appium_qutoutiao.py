@@ -19,7 +19,8 @@ from handle_callback import HandleCallback
 
 class TaskAppiumQutoutiaoBase(AbsBasicAppiumTask, abc.ABC):
     def __init__(self):
-        AbsBasicAppiumTask.__init__(self, "com.jifen.qukan", "com.jifen.qkbase.main.MainActivity")
+        AbsBasicAppiumTask.__init__(self, "com.jifen.qukan", "com.jifen.qkbase.main.MainActivity",
+                                    "com.jifen.qkbase.main.MainActivity")
 
     def except_case_in_query_ele(self):
         if AbsBasicAppiumTask.except_case_in_query_ele(self) is True:
@@ -47,15 +48,6 @@ class TaskAppiumQutoutiaoBase(AbsBasicAppiumTask, abc.ABC):
                     click_mode="click", is_ignore_except_case=True, retry_count=0) is not None:
                 return True
         return False
-
-    def run_task(self, handle_callback):
-        if AbsBasicAppiumTask.run_task(self, handle_callback) is False:
-            return False
-        # 延长重试次数，避免应用启动比较耗时的情况
-        if self.wait_activity(self.driver, "com.jifen.qkbase.main.MainActivity", retry_count=50) is False:
-            self.task_scheduler_failed("未进入趣头条首页")
-            return False
-        return True
 
 
 class TaskAppiumQutoutiaoYuedu(TaskAppiumQutoutiaoBase):
@@ -138,7 +130,7 @@ class TaskAppiumQutoutiaoYuedu(TaskAppiumQutoutiaoBase):
                 utils_logger.log("尝试进入文章时发现不在新闻列表页,直接退出")
                 return False
             self.safe_tap_in_point([random.randint(100, 400), random.randint(200, 800)])
-            if self.wait_activity(driver=self.driver, target=news_activitys + video_activitys, retry_count=1) is True:
+            if self.wait_activity(driver=self.driver, target=news_activitys + video_activitys) is True:
                 utils_logger.debug("成功进入某个详情页面")
                 break
             else:

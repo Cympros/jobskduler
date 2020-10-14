@@ -56,7 +56,7 @@ class TaskAppiumHuiSuoPingHourCredit(TaskAppiumHuiSuoPingBase):
     def run_task(self, _handle_callback):
         if TaskAppiumHuiSuoPingBase.run_task(self, _handle_callback) is False:
             return False
-        if self.wait_activity(driver=self.driver, target='.account.ui.main.MainTabActivity', retry_count=20) is False:
+        if self.wait_activity(driver=self.driver, target='.account.ui.main.MainTabActivity') is False:
             self.task_scheduler_failed('not in .account.ui.main.MainTabActivity')
             return False
         if self.query_ele_wrapper(self.get_query_str_by_viewid('com.huaqian:id/rlayout_menu')) is None:

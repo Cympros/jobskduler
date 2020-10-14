@@ -19,7 +19,9 @@ class TaskAppiumJDJRSignBase(AbsBasicAppiumTask, abc.ABC):
     "'''
 
     def __init__(self):
-        AbsBasicAppiumTask.__init__(self, "com.jd.jrapp", "com.jd.jrapp.WelcomeActivity")
+        search_fliter = ['.ver2.main.MainActivity', '.ver2.account.security.GestureLockActivity',
+                         '.bm.zhyy.account.security.GestureLockActivity']
+        AbsBasicAppiumTask.__init__(self, "com.jd.jrapp", "com.jd.jrapp.WelcomeActivity", search_fliter)
 
     def __deal_within_login(self):
         '处理在登录界面的情况'
@@ -60,14 +62,12 @@ class TaskAppiumJDJRSignBase(AbsBasicAppiumTask, abc.ABC):
         if AbsBasicAppiumTask.except_case_in_query_ele(self) is True:
             return True
         if self.wait_activity(self.driver, ['.ver2.account.security.GestureLockActivity',
-                                            '.bm.zhyy.account.security.GestureLockActivity'],
-                              is_ignore_except_case=True) is True:
+                                            '.bm.zhyy.account.security.GestureLockActivity']) is True:
             # 手势界面:不予处理，邮件通知需要让用户将手势开关关闭
             self.task_scheduler_failed("请务必关闭手势，提高软件运行效率")
             return False
         elif self.wait_activity(self.driver,
-                                ['.ver2.account.login.ui.LoginActivity', '.bm.zhyy.login.ui.LoginActivity'],
-                                is_ignore_except_case=True) is True \
+                                ['.ver2.account.login.ui.LoginActivity', '.bm.zhyy.login.ui.LoginActivity']) is True \
                 and self.__deal_within_login() is True:
             utils_logger.log("检测到需要登录界面")
             return True
@@ -91,15 +91,6 @@ class TaskAppiumJDJRSignBase(AbsBasicAppiumTask, abc.ABC):
                 return False
             return True
         return False
-
-    def run_task(self, _handle_callback):
-        if AbsBasicAppiumTask.run_task(self, _handle_callback) is False:
-            return False
-        search_fliter = ['.ver2.main.MainActivity', '.ver2.account.security.GestureLockActivity',
-                         '.bm.zhyy.account.security.GestureLockActivity']
-        if not self.wait_activity(self.driver, search_fliter, retry_count=20):
-            self.task_scheduler_failed("not in target activity")
-            return False
 
 
 class TaskAppiumJDJRQuanyiCenter(TaskAppiumJDJRSignBase):

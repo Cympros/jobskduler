@@ -18,16 +18,12 @@ from helper import utils_yaml
 
 class TaskAppiumFeizhu(AbsBasicAppiumTask):
     def __init__(self):
-        AbsBasicAppiumTask.__init__(self, "com.taobao.trip", "com.alipay.mobile.quinox.LauncherActivity")
+        AbsBasicAppiumTask.__init__(self, "com.taobao.trip", "com.alipay.mobile.quinox.LauncherActivity",
+                                    ".home.HomeActivity")
 
     def run_task(self, _handle_callback):
         if AbsBasicAppiumTask.run_task(self, _handle_callback) is False:
             return False
-        wait_status = self.wait_activity(self.driver, ".home.HomeActivity")
-        if not wait_status:
-            self.task_scheduler_failed(message='not in .home.HomeActivity')
-            return False
-
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("领里程"), click_mode="click") is None:
             # 新版做兼容处理
             if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("今日已签")) is not None:

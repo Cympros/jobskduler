@@ -14,12 +14,13 @@ from tasks.appium.task_appium_base import AbsBasicAppiumTask
 from tasks.appium import utils_appium
 
 
-# from helper import utils_logger
+from helper import utils_logger
 
 
 class TaskAppiumTaoToutiaoBase(AbsBasicAppiumTask, abc.ABC):
     def __init__(self):
-        AbsBasicAppiumTask.__init__(self, 'com.ly.taotoutiao', 'com.ly.taotoutiao.view.activity.WelComeActivity')
+        AbsBasicAppiumTask.__init__(self, 'com.ly.taotoutiao', 'com.ly.taotoutiao.view.activity.WelComeActivity',
+                                    ".view.activity.MainActivity")
 
     def except_case_in_query_ele(self):
         if AbsBasicAppiumTask.except_case_in_query_ele(self) is True:
@@ -28,13 +29,6 @@ class TaskAppiumTaoToutiaoBase(AbsBasicAppiumTask, abc.ABC):
                                   is_ignore_except_case=True, click_mode='click') is not None:
             return True
         return False
-
-    def run_task(self, _handle_callback):
-        if AbsBasicAppiumTask.run_task(self, _handle_callback) is False:
-            return False
-        if self.wait_activity(self.driver, ".view.activity.MainActivity") is False:
-            self.task_scheduler_failed("未进入淘头条首页")
-            return False
 
 
 class TaskAppiumTaotoutiaoCoreShiduanJiangli(TaskAppiumTaoToutiaoBase):
@@ -126,7 +120,7 @@ class TaskAppiumTaoToutiaoYueDu(TaskAppiumTaoToutiaoBase):
                 utils_logger.log("尝试进入文章时发现不在新闻列表页,直接退出")
                 return False
             self.safe_tap_in_point([random.randint(100, 400), random.randint(200, 800)])
-            if self.wait_activity(driver=self.driver, target=news_activitys + video_activitys, retry_count=1) is True:
+            if self.wait_activity(driver=self.driver, target=news_activitys + video_activitys) is True:
                 utils_logger.debug("成功进入某个详情页面")
                 break
             else:

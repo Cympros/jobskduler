@@ -33,13 +33,20 @@ PATH = lambda p: os.path.abspath(
 
 
 class AbsBasicAppiumTask(BaseTask, abc.ABC):
-    def __init__(self, target_application_id=None, launch_activity=None):
+    """
+    @:param target_application_id 应用包名
+    @:param launch_activity 启动页
+    @:param home_page_activity 应用首页
+    """
+
+    def __init__(self, target_application_id=None, launch_activity=None, home_page_activity=None):
         BaseTask.__init__(self)
 
         # 外部参数依赖
         self.target_device_name = None
         self.target_application_id = target_application_id
         self.launch_activity = launch_activity
+        self.home_page_activity = home_page_activity
 
         # 本地实例化参数
         self.driver = None
@@ -47,8 +54,7 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         self.appium_port_bp = None
         self.upload_files = []  # 待上传至远端的文件列表
 
-    def wait_activity(self, driver, target, check_period=2, retry_count=10,
-                      is_ignore_except_case=False):
+    def wait_activity(self, driver, target, check_period=2, retry_count=0):
         """activity等待时添加弹框过滤函数
         :param driver: 
         :param target: 若给定的不包含包名,则手动匹配包名
@@ -58,13 +64,17 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         :return: boolean
         """
         # 第一次搜索时retry_count设置为1次(即一秒)，以避免wait_activity_with_status的重试时间内权限弹框被系统倒计时逻辑关闭
-        for index in range(20):
-            utils_logger.log("重复执行：" + str(index))
-            if utils_appium.wait_activity_with_status(driver=driver, target=target, check_period=check_period) is True:
-                return True
-            if is_ignore_except_case is False:
-                self.except_case_in_query_ele()
-        return False
+        if utils_appium.wait_activity_with_status(driver=driver, target=target) is True:
+            return True
+        else:
+            if retry_count <= 0:
+                utils_logger.debug("wait_activity failed with no chance：", target)
+                return False
+            else:
+                if check_period >= 0:
+                    utils_logger.log("wait_activity sleep:", check_period)
+                    time.sleep(check_period)
+                return self.wait_activity(driver, target, check_period, retry_count - 1)
 
     def write_page_resource_into_file(self, suffix="normal"):
         """将pageresource写入文件"""
@@ -210,11 +220,15 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
             self.task_scheduler_failed(
                 "cureent env not right:[" + str(self.driver) + "," + str(self.target_device_name) + "]")
             return False
-
         # 检查是否锁屏
         if utils_android.lock_off_screen_if_need(self.target_device_name) is False:
             self.task_scheduler_failed("---> lock_off_screen_if_need failed")
             return False
+        # 检查是否进入首页
+        if self.home_page_activity is not None:
+            if self.wait_activity(self.driver, self.home_page_activity, retry_count=10) is False:
+                self.task_scheduler_failed("未进入应用首页", self.home_page_activity)
+                return False
         return True
 
     def release_after_task(self):

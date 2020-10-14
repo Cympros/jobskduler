@@ -316,55 +316,35 @@ def find_element_by_xpath(driver, xpath, retry_count=2, interval_time=0):
                                          interval_time=interval_time)
 
 
-def wait_activity_with_status(driver, target, check_period=1):
-    '''
-    :param retry_count: 重试次数
-    :param target: 待匹配的界面，支持单个字串以及数组
-    :param check_period:轮训周期，单位为秒
-    :return:
-    '''
-
+def wait_activity_with_status(driver, target):
     def is_in_fliter(lists, search_fliter):
         if search_fliter is None or lists is None:
             return False
 
         search_status = False
-        # utils_logger.debug("wait_activity_with_status.is_in_fliter<" + search_fliter + "> in <" + str(lists) + ">")
         for item in lists:
             if item.endswith(search_fliter) is True:
                 search_status = True
                 break
         return search_status
 
-    '''
+    """
     等待activity响应
-    :param driver:
-    :param target_act: 目标activity
-    :param check_period: 检测周期，默认2秒
-    :param check_count: 总共检测次数
+    :param driver: 
+    :param target: 待匹配的界面，支持单个字串以及数组
     :return:
-    '''
-    res_status = False
+    """
     # 格式化搜索条件
     if not isinstance(target, list):
         fliters = [target]
     else:
         fliters = target
-    count = 0
-    show_activity = None
-    while count < 10:
-        show_activity = get_cur_act(driver=driver)
-        # utils_logger.debug("重试:" + str(count), str(show_activity), str(fliters))
-        if is_in_fliter(fliters, show_activity) is True:
-            res_status = True
-            break
-        count = count + 1
-        if check_period > 0:
-            utils_logger.log("wait_activity_with_status sleep:", check_period)
-            time.sleep(check_period)
-    if res_status is False:
+    show_activity = get_cur_act(driver=driver)
+    if is_in_fliter(fliters, show_activity) is False:
         utils_logger.debug("检索当前Activity元素失败", show_activity, str(fliters))
-    return res_status
+        return False
+    else:
+        return True
 
 
 def get_driver_by_launch_app(application_id, launch_activity, device_name_to_connected,
@@ -402,8 +382,8 @@ def get_driver_by_launch_app(application_id, launch_activity, device_name_to_con
                     'noReset': True,
                     'appPackage': application_id,
                     'appActivity': launch_activity,
-                    'newCommandTimeout': 3 * 60,  # 无响应再关闭
-                    'adbExecTimeout': 50000,
+                    # 'newCommandTimeout': 3 * 60,  # 无响应再关闭
+                    # 'adbExecTimeout': 50000,
                     'disableWindowAnimation': True,
                     # 'automationName':'uiautomator2'   # todo:还不稳定，观望中
                     }

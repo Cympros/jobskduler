@@ -69,7 +69,7 @@ class TaskAppiumJingDongEarnJingDou(TaskAppiumJingDongBase):
             return False
         status = self.wait_activity(self.driver, '.MainFrameActivity')
         if not status:
-            self.task_scheduler_failed("wait_activity_with_status failed with '.MainFrameActivity'")
+            self.task_scheduler_failed("wait_activity failed with '.MainFrameActivity'")
             return False
         if self.__enter_earn_jd_pg_within_main() is True:
             if self.wait_activity(driver=self.driver, target=['com.jd.lib.enjoybuy.EnjoyBuyMainActivity',
@@ -259,7 +259,7 @@ class TaskAppiumJingDongVoucherCenter(TaskAppiumJingDongBase):
             return False
         status = self.wait_activity(self.driver, '.MainFrameActivity')
         if not status:
-            self.task_scheduler_failed("wait_activity_with_status failed with '.MainFrameActivity'")
+            self.task_scheduler_failed("wait_activity failed with '.MainFrameActivity'")
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("领券"), click_mode="click") is None:
             self.task_scheduler_failed("get_xpath_only_text failed with 领券")

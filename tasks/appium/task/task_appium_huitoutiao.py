@@ -18,7 +18,8 @@ from helper import utils_logger
 
 class TaskAppiumHuiToutiaoBase(AbsBasicAppiumTask, abc.ABC):
     def __init__(self):
-        AbsBasicAppiumTask.__init__(self, 'com.cashtoutiao', 'com.cashtoutiao.common.ui.SplashActivity')
+        AbsBasicAppiumTask.__init__(self, 'com.cashtoutiao', 'com.cashtoutiao.common.ui.SplashActivity',
+                                    "com.cashtoutiao.account.ui.main.MainTabActivity")
 
     def except_case_in_query_ele(self):
         if AbsBasicAppiumTask.except_case_in_query_ele(self) is True:
@@ -47,13 +48,6 @@ class TaskAppiumHuiToutiaoBase(AbsBasicAppiumTask, abc.ABC):
                 self.task_scheduler_failed("检测到'下载提示弹框'，但无法关闭")
                 return False
         return False
-
-    def run_task(self, _handle_callback):
-        if AbsBasicAppiumTask.run_task(self, _handle_callback) is False:
-            return False
-        if self.wait_activity(self.driver, "com.cashtoutiao.account.ui.main.MainTabActivity") is False:
-            self.task_scheduler_failed("未进入惠头条首页")
-            return False
 
 
 class TaskAppiumHuitoutiaoCoreShiduanJiangli(TaskAppiumHuiToutiaoBase):
@@ -135,7 +129,7 @@ class TaskAppiumHuiToutiaoYueDu(TaskAppiumHuiToutiaoBase):
                 utils_logger.log("尝试进入文章时发现不在新闻列表页,直接退出")
                 return False
             self.safe_tap_in_point([random.randint(100, 400), random.randint(200, 800)])
-            if self.wait_activity(driver=self.driver, target=news_activitys + video_activitys, retry_count=1) is True:
+            if self.wait_activity(driver=self.driver, target=news_activitys + video_activitys) is True:
                 utils_logger.debug("成功进入某个详情页面")
                 break
             else:

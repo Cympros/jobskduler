@@ -75,8 +75,7 @@ class TaskAppiumWeixinBase(AbsBasicAppiumTask, abc.ABC):
     def except_case_in_query_ele(self):
         if AbsBasicAppiumTask.except_case_in_query_ele(self) is True:
             return True
-        if self.wait_activity(self.driver, '.plugin.account.ui.LoginPasswordUI', is_ignore_except_case=True,
-                              retry_count=1) is True:
+        if self.wait_activity(self.driver, '.plugin.account.ui.LoginPasswordUI') is True:
             # 微信密码还没有指定
             weixin_pwd = conf_modify.query("", "weixin_password")
             if weixin_pwd is None:

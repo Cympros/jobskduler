@@ -19,19 +19,11 @@ from helper import utils_common
 
 class TaskAppiumDongFangToutiaoBase(AbsBasicAppiumTask, abc.ABC):
     def __init__(self):
-        AbsBasicAppiumTask.__init__(self, 'com.songheng.eastnews',
-                                    'com.oa.eastfirst.activity.WelcomeActivity')
+        AbsBasicAppiumTask.__init__(self, 'com.songheng.eastnews', 'com.oa.eastfirst.activity.WelcomeActivity',
+                                    "com.songheng.eastfirst.common.view.activity.MainActivity")
 
     def except_case_in_query_ele(self):
         return AbsBasicAppiumTask.except_case_in_query_ele(self)
-
-    def run_task(self, _handle_callback):
-        if AbsBasicAppiumTask.run_task(self, _handle_callback) is False:
-            return False
-        if self.wait_activity(self.driver,
-                              "com.songheng.eastfirst.common.view.activity.MainActivity") is False:
-            self.task_scheduler_failed("未进入东方头条首页")
-            return False
 
 
 class TaskAppiumDongFangtoutiaoCoreShiduanJiangli(TaskAppiumDongFangToutiaoBase):
@@ -117,7 +109,7 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
                 utils_logger.log("尝试进入文章时发现不在新闻列表页,直接退出")
                 return False
             self.safe_tap_in_point([random.randint(100, 400), random.randint(200, 800)])
-            if self.wait_activity(driver=self.driver, target=news_activitys + video_activitys, retry_count=1) is True:
+            if self.wait_activity(driver=self.driver, target=news_activitys + video_activitys) is True:
                 utils_logger.debug("成功进入某个详情页面")
                 break
             else:

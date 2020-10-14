@@ -15,7 +15,7 @@ from helper import utils_logger
 
 class TaskAppiumSinaWeiboBase(AbsBasicAppiumTask, abc.ABC):
     def __init__(self):
-        AbsBasicAppiumTask.__init__(self, "com.sina.weibo", "com.sina.weibo.MainTabActivity")
+        AbsBasicAppiumTask.__init__(self, "com.sina.weibo", "com.sina.weibo.MainTabActivity", ['.MainTabActivity'])
 
     def except_case_in_query_ele(self):
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('不了，谢谢'),
@@ -34,10 +34,6 @@ class TaskAppiumSinaWeiboDailyClockOnBase(TaskAppiumSinaWeiboBase):
 
     def run_task(self, _handle_callback):
         if TaskAppiumSinaWeiboBase.run_task(self, _handle_callback) is False:
-            return False
-        if self.wait_activity(driver=self.driver, target=['.MainTabActivity'],
-                              retry_count=20) is False:
-            self.task_scheduler_failed('进入微博首页失败')
             return False
         if self.query_ele_wrapper(
                 "//android.widget.FrameLayout//android.widget.LinearLayout[@resource-id='com.sina.weibo:id/main_radio']//android.view.ViewGroup",
