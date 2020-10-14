@@ -1,0 +1,17 @@
+Appium-Python-Client==0.52
+baidu-aip==2.2.18.0
+certifi==2020.4.5.1
+chardet==3.0.4
+idna==2.9
+ImageHash==4.1.0
+numpy==1.18.4
+opencv-python==4.2.0.34
+Pillow==7.1.2
+pytz==2020.1
+PyWavelets==1.1.1
+PyYAML==5.3.1
+requests==2.23.0
+scipy==1.4.1
+selenium==3.141.0
+six==1.14.0
+urllib3==1.25.9

@@ -1,3 +1,12 @@
+# 导出pip依赖信息
+pip freeze > requirements.txt
+pip install -r requirement.txt
+
+python -m pip install --upgrade pip      # 更新pip
+
+
+
+
 # job_schduler模块简单使用
 1.添加task任务定义     
 具体可参考"./config/task.config"中结构申明
