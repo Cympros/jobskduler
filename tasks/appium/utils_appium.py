@@ -104,8 +104,7 @@ def touch_action(driver, target_device_name, is_down=True, tab_center=0.5, tab_i
         driver.swipe(t_from, t_tab_center, t_to, t_tab_center, duration)
 
 
-def start_appium_service(device, appium_port, access_appium_bp_port, retry_count=5,
-                         interval_time=5):
+def start_appium_service(device, appium_port, access_appium_bp_port, retry_count=5, interval_time=5):
     """启动appium服务,添加重试机制"""
     # 检测appium是否安装
     check_res, check_error = utils_common.exec_shell_cmd('which appium')
@@ -145,8 +144,9 @@ def start_appium_service(device, appium_port, access_appium_bp_port, retry_count
                     appium_start_cmd) + "] with response:[" + str(
                     res) + "] and error:[" + str(err) + "]")
             time.sleep(interval_time)  # 等待appium服务完全启动
-        return False if retry_count <= 0 else start_appium_service(device, appium_port,
-                                                                   access_appium_bp_port,
+        return False if retry_count <= 0 else start_appium_service(device=device,
+                                                                   appium_port=appium_port,
+                                                                   access_appium_bp_port=access_appium_bp_port,
                                                                    retry_count=retry_count - 1,
                                                                    interval_time=interval_time)
 
@@ -165,7 +165,7 @@ def tap_in_point(driver, point, delay_to_load=0):
     driver.tap([(tab_x, tab_y)], 2)
 
 
-def get_screen_shots(driver, file_directory, target_device=None, file_name=None, retry_count=2):
+def get_screen_shots(driver, file_directory, target_device=None, file_name=None, retry_count=0):
     """
     获取当前截图
     :param file_name: 屏幕截图文件名称
@@ -209,7 +209,7 @@ def get_screen_shots(driver, file_directory, target_device=None, file_name=None,
             return None
 
 
-def get_pg_source(driver, retry_count=5):
+def get_pg_source(driver, retry_count=0):
     if driver is None:
         utils_logger.log('failed because driver is null')
         return None
@@ -220,7 +220,6 @@ def get_pg_source(driver, retry_count=5):
         if retry_count <= 0:
             return None
         else:
-            # time.sleep(1)
             return get_pg_source(driver=driver, retry_count=retry_count - 1)
 
 
@@ -256,7 +255,7 @@ def get_cur_act(driver, delay_time=0):
         return None
 
 
-def find_element_by_content_desc(driver, content_desc, retry_count=2, interval_time=0):
+def find_element_by_content_desc(driver, content_desc, retry_count=0, interval_time=0):
     '查询content-desc字段'
     element = None
     try:
@@ -276,7 +275,7 @@ def find_element_by_content_desc(driver, content_desc, retry_count=2, interval_t
                                                 interval_time)
 
 
-def find_element_by_viewid(driver, viewid, retry_count=2, interval_time=0):
+def find_element_by_viewid(driver, viewid, retry_count=0, interval_time=0):
     """根据id寻找资源"""
     element = None
     try:
@@ -296,7 +295,7 @@ def find_element_by_viewid(driver, viewid, retry_count=2, interval_time=0):
                                           interval_time=interval_time)
 
 
-def find_element_by_xpath(driver, xpath, retry_count=2, interval_time=0):
+def find_element_by_xpath(driver, xpath, retry_count=0, interval_time=0):
     """基于xpath寻找控件"""
     element = None
     try:

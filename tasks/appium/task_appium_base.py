@@ -365,7 +365,7 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         return os.path.abspath(appium_img_dir + "/" + file_name)
 
     def query_ele_wrapper(self, query_str, is_ignore_except_case=False, click_mode=None,
-                          retry_count=2,
+                          retry_count=0,
                           time_wait_page_completely_resumed=0,
                           rect_scale_check_element_region=None):
         """
@@ -451,7 +451,7 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
                                               time_wait_page_completely_resumed=0,
                                               rect_scale_check_element_region=rect_scale_check_element_region)
 
-    def query_point_size_within_text(self, search_text, retry_count=2, interval_time=5,
+    def query_point_size_within_text(self, search_text, retry_count=0, interval_time=5,
                                      cutted_rect=None,
                                      is_ignore_except_case=False, is_check_view_inflated=True):
         points = self._query_points_with_text_by_ocr(search_text=search_text,
@@ -536,7 +536,7 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
             else:
                 return self.safe_tap_in_point(point=point, retry_count=retry_count - 1)
 
-    def _query_points_with_text_by_ocr(self, search_text, retry_count=2, interval_time=0,
+    def _query_points_with_text_by_ocr(self, search_text, retry_count=0, interval_time=0,
                                        cutted_rect=None,
                                        is_ignore_except_case=False, is_check_view_inflated=True):
         """
@@ -627,7 +627,7 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
                                                                is_ignore_except_case=is_ignore_except_case,
                                                                is_check_view_inflated=is_check_view_inflated)
 
-    def query_only_point_within_text(self, search_text, retry_count=2, interval_time=5,
+    def query_only_point_within_text(self, search_text, retry_count=0, interval_time=5,
                                      is_auto_click=False,
                                      cutted_rect=None,
                                      is_ignore_except_case=False, is_check_view_inflated=True,
@@ -733,7 +733,7 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
 
     def _query_matchs_within_check_region(self, part_pic_path, part_rect_scale,
                                           check_rect_scale=[0, 1, 0, 1],
-                                          is_ignore_except_case=False, retry_count=2):
+                                          is_ignore_except_case=False, retry_count=0):
         """
         根据子图搜索截图里所有满足条件的区域，包含重试,需要对搜索的对应子图位置做check
         :param is_ignore_except_case:
