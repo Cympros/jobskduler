@@ -186,7 +186,6 @@ def get_screen_shots(driver, file_directory, target_device=None, file_name=None,
         utils_logger.debug("[get_screen_shots] 构建默认截图存储路径")
         resolution_within_devices = utils_android.get_resolution_by_device(device=target_device)
         file_name = "screen_shot" \
-                    + "_" + str(utils_common.get_shanghai_time()) \
                     + "_" + (target_device if target_device is not None else "none") \
                     + "_" + (resolution_within_devices if resolution_within_devices is not None else "none") \
                     + ".png"
