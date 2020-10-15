@@ -4,7 +4,7 @@ import os
 import sys
 
 
-import aircv as aircv
+# import aircv as aircv
 import traceback
 
 project_root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
