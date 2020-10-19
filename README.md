@@ -2,22 +2,6 @@
 pip freeze > requirements.txt
 pip install -r requirements.txt
 
-不安装软件包的情况下下载软件包至本地
-pip download --destination-directory ./wheels/ -r requirements.txt
-单个软件包的本地安装(前提:pkg软件包已下载至local/wheels目录)
-pip install --no-index --find-links=./wheels pkg
-本地批量安装软件包
-pip install --no-index --find-links=/local/wheels -r requirements.txt
-屏蔽平台差异性(wheel包是pip download命令运行目录,maybe出现平台不适配)
-pip download --no-binary=:all: pkg
-pip install pkg --no-binary
-指定升级策略:--upgrade-strategy
-pip install --upgrade pkg1 --upgrade-strategy only-if-need
-聚合命令:pip download --no-binary=:all: --destination-directory ./no-binary-wheels/ -r requirements.txt
-
-设置pip国内源(还原删除~/.config/pip/pip.conf文件即可)
-pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
-
 # daily-task支持功能简介
 1.支持功能说明
 ```
