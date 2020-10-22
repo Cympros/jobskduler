@@ -40,5 +40,5 @@ sqlparse==0.4.1
 thriftpy2==0.4.12
 toml==0.10.1
 typed-ast==1.4.1
-urllib3==1.25.10
+urllib3==1.25.11
 wrapt==1.12.1
