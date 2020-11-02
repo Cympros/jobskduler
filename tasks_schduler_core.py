@@ -93,7 +93,7 @@ class DispatcherThread(threading.Thread):
             try:
                 exec_state = self.exec_single_loop_task()
             except Exception:
-                print("exec_single_loop_task catch exception", traceback.format_exc())
+                utils_logger.log("exec_single_loop_task catch exception", traceback.format_exc())
             if exec_state is not None and exec_state is True:
                 fail_count = 0
             else:
@@ -110,9 +110,6 @@ class DispatcherThread(threading.Thread):
         for py_module_path in find_all_modules(project_root_path + "/tasks/appium"):
             (module_dir, tempt) = os.path.split(py_module_path)
             (module_name, extension) = os.path.splitext(tempt)
-            # if module_name is None or not module_name.startswith("task_") or module_name.find("base") > -1:
-            #     utils_logger.debug("exec_single_loop_task continue: " + str(module_name))
-            #     continue
             # 动态导入模块
             if not module_dir in sys.path:
                 utils_logger.debug("> sys.path.append: " + module_dir)
@@ -137,8 +134,8 @@ class DispatcherThread(threading.Thread):
                     task_maps[self.get_task_key(name)] = task_state
                 now_time = time.time()
                 if task_state.next_exec_time > now_time:
-                    # utils_logger.log("时间还未到,继续等待", self.get_task_key(name), task_state,
-                    #                  "now:" + timestamp_to_date(now_time))
+                    utils_logger.log("时间还未到,继续等待", self.get_task_key(name), task_state,
+                                     "now:" + timestamp_to_date(now_time))
                     continue
 
                 # 反射执行task
@@ -147,8 +144,10 @@ class DispatcherThread(threading.Thread):
                 instance = my_class()
                 handle_callback = HandleCallback()
                 if instance.run_task(handle_callback) is True:
-                    utils_logger.log("成功执行任务", module_dynamic_imported, name)
+                    utils_logger.log("执行任务成功", module_dynamic_imported, name)
                     handle_callback.notify_task_success(module_name, name)
+                else:
+                    utils_logger.log("执行任务失败", module_dynamic_imported, name)
                 instance.release_after_task()  # 环境清理
 
                 # 添加任务管理

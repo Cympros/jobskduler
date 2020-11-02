@@ -119,7 +119,7 @@ class TaskAppiumJDJRQuanyiCenter(TaskAppiumJDJRSignBase):
                 search_result = True
                 break
             utils_logger.log("开始滚动第", scroll_index, "次")
-            if self.safe_touch_action(tab_interval=[0.6, 0.4]) is True:
+            if self.safe_scroll_by(tab_interval=[0.6, 0.4]) is True:
                 time.sleep(3)  # 这个时候滚动完了，可能页面还没有静止，因此延时等待下
         if search_result is False:
             self.task_scheduler_failed("not found '权益中心'按钮")

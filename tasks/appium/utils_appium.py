@@ -69,8 +69,8 @@ def is_element_region_right(element, region_rect=None):
         return False
 
 
-def touch_action(driver, target_device_name, is_down=True, tab_center=0.5, tab_interval=[0, 1],
-                 duration=100):
+def scroll_by(driver, target_device_name, is_down=True, tab_center=0.5, tab_interval=[0, 1],
+              duration=100):
     """
     :param driver:
     :param target_device_name:
@@ -81,7 +81,7 @@ def touch_action(driver, target_device_name, is_down=True, tab_center=0.5, tab_i
     :return:
     """
     utils_logger.debug(
-        "[touch_action] tab_interval=" + str(tab_interval) + ",is_down=" + str(is_down) + ",tab_center=" + str(
+        "[scroll_by] tab_interval=" + str(tab_interval) + ",is_down=" + str(is_down) + ",tab_center=" + str(
             tab_center))
     'TODO：Peform Action的使用'
     resolution = utils_android.get_resolution_by_device(target_device_name).split('x')
@@ -89,17 +89,17 @@ def touch_action(driver, target_device_name, is_down=True, tab_center=0.5, tab_i
     screen_heigh = float(resolution[1])
     time.sleep(1)  # driver.swipe经常崩溃,添加延时任务
     if is_down:
-        # utils_logger.log("touch_action:","上下滑动"
+        utils_logger.debug("scroll_by:", "上下滑动")
         t_tab_center = int(tab_center * screen_width)
         t_from = int(float(tab_interval[0]) * screen_heigh)
         t_to = int(float(tab_interval[1]) * screen_heigh)
         driver.swipe(t_tab_center, t_from, tab_center, t_to, duration)
     else:
-        # utils_logger.log("touch_action:","左右滑动"
+        utils_logger.debug("scroll_by:", "左右滑动")
         t_tab_center = int(tab_center * screen_heigh)
         t_from = int(float(tab_interval[0]) * screen_width)
         t_to = int(float(tab_interval[1]) * screen_width)
-        utils_logger.log("[touch_action] t_tab_center:", t_tab_center, ",t_from:", t_from,
+        utils_logger.log("[scroll_by] t_tab_center:", t_tab_center, ",t_from:", t_from,
                          ",t_to:", t_to)
         driver.swipe(t_from, t_tab_center, t_to, t_tab_center, duration)
 
@@ -111,32 +111,29 @@ def start_appium_service(device, appium_port, access_appium_bp_port, retry_count
     if not check_res:  # 空串表示未安装appium服务
         utils_logger.log("appium服务还未安装,调用'npm install -g appium'执行安装程序")
         return False
-    # utils_logger.log("appium服务安装地址", check_res)
-    # utils_logger.log("重试检查appium服务启动状态 ", retry_count)
+    utils_logger.debug("appium服务安装地址", check_res)
+    utils_logger.debug("重试检查appium服务启动状态 ", retry_count)
     # 存在appium进程则输出success，否则输出空串
-    appium_state_check_cmd = "ps -ef | grep \'appium"
-    if appium_port is not None:
-        appium_state_check_cmd += " -p " + str(appium_port)
-    appium_state_check_cmd += "\' | grep -v \'grep\' >/dev/null && echo success"
-    # 屏蔽因日志太多堵塞
-    appium_start_cmd = "nohup appium "
-    if appium_port is not None:
-        appium_start_cmd += " -p " + str(appium_port)
-    if access_appium_bp_port is not None:
-        appium_start_cmd += " -bp " + str(access_appium_bp_port)
-    if device is not None:
-        appium_start_cmd += " -U " + str(device)
-    appium_start_cmd += " 1>/dev/null 2>&1 &"
-
+    appium_state_check_cmd = "ps -ef | grep \'appium\' | grep " + str(device) \
+                             + " | grep -v \'grep\' >/dev/null && echo success"
     res_apm, res_apm_error = utils_common.exec_shell_cmd(appium_state_check_cmd)
     utils_logger.debug("appium服务是否启动", appium_state_check_cmd, str(res_apm), str(res_apm_error))
     if res_apm is not None:
         return True
     else:
         # 关闭appium服务,保证同一时刻仅有唯一服务
-        utils_common.exec_shell_cmd("ps -ef | grep appium | grep nohup | grep -v \"$$\" | awk  '{print \"kill -9 \" "
-                                    "$2}' | sh")
-        # 启动appium服务
+        utils_common.exec_shell_cmd(
+            "ps -ef | grep appium | grep " + str(device) + " | grep nohup | grep -v \"$$\" | awk  '{print \"kill -9 \" "
+                                                           "$2}' | sh")
+        # 启动appium服务(屏蔽因日志太多堵塞)
+        appium_start_cmd = "nohup appium "
+        if appium_port is not None:
+            appium_start_cmd += " -p " + str(appium_port)
+        if access_appium_bp_port is not None:
+            appium_start_cmd += " -bp " + str(access_appium_bp_port)
+        if device is not None:
+            appium_start_cmd += " -U " + str(device)
+        appium_start_cmd += " 1>/dev/null 2>&1 &"
         res, err = utils_common.exec_shell_cmd(appium_start_cmd)
         if interval_time > 0:
             utils_logger.debug(

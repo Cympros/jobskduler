@@ -107,7 +107,7 @@ class TaskAppiumQutoutiaoYuedu(TaskAppiumQutoutiaoBase):
         utils_logger.debug("页面滚动次数：", scroll_size)
         for index in range(scroll_size):
             # 滑动以选择文章开启阅读任务
-            self.safe_touch_action(tab_interval=[float(random.uniform(0.6, 0.8)), 0.2])
+            self.safe_scroll_by(tab_interval=[float(random.uniform(0.6, 0.8)), 0.2])
         news_activitys = ['.content.view.activity.NewsDetailActivity', '.content.newsdetail.news.NewsDetailActivity',
                           '.content.newsdetail.news.NewsDetailNewActivity']
         video_activitys = ['.content.view.activity.VideoNewsDetailActivity',
@@ -138,7 +138,7 @@ class TaskAppiumQutoutiaoYuedu(TaskAppiumQutoutiaoBase):
                 if utils_appium.back_to_target_activity(self.driver, main_activity) is False:
                     utils_logger.log("等待进入详情页失败,且无法回退至首页,则直接退出浏览")
                     return False
-                self.safe_touch_action(tab_interval=[float(random.uniform(0.65, 0.35)), 0.35])
+                self.safe_scroll_by(tab_interval=[float(random.uniform(0.65, 0.35)), 0.35])
         # 判断是否在详情页面
         cur_activity = utils_appium.get_cur_act(self.driver)
         if cur_activity == main_activity:
@@ -175,8 +175,8 @@ class TaskAppiumQutoutiaoYuedu(TaskAppiumQutoutiaoBase):
                     utils_logger.debug(
                         "[" + str(time_to_foreach) + "] for tab_interval[" + str(tab_interval) + "] with index:" + str(
                             index))
-                    if self.safe_touch_action(tab_interval=tab_interval, duration=int(float(period * 1000))) is False:
-                        utils_logger.log("----> safe_touch_action caught exception")
+                    if self.safe_scroll_by(tab_interval=tab_interval, duration=int(float(period * 1000))) is False:
+                        utils_logger.log("----> safe_scroll_by caught exception")
                         break
                     # 每滑动一次,均判断是否还在详情页
                     scroll_activity = utils_appium.get_cur_act(self.driver)
@@ -302,7 +302,7 @@ class TaskAppiumQutoutiaoOpenBaoxiang(TaskAppiumQutoutiaoTaskCenter):
 
             utils_logger.log('未找到开宝箱的按钮')
             utils_logger.log("TaskAppiumQtoutiaoOpenBaoxiang swipe of index：", i)
-            self.safe_touch_action(tab_center=0.4, is_down=True, tab_interval=[0.65, 0.35])
+            self.safe_scroll_by(tab_center=0.4, is_down=True, tab_interval=[0.65, 0.35])
             continue
         # 检测到
         if self.query_ele_wrapper("//android.view.View[@content-desc='开启宝箱']", click_mode="click") is not None:
@@ -351,7 +351,7 @@ class TaskAppiumQutoutiaoGrandTotalJiangli(TaskAppiumQutoutiaoTaskCenter):
                                       rect_scale_check_element_region=[0, 1, 0, 1]) is not None:
                 utils_logger.log("检测到\"累计阅读时长达到60分钟\"")
                 break
-            self.safe_touch_action(tab_center=0.4, is_down=True, tab_interval=[0.65, 0.35])
+            self.safe_scroll_by(tab_center=0.4, is_down=True, tab_interval=[0.65, 0.35])
         if self.query_ele_wrapper("//android.view.View[@content-desc='累计阅读时长达到60分钟']") is not None:
             if self.query_ele_wrapper("//android.view.View[@content-desc='立即阅读']") is not None:
                 utils_logger.log("阅读时间未达到60分钟")

@@ -6,17 +6,16 @@ import json
 import hashlib
 import traceback
 
+from numpy.core import unicode
+
 project_root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
 sys.path.insert(0, project_root_path)
-
-reload(sys)
-sys.setdefaultencoding('utf-8')
 
 from email.mime.text import MIMEText
 from email.header import Header
 from email.utils import parseaddr, formataddr
-from email.MIMEMultipart import MIMEMultipart
-from email.MIMEBase import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
 from email import encoders
 
 from smtplib import SMTP_SSL
@@ -24,50 +23,10 @@ from smtplib import SMTPException
 
 from helper import utils_common, utils_logger, utils_yaml
 from helper import utils_file
-from config import envs
-
-
-def wrapper_send_email(title=None, content=None, files=None):
-    mail_title = title if title is not None else u'python邮件标题'
-    # files组合成数组
-    wrapper_files = None
-    if files is not None:
-        if not isinstance(files, list):
-            wrapper_files = [files]
-        else:
-            wrapper_files = files
-    # 组装邮件内容[Git_Desc下格式]：【local分支】+【git_revision_number】+【orgin信息】+【commit_desc】
-    mail_content = "Device_Host_Name:  " + utils_common.get_host_name() + "\n" \
-                   + "Host_IP:   " + utils_common.get_real_host_ip() + "\n" \
-                   + "Git_Desc:   " + json.dumps(utils_common.exec_shell_cmd("git branch -vv | grep '*'"),
-                                                 ensure_ascii=False, ) + "\n\n" \
-                   + "Content:    \n" + (content if content is not None else '来自python登录qq邮箱的测试邮件')
-
-    yaml_loader = utils_yaml.load_yaml(envs.get_yaml_path())
-    if yaml_loader is None:
-        utils_logger.log("wrapper_send_email 邮件发送失败，未读取到配置")
-        return
-    # 发送邮件
-    receiver_user = yaml_loader.get('email_receiver')  # 邮件接收地址
-    utils_logger.log("start to wrapper_send_email[" + receiver_user + "][" + mail_title + "]:",
-                            wrapper_files)
-    for sender in yaml_loader.get('sender_list'):
-        sender_host = sender['email_sender_host']
-        email_sender_user = sender['email_sender_user']
-        email_sender_pwd = sender['email_sender_pwd']
-        if receiver_user == "" or sender_host == "" or email_sender_user == "" or email_sender_pwd == "":
-            utils_logger.log("#wrapper_send_email# 参数配置错误", receiver_user, email_sender_user, email_sender_pwd,
-                             sender_host)
-            continue
-        email_state = send_smtp_email(sender_host, email_sender_user, email_sender_pwd,
-                                      receiver_user, mail_title, mail_content, wrapper_files)
-        if email_state is False:
-            utils_logger.log(
-                "-------wrapper_send_email caught exceptiion-------")
 
 
 def send_smtp_email(smtp_host, send_user, send_password, receiver_user, title, content, files, retry_count=3):
-    utils_logger.log("#send_smtp_email# ", smtp_host, send_user, send_password)
+    utils_logger.log(smtp_host, send_user, send_password)
     try:
         # 构造邮件
         msg = MIMEMultipart()

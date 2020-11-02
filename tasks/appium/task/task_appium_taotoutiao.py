@@ -97,7 +97,7 @@ class TaskAppiumTaoToutiaoYueDu(TaskAppiumTaoToutiaoBase):
         utils_logger.log("页面滚动次数：", scroll_size)
         for index in range(scroll_size):
             # 滑动以选择文章开启阅读任务
-            self.safe_touch_action(tab_interval=[float(random.uniform(0.65, 0.35)), 0.35])
+            self.safe_scroll_by(tab_interval=[float(random.uniform(0.65, 0.35)), 0.35])
         # 随便点击，选择指定文章开始读取
         news_activitys = ['.view.activity.NewsDetialTempActivity']
         video_activitys = ['com.lightsky.video.videodetails.ui.activity.VideoDetailsActivity',
@@ -128,7 +128,7 @@ class TaskAppiumTaoToutiaoYueDu(TaskAppiumTaoToutiaoBase):
                 if utils_appium.back_to_target_activity(self.driver, main_activity) is False:
                     utils_logger.log("等待进入详情页失败,且无法回退至首页,则直接退出浏览")
                     return False
-                self.safe_touch_action(tab_interval=[float(random.uniform(0.65, 0.35)), 0.35])
+                self.safe_scroll_by(tab_interval=[float(random.uniform(0.65, 0.35)), 0.35])
         # 判断是否在详情页面
         cur_activity = utils_appium.get_cur_act(self.driver)
         if cur_activity == main_activity:
@@ -146,8 +146,8 @@ class TaskAppiumTaoToutiaoYueDu(TaskAppiumTaoToutiaoBase):
                 else:
                     tab_interval = [0.25, 0.75]
                 utils_logger.log("[", time_to_foreach, "] for tab_interval[", tab_interval, "] with index:", index)
-                if self.safe_touch_action(tab_interval=tab_interval, duration=int(float(period * 1000))) is False:
-                    utils_logger.log("----> safe_touch_action caught exception")
+                if self.safe_scroll_by(tab_interval=tab_interval, duration=int(float(period * 1000))) is False:
+                    utils_logger.log("----> safe_scroll_by caught exception")
             return True
         elif cur_activity in video_activitys:
             utils_logger.log("等待视频播放完成：45")

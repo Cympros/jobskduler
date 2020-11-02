@@ -90,7 +90,7 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
         utils_logger.debug("页面滚动次数：", scroll_size)
         for index in range(scroll_size):
             # 滑动以选择文章开启阅读任务
-            self.safe_touch_action(tab_interval=[float(random.uniform(0.65, 0.35)), 0.35])
+            self.safe_scroll_by(tab_interval=[float(random.uniform(0.65, 0.35)), 0.35])
         # 随便点击，选择指定文章开始读取
         news_activitys = ['com.songheng.eastfirst.business.newsdetail.view.activity.NewsDetailH5Activity',
                           'com.songheng.eastfirst.business.newsdetail.view.activity.NewsDetailHardwareActivity']
@@ -118,7 +118,7 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
                     utils_logger.log("等待进入详情页失败,且无法回退至首页,则直接退出浏览")
                     return False
                 # 回退至首页时,增加随机滚动,避免又点入同一份广告
-                self.safe_touch_action(tab_interval=[float(random.uniform(0.65, 0.35)), 0.35])
+                self.safe_scroll_by(tab_interval=[float(random.uniform(0.65, 0.35)), 0.35])
         # 判断是否在详情页面
         cur_activity = utils_android.get_resumed_activity(self.target_device_name)
         if cur_activity == main_activity:
@@ -150,9 +150,9 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
                     utils_logger.debug(
                         "[" + str(time_to_foreach) + "] for tab_interval[" + str(tab_interval) + "] with index:" + str(
                             index))
-                    if self.safe_touch_action(tab_interval=tab_interval,
+                    if self.safe_scroll_by(tab_interval=tab_interval,
                                               duration=int(float(period * 1000))) is False:
-                        utils_logger.log("----> safe_touch_action caught exception")
+                        utils_logger.log("----> safe_scroll_by caught exception")
                         return False
                     # 东方头条有可能向下拖动的时候退出详情页,因此添加检测机制
                     if utils_android.get_resumed_activity(self.target_device_name) == main_activity:

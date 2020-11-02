@@ -15,6 +15,7 @@ sys.path.insert(0, project_root_path)
 
 from helper import utils_logger
 from helper import utils_common
+from helper import email_send
 
 
 class BaseTask(abc.ABC):
@@ -35,7 +36,7 @@ class BaseTask(abc.ABC):
         return True
 
     def get_project_output_dir(self):
-        return self.handle_callback.read_config(None, None, "get_project_output_dir")
+        return self.handle_callback.read_config(self, "get_project_output_dir")
 
     def release_after_task(self):
         # 任务执行完后的释放资源
@@ -58,7 +59,37 @@ class BaseTask(abc.ABC):
                  }
 
         send_content = json.dumps(error, ensure_ascii=False).encode('utf8')
-        utils_common.zip_msg_within_files(self.get_project_output_dir(), email_title,
-                                          send_content.decode() + "\n堆栈信息：\n"
-                                          + ("None" if exception_info is None else exception_info),
-                                          list(set(self.upload_files)))
+
+        self.wrapper_send_email(title=email_title, content=str(send_content) + "\n堆栈信息：\n" + (
+            "None" if exception_info is None else exception_info), files=list(set(self.upload_files)))
+
+    def wrapper_send_email(self, title=None, content=None, files=None):
+        mail_title = title if title is not None else u'python邮件标题'
+        # files组合成数组
+        wrapper_files = None
+        if files is not None:
+            if not isinstance(files, list):
+                wrapper_files = [files]
+            else:
+                wrapper_files = files
+        # 组装邮件内容[Git_Desc下格式]：【local分支】+【git_revision_number】+【orgin信息】+【commit_desc】
+        mail_content = "Device_Host_Name:  " + utils_common.get_host_name() + "\n" \
+                       + "Host_IP:   " + utils_common.get_real_host_ip() + "\n" \
+                       + "Git_Desc:   " + json.dumps(utils_common.exec_shell_cmd("git branch -vv | grep '*'"),
+                                                     ensure_ascii=False, ) + "\n\n" \
+                       + "Content:    \n" + (content if content is not None else '来自python登录qq邮箱的测试邮件')
+
+        # 发送邮件
+        receiver_user = self.handle_callback.read_config(self, 'email_receiver')  # 邮件接收地址
+        utils_logger.log("start to wrapper_send_email[" + receiver_user + "][" + mail_title + "]:", wrapper_files)
+        # 发送email
+        sender_host = self.handle_callback.read_config(self, 'email_sender_host')
+        email_sender_user = self.handle_callback.read_config(self, 'email_sender_user')
+        email_sender_pwd = self.handle_callback.read_config(self, 'email_sender_pwd')
+        if receiver_user == "" or sender_host == "" or email_sender_user == "" or email_sender_pwd == "":
+            utils_logger.log("参数配置错误", receiver_user, email_sender_user, email_sender_pwd, sender_host)
+            return
+        email_state = email_send.send_smtp_email(sender_host, email_sender_user, email_sender_pwd,
+                                                 receiver_user, mail_title, mail_content, wrapper_files)
+        if email_state is False:
+            utils_logger.log("-------wrapper_send_email caught exceptiion-------")

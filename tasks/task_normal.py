@@ -154,7 +154,7 @@ class TaskResetRunRetryModel(AbsAbsBasicPCTask):
             for task_session in task_sessions:  # 包含设备相关的task描述
                 is_retry_count_over = conf_modify.query(task_session, "is_retry_count_over",
                                                         "false")
-                # print task_session,is_retry_count_over
+                # print is_retry_count_over
                 if is_retry_count_over == "true":
                     retry_over_tasks.append(task_session)
             # 组建提示信息

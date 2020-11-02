@@ -23,10 +23,22 @@ class HandleCallback(metaclass=ABCMeta):
     def __init__(self):
         pass
 
-    def read_config(self, module_name, task_name, config_key):
-        utils_logger.debug("HandleCallback.read_config", module_name, task_name, config_key)
+    def read_config(self, module, config_key):
+        utils_logger.debug("HandleCallback.read_config", module, config_key)
         if config_key == 'get_project_output_dir':
             return get_out_dir()
+        elif config_key == "feizu_account":
+            return ""
+        elif config_key == "feizu_password":
+            return ""
+        elif config_key == "email_receiver":
+            return "firy.itzin@gmail.com"
+        elif config_key == "email_sender_host":
+            return "smtp.163.com"
+        elif config_key == "email_sender_user":
+            return "13651968735@163.com"
+        elif config_key == "email_sender_pwd":
+            return "QPYNHNZLCMBDQIQU"
 
     def notify_task_success(self, module_name, task_name):
         """更新任务状态"""

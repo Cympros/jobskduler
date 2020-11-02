@@ -9,7 +9,7 @@ import abc
 project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../')
 sys.path.insert(0, project_root_path)
 
-#https: // github.com / appium / python - client  # getting-the-appium-python-client
+# https: // github.com / appium / python - client  # getting-the-appium-python-client
 import appium  # pip install Appium-Python-Client
 
 import time
@@ -135,10 +135,6 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
                                        upload_files=list(set(self.upload_files)),
                                        exception_info=exception_info)
 
-    def register_config(self, xargs_dict=None):
-        BaseTask.register_config(self, xargs_dict)
-        self.target_device_name = xargs_dict.get('device_name')
-
     def whether_support_device_type(self, device_type):
         if BaseTask.whether_support_device_type(self, device_type) is False:
             return False
@@ -230,7 +226,7 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
 
     def release_after_task(self):
         BaseTask.release_after_task(self)
-        # utils_logger.log("task_appium_base 释放资源")
+        utils_logger.debug("task_appium_base 释放资源")
         if self.driver is not None:
             try:
                 self.driver.quit()
@@ -354,14 +350,6 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
                 utils_logger.log("监测到删除应用的历史残留数据弹框，但没办法关闭")
         return False
 
-    def get_path_in_appium_img_dir(self, file_name):
-        '返回file_name对应的全路径'
-        'appium下存放img的目录'
-        appium_img_dir = os.path.abspath(get_module_root_path() + "/tasks/appium/img")
-        if not os.path.exists(appium_img_dir):
-            return None
-        return os.path.abspath(appium_img_dir + "/" + file_name)
-
     def query_ele_wrapper(self, query_str, is_ignore_except_case=False, click_mode=None,
                           retry_count=0,
                           time_wait_page_completely_resumed=0,
@@ -478,7 +466,6 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
             utils_logger.log("[wait_view_layout_finish] 不需要检查当前页面是否加载完")
             return True, file_screen_shot
         # 使用图片空白区域识别页面是否加载完成
-        is_view_layout_finished = False
         for check_index in range(3):  # 最多重试3次，每次时间间隔为2秒
             # 基于图片识别纯色图片范围判断页面是否加载完成
             if utils_android.is_page_loging(file_screen_shot) is True:
@@ -495,7 +482,7 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
                 return True, file_screen_shot
         return False, file_screen_shot
 
-    def safe_touch_action(self, tab_interval, retry_count=3, is_down=True, tab_center=0.5,
+    def safe_scroll_by(self, tab_interval, retry_count=3, is_down=True, tab_center=0.5,
                           duration=300):
         """
         :param tab_interval: 触摸区间
@@ -506,21 +493,21 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         :return:
         """
         try:
-            utils_logger.debug("safe_touch_action with retry_count: " + str(retry_count))
-            utils_appium.touch_action(driver=self.driver,
+            utils_logger.debug("safe_scroll_by with retry_count: " + str(retry_count))
+            utils_appium.scroll_by(driver=self.driver,
                                       target_device_name=self.target_device_name, is_down=is_down,
                                       tab_center=tab_center, tab_interval=tab_interval,
                                       duration=duration)
             return True
         except Exception as exception:
             except_name = exception.__class__.__name__
-            utils_logger.log("TouchError:safe_touch_action caught exception[" + str(except_name) + "]:", retry_count)
+            utils_logger.log("TouchError:safe_scroll_by caught exception[" + str(except_name) + "]:", retry_count)
             # 屏蔽常规异常
             if retry_count <= 0 or except_name == 'InvalidSessionIdException' or except_name == 'WebDriverException':
-                utils_logger.log("safe_touch_action", traceback.format_exc())
+                utils_logger.log("safe_scroll_by", traceback.format_exc())
                 return False
             else:
-                return self.safe_touch_action(tab_interval=tab_interval,
+                return self.safe_scroll_by(tab_interval=tab_interval,
                                               retry_count=retry_count - 1, is_down=is_down,
                                               tab_center=tab_center, duration=duration)
 

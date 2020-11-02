@@ -318,7 +318,7 @@ class TaskAppiumWeixinJimmieJDPeiyuchang(TaskAppiumWeixinBase):
                 tab_interval = [0.3, 0.7]
             else:
                 tab_interval = [0.7, 0.3]
-            self.safe_touch_action(is_down=False, tab_center=0.85, tab_interval=tab_interval, duration=300)
+            self.safe_scroll_by(is_down=False, tab_center=0.85, tab_interval=tab_interval, duration=300)
         return True
 
 

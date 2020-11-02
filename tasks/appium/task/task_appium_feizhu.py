@@ -63,8 +63,8 @@ class TaskAppiumFeizhu(AbsBasicAppiumTask):
         cur_act = utils_appium.get_cur_act(self.driver)
         if cur_act == 'com.ali.user.mobile.login.ui.UserLoginActivity':
             # 校验账号密码
-            account = utils_yaml.load_yaml(envs.get_yaml_path()).get('feizu_account')
-            pwd = utils_yaml.load_yaml(envs.get_yaml_path()).get('feizu_password')
+            account = self.handle_callback.read_config(self, 'feizu_account')
+            pwd = self.handle_callback.read_config(self, 'feizu_password')
             if account is None or pwd is None:
                 self.self.task_scheduler_failed("请设置飞猪账号&密钥")
                 return False
