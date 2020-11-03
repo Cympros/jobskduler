@@ -40,12 +40,12 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         BaseTask.__init__(self)
 
         # 外部参数依赖
-        self.target_device_name = None
         self.target_application_id = target_application_id
         self.launch_activity = launch_activity
         self.home_page_activity = home_page_activity
 
         # 本地实例化参数
+        self.target_device_name = None
         self.driver = None
         self.appium_port = None
         self.appium_port_bp = None
