@@ -168,7 +168,7 @@ if __name__ == '__main__':
         choice = input("确认添加Android线程(yes/y)：" + str(android_device) + "\n")
         if choice in yes:
             utils_logger.debug("android_device", android_device)
-            thread_names.append(android_device)
+            thread_names.append("threadid-" + android_device)
         else:
             sys.stdout.write("Please respond with 'yes' or 'no'")
     utils_logger.log("thread_names", thread_names)

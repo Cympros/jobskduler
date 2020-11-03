@@ -13,7 +13,6 @@ sys.path.insert(0, project_root_path)
 from tasks.appium.task_appium_base import AbsBasicAppiumTask
 from tasks.appium import utils_appium
 
-
 from helper import utils_logger
 
 
@@ -190,4 +189,6 @@ if __name__ == '__main__':
             break
         task_name = tasks[task_index_selected]
         task = eval(task_name + '()')
-        task.run_task()
+        from handle_callback import HandleCallback
+
+        task.run_task(HandleCallback())

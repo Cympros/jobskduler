@@ -21,7 +21,6 @@ from helper import email_send
 class BaseTask(abc.ABC):
     def __init__(self):
         self.upload_files = []  # 用于存储待上传的文件列表
-        self.task_session = None
 
     def get_dependence_task(self):
         """判断当前任务对应的依赖项是否已经全部完成"""
@@ -54,11 +53,11 @@ class BaseTask(abc.ABC):
         utils_logger.log("task_scheduler_failed.upload_files",
                          list(set(self.upload_files)))
         error = {'message': message,
-                 'task_name': self.task_session if self.task_session is not None else "None",
+                 'task_name': self.__str__(),
                  'threadid': str(threading.currentThread().getName()),
                  }
-
-        send_content = json.dumps(error, ensure_ascii=False).encode('utf8')
+        send_content = json.dumps(error, ensure_ascii=False)
+        utils_logger.debug("error is below:", send_content)
 
         self.wrapper_send_email(title=email_title, content=str(send_content) + "\n堆栈信息：\n" + (
             "None" if exception_info is None else exception_info), files=list(set(self.upload_files)))

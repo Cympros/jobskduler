@@ -2,8 +2,6 @@
 # 发送邮件
 import os
 import sys
-import json
-import hashlib
 import traceback
 
 from numpy.core import unicode
@@ -21,7 +19,7 @@ from email import encoders
 from smtplib import SMTP_SSL
 from smtplib import SMTPException
 
-from helper import utils_common, utils_logger, utils_yaml
+from helper import utils_logger
 from helper import utils_file
 
 

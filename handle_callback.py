@@ -12,7 +12,8 @@ from helper import utils_logger
 
 def get_out_dir():
     """临时文件的存放跟目录"""
-    outer_dir = project_root_path + "/../out/sub.daily-task/"
+    # outer_dir = project_root_path + "/../out/sub.daily-task/"
+    outer_dir = os.path.expanduser('~') + "/Downloads/out.sub.daily-task/"
     if not os.path.exists(outer_dir):
         os.makedirs(outer_dir)
     return outer_dir

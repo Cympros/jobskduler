@@ -100,9 +100,8 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
             utils_logger.debug("screen shot write to file ")
             self.upload_files.append(scr_path)
 
-    def task_scheduler_failed(self, message, email_title=u'异常信息', is_page_source=True,
-                              is_scr_shot=True, upload_files=[],
-                              exception_info=None):
+    def task_scheduler_failed(self, message, email_title=u'异常信息', is_page_source=True, is_scr_shot=True,
+                              upload_files=[], exception_info=None):
         """upload_files：可以允许自定义添加待上传的文件"""
         self.upload_files.extend(upload_files)
         if message is not None:
@@ -115,10 +114,10 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
                 'device_brand': utils_android.get_brand_by_device(self.target_device_name),
                 'device_model': utils_android.get_model_by_device(self.target_device_name),
                 'device_resolution': utils_android.get_resolution_by_device(self.target_device_name),
-                'app_version': utils_android.get_app_version_by_applicaionid(
-                    self.target_device_name,
-                    self.target_application_id),
-                'raw_message': message, }
+                'app_version': utils_android.get_app_version_by_applicaionid(self.target_device_name,
+                                                                             self.target_application_id),
+                'raw_message': message,
+                }
         if self.driver is not None:
             msgs['current_activity'] = utils_appium.get_cur_act(self.driver)
         # 截取日志并上传
@@ -483,7 +482,7 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         return False, file_screen_shot
 
     def safe_scroll_by(self, tab_interval, retry_count=3, is_down=True, tab_center=0.5,
-                          duration=300):
+                       duration=300):
         """
         :param tab_interval: 触摸区间
         :param retry_count: 重试次数
@@ -495,9 +494,9 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         try:
             utils_logger.debug("safe_scroll_by with retry_count: " + str(retry_count))
             utils_appium.scroll_by(driver=self.driver,
-                                      target_device_name=self.target_device_name, is_down=is_down,
-                                      tab_center=tab_center, tab_interval=tab_interval,
-                                      duration=duration)
+                                   target_device_name=self.target_device_name, is_down=is_down,
+                                   tab_center=tab_center, tab_interval=tab_interval,
+                                   duration=duration)
             return True
         except Exception as exception:
             except_name = exception.__class__.__name__
@@ -508,8 +507,8 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
                 return False
             else:
                 return self.safe_scroll_by(tab_interval=tab_interval,
-                                              retry_count=retry_count - 1, is_down=is_down,
-                                              tab_center=tab_center, duration=duration)
+                                           retry_count=retry_count - 1, is_down=is_down,
+                                           tab_center=tab_center, duration=duration)
 
     def safe_tap_in_point(self, point, retry_count=3):
         """tap_in_point安全模式"""
