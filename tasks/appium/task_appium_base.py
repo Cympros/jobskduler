@@ -45,7 +45,6 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         self.home_page_activity = home_page_activity
 
         # 本地实例化参数
-        self.target_device_name = None
         self.driver = None
         self.appium_port = None
         self.appium_port_bp = None
@@ -150,24 +149,12 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         if self.target_application_id is None or self.launch_activity is None:
             utils_logger.debug("缺失必要参数")
             return False
-        # 检查设备在线状态
-        if self.target_device_name is not None:
-            device_status = utils_android.get_device_statue(self.target_device_name)
-            if device_status != "device":
-                # 尝试重连
-                if self.target_device_name.endswith(":5555") is True:
-                    utils_common.exec_shell_cmd("adb -s " + self.target_device_name + " disconnect")
-                    utils_common.exec_shell_cmd("adb connect " + self.target_device_name)
-                utils_logger.log("[" + self.target_device_name + "]设备不在线", device_status)
-                return False
-        else:
-            connected_devcies = utils_android.get_connected_devcies()
-            if connected_devcies is not None and len(connected_devcies) > 0:
-                self.target_device_name = connected_devcies[0]
+        self.target_device_name = self.handle_callback.read_config(self, "target_device_name")
         # 检查是否设备已连接
         if self.target_device_name is None:
             utils_logger.debug("未连接设备")
             return False
+        utils_logger.log("target_device_name:", self.target_device_name)
         # 检查应用是否安装
         check_installed_response, response_errror = utils_android.is_app_installed(
             self.target_device_name,

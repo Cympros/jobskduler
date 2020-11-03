@@ -276,17 +276,9 @@ def get_start_activity_by_application_id(application_id):
 
 def get_device_statue(device=None):
     """读取设备在线状态"""
-    device_infos, device_infos_errror = _check_adb_command_result("adb devices | grep -v 'List of devices attached'")
-    if device_infos is None:
-        return None
-    for device_info in device_infos.split("\n"):
-        trim_device_info = device_info.lstrip().rstrip()
-        if trim_device_info != "" and trim_device_info != "List of devices attached":
-            split_array = trim_device_info.split('\t')
-            trim_device_info = split_array[0]
-            if trim_device_info == device:
-                return split_array[1]
-    return None
+    cmd = "adb %s get-state" % (" " if device is None else " -s " + str(device) + " ")
+    device_status, device_status_errror = _check_adb_command_result(cmd)
+    return device_status
 
 
 def is_app_installed(device, application_id):

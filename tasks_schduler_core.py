@@ -164,13 +164,15 @@ if __name__ == '__main__':
     # thread_names.append('pc')
 
     yes = {'yes', 'y'}
-    for android_device in utils_android.get_connected_devcies():
-        choice = input("确认添加Android线程(yes/y)：" + str(android_device) + "\n")
-        if choice in yes:
-            utils_logger.debug("android_device", android_device)
-            thread_names.append("threadid-" + android_device)
-        else:
-            sys.stdout.write("Please respond with 'yes' or 'no'")
+    connected_devices = utils_android.get_connected_devcies()
+    if connected_devices is not None:
+        for android_device in connected_devices:
+            choice = input("确认添加Android线程(yes/y)：" + str(android_device) + "\n")
+            if choice in yes:
+                utils_logger.debug("android_device", android_device)
+                thread_names.append("android-thread-" + android_device)
+            else:
+                sys.stdout.write("Please respond with 'yes' or 'no'")
     utils_logger.log("thread_names", thread_names)
     for thread_name in thread_names:
         t = DispatcherThread(name=thread_name)

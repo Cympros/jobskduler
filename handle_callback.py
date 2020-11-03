@@ -1,13 +1,17 @@
 # coding=utf-8
 # 最外层的项目配置
 import os
+import re
 import sys
+import threading
 
 project_root_path = os.path.split(os.path.realpath(__file__))[0]
 sys.path.insert(0, project_root_path)
 
 from abc import ABCMeta, abstractmethod
 from helper import utils_logger
+from helper import utils_android
+from helper import utils_common
 
 
 def get_out_dir():
@@ -40,6 +44,24 @@ class HandleCallback(metaclass=ABCMeta):
             return "13651968735@163.com"
         elif config_key == "email_sender_pwd":
             return "QPYNHNZLCMBDQIQU"
+        elif config_key == "target_device_name":
+            # 从线程名中解析deviceName
+            thread_name = threading.currentThread().getName()
+            utils_logger.debug("thread_name", thread_name)
+            tmp_device = None
+            if thread_name.startswith("android-thread-"):
+                tmp_device = thread_name.strip("android-thread-")
+            else:
+                connected_devcies = utils_android.get_connected_devcies()
+                if connected_devcies is not None and len(connected_devcies) > 0:
+                    tmp_device = connected_devcies[0]
+            # 若是ip地址,则尝试重连
+            compile_rule = re.compile(r'\d+[\.]\d+[\.]\d+[\.]\d+')
+            match_list = re.findall(compile_rule, tmp_device)
+            if match_list:
+                reconect_res, reconnect_error = utils_common.exec_shell_cmd("adb connect %s" % tmp_device)
+                utils_logger.debug("reconect_res:", reconect_res)
+            return tmp_device
 
     def notify_task_success(self, module_name, task_name):
         """更新任务状态"""
