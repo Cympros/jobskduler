@@ -166,7 +166,7 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
                 self.target_device_name = connected_devcies[0]
         # 检查是否设备已连接
         if self.target_device_name is None:
-            self.task_scheduler_failed("未连接设备")
+            utils_logger.debug("未连接设备")
             return False
         # 检查应用是否安装
         check_installed_response, response_errror = utils_android.is_app_installed(
@@ -182,7 +182,7 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         # 分配appium服务端口
         self.appium_port = utils_appium.query_avaiable_port(4273, 9999)
         if self.appium_port is None:
-            self.task_scheduler_failed("未指定appium服务端口")
+            utils_logger.log("未指定appium服务端口")
             return False
         self.appium_port_bp = utils_appium.query_avaiable_port(self.appium_port + 1, 9999)
         utils_logger.debug(
@@ -205,21 +205,20 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
                 return False
 
         if self.driver is None:
-            self.task_scheduler_failed("not init appium driver")
+            utils_logger.log("not init appium driver")
             return False
 
         if self.driver is None or self.target_device_name is None:
-            self.task_scheduler_failed(
-                "cureent env not right:[" + str(self.driver) + "," + str(self.target_device_name) + "]")
+            utils_logger.log("cureent env not right:[" + str(self.driver) + "," + str(self.target_device_name) + "]")
             return False
         # 检查是否锁屏
         if utils_android.lock_off_screen_if_need(self.target_device_name) is False:
-            self.task_scheduler_failed("---> lock_off_screen_if_need failed")
+            utils_logger.log("---> lock_off_screen_if_need failed")
             return False
         # 检查是否进入首页
         if self.home_page_activity is not None:
             if self.wait_activity(self.driver, self.home_page_activity, retry_count=10) is False:
-                self.task_scheduler_failed("未进入应用首页", self.home_page_activity)
+                utils_logger.log("未进入应用首页", self.home_page_activity)
                 return False
         return True
 
@@ -543,12 +542,10 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
             is_check_view_inflated)
         if is_view_layout_finished is False:
             utils_logger.log("[_query_points_with_text_by_ocr] 页面在指定时间并没有加载完成")
-            self.task_scheduler_failed(
-                "[_query_points_with_text_by_ocr] '" + search_text + "' 页面在指定时间并没有加载完成")
+            self.task_scheduler_failed(search_text + "' 页面在指定时间并没有加载完成")
             return None
         if file_screen_shot is None:
-            self.task_scheduler_failed(
-                "[_query_points_with_text_by_ocr] '" + search_text + "' failed because no file_screen_shot")
+            self.task_scheduler_failed(search_text + "' failed because no file_screen_shot")
             return None
         # 根据参数裁剪图片
         cutted_file_screen_shot = file_screen_shot
@@ -562,10 +559,8 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
                                                                    file_screen_shot,
                                                                    suffix="cutted"))
         if cutted_file_screen_shot is None:
-            utils_logger.log(
-                "--->[_query_points_with_text_by_ocr] '" + search_text + "' 截图文件裁剪 failed")
-            self.task_scheduler_failed(
-                '[_query_points_with_text_by_ocr] create cutted image for screen shot failed')
+            utils_logger.log(search_text + "' 截图文件裁剪 failed")
+            self.task_scheduler_failed('create cutted image for screen shot failed')
             return None
         # 检查匹配元素
         match_points = ocr_utils.get_points_within_text(cutted_file_screen_shot, search_text)
@@ -641,8 +636,7 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         else:
             if len(points) > 1:
                 utils_logger.log("查询元素不唯一，请检查页面元素")
-                self.task_scheduler_failed(
-                    ("query_only_point_within_text[" + search_text + "]元素不唯一: ").joins(points))
+                self.task_scheduler_failed(("[" + search_text + "]元素不唯一: ").joins(points))
                 return None
             else:
                 single_point = points[0]
@@ -670,12 +664,10 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         is_view_layout_finished, file_screen_shot = self.wait_view_layout_finish()
         if is_view_layout_finished is False:
             utils_logger.log("[query_point_throw_part_pic] 页面在指定时间并没有加载完成")
-            self.task_scheduler_failed(
-                "[query_point_throw_part_pic] '" + part_pic_path + "' 页面在指定时间并没有加载完成")
+            self.task_scheduler_failed(part_pic_path + "' 页面在指定时间并没有加载完成")
             return None
         if file_screen_shot is None:
-            self.task_scheduler_failed(
-                "[query_point_throw_part_pic] '" + part_pic_path + "' failed because no file_screen_shot")
+            self.task_scheduler_failed(part_pic_path + "' failed because no file_screen_shot")
             return None
         # 裁剪获得比对的资源图片
         utils_logger.log("[query_point_throw_part_pic] 格式化资源文件")
