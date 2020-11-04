@@ -117,9 +117,9 @@ class TaskAppiumWeixinBase(AbsBasicAppiumTask, abc.ABC):
         if AbsBasicAppiumTask.run_task(self, _handle_callback) is False:
             return False
         if self.wait_activity(self.driver, '.ui.LauncherUI') is False:
-            resumed_activity = utils_android.get_resumed_activity(self.target_device_name)
-            if resumed_activity in ['.plugin.account.ui.LoginPasswordUI', '.app.WeChatSplashActivity']:
-                utils_logger.log("resumed_activity", resumed_activity)
+            if self.wait_activity(self.driver,
+                                  ['.plugin.account.ui.LoginPasswordUI', '.app.WeChatSplashActivity']) is True:
+                utils_logger.log("resumed_activity", utils_android.get_resumed_activity(self.target_device_name))
                 return False
             else:
                 self.task_scheduler_failed('why not in main page of weixin')
