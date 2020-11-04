@@ -9,7 +9,7 @@ import abc
 project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../../')
 sys.path.insert(0, project_root_path)
 
-from helper import utils_image as image_utils, utils_logger
+from helper import utils_image as image_utils, utils_logger, utils_android
 from helper import utils_file as file_utils
 from x_aircv.core import Template
 from tasks.appium import utils_appium
@@ -117,8 +117,13 @@ class TaskAppiumWeixinBase(AbsBasicAppiumTask, abc.ABC):
         if AbsBasicAppiumTask.run_task(self, _handle_callback) is False:
             return False
         if self.wait_activity(self.driver, '.ui.LauncherUI') is False:
-            self.task_scheduler_failed('why not in main page of weixin')
-            return False
+            resumed_activity = utils_android.get_resumed_activity(self.target_device_name)
+            if resumed_activity in ['.plugin.account.ui.LoginPasswordUI', '.app.WeChatSplashActivity']:
+                utils_logger.log("resumed_activity", resumed_activity)
+                return False
+            else:
+                self.task_scheduler_failed('why not in main page of weixin')
+                return False
 
 
 class TaskAppiumWeixinJimmieJDJingdonghuiyuan(TaskAppiumWeixinBase):

@@ -101,7 +101,7 @@ class TaskAppiumHuiToutiaoYueDu(TaskAppiumHuiToutiaoBase):
         module_text = random.choice([u"关注", u'头条', u'娱乐', u'奇趣', u'美食'])
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text(module_text), click_mode="click",
                                   retry_count=0) is None:
-            self.task_scheduler_failed('找不到' + module_text + '板块')
+            utils_logger.log('找不到' + module_text + '板块')
             return False
         is_view_inflated, scr_shots = self.wait_view_layout_finish(True)
         if is_view_inflated is False:

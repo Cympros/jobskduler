@@ -254,7 +254,7 @@ class TaskAppiumQutoutiaoTaskCenter(TaskAppiumQutoutiaoBase):
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('任务', view_type='android.widget.Button'),
                                   click_mode="click", time_wait_page_completely_resumed=5) is None:
-            self.task_scheduler_failed('找不到\"任务\"按钮')
+            utils_logger.log('找不到\"任务\"按钮')
             return False
         # # 每次进入'我的'页面，都会下拉刷新一次，因此point位置会变更，故而加上个time_wait_page_completely_resumed
         # if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('任务中心'),click_mode="click",time_wait_page_completely_resumed=5) is None:
@@ -363,23 +363,6 @@ class TaskAppiumQutoutiaoGrandTotalJiangli(TaskAppiumQutoutiaoTaskCenter):
             self.task_scheduler_failed('未检测到\"累计阅读时长达到60分钟\"')
             return False
         return False
-
-
-class TaskAppiumQtoutiaoLogin(TaskAppiumQutoutiaoBase):
-    def run_task(self, _handle_callback):
-        if TaskAppiumQutoutiaoBase.run_task(self, _handle_callback) is False:
-            return False
-        if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text(text='我的')) is None:
-            self.task_scheduler_failed('未检测到\"我的\"')
-            return False
-        if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text(text='手机登录')) is None:
-            self.task_scheduler_failed('未检测到\"手机登录\"')
-            return False
-        if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text(text='密码登录')) is None:
-            self.task_scheduler_failed('未检测到\"密码登录\"')
-            return False
-        self.task_scheduler_failed('密码登录页面')
-        return True
 
 
 if __name__ == '__main__':
