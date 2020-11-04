@@ -121,10 +121,10 @@ def start_appium_service(device, appium_port, access_appium_bp_port, retry_count
     if res_apm is not None:
         return True
     else:
-        # 关闭appium服务,保证同一时刻仅有唯一服务
-        utils_common.exec_shell_cmd(
-            "ps -ef | grep appium | grep " + str(device) + " | grep nohup | grep -v \"$$\" | awk  '{print \"kill -9 \" "
-                                                           "$2}' | sh")
+        # # 关闭appium服务,保证同一时刻仅有唯一服务
+        # utils_common.exec_shell_cmd(
+        #     "ps -ef | grep appium | grep " + str(device) + " | grep nohup | grep -v \"$$\" | awk  '{print \"kill -9 \" "
+        #                                                    "$2}' | sh")
         # 启动appium服务(屏蔽因日志太多堵塞)
         appium_start_cmd = "nohup appium "
         if appium_port is not None:

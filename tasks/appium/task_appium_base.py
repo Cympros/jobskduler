@@ -192,8 +192,8 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
             except_name = exception.__class__.__name__
             if except_name == "MaxRetryError":
                 utils_logger.log("获取appium服务失败", except_name)
-                utils_common.exec_shell_cmd(
-                    "ps -ef | grep appium | grep -v \"$$\" | awk  '{print \"kill -9 \" $2}' | sh")
+                # utils_common.exec_shell_cmd(
+                #     "ps -ef | grep appium | grep -v \"$$\" | awk  '{print \"kill -9 \" $2}' | sh")
                 return False
 
         if self.driver is None:
