@@ -104,6 +104,9 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
     def task_scheduler_failed(self, message, email_title=u'异常信息', is_page_source=True, is_scr_shot=True,
                               upload_files=[], exception_info=None):
         """upload_files：可以允许自定义添加待上传的文件"""
+        if self.driver is None:
+            utils_logger.log("driver初始化失败")
+            return
         self.upload_files.extend(upload_files)
         if message is not None:
             utils_logger.log(message)
