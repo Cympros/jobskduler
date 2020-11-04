@@ -227,8 +227,9 @@ class TaskAppiumQutoutiaoCoreShiduanJiangli(TaskAppiumQutoutiaoBase):
                         '//android.widget.RelativeLayout//android.widget.RelativeLayout//android.widget.FrameLayout' \
                         '//android.widget.TextView '
         # 第一次点击小时签到
-        if self.query_ele_wrapper(btn_ele_xpath, click_mode="click", time_wait_page_completely_resumed=5,
-                                  retry_count=0) is not None:
+        if self.query_ele_wrapper(btn_ele_xpath, click_mode="click",
+                                  time_wait_page_completely_resumed=5) is not None or self.query_ele_wrapper(
+                self.get_query_str_within_xpath_only_text("领取"), click_mode='click') is not None:
             if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('时段奖励'), retry_count=0) is not None:
                 utils_logger.log("成功弹出时段奖励弹框")
                 return True

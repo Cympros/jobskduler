@@ -127,19 +127,19 @@ class DispatcherThread(threading.Thread):
                     utils_logger.debug("is_child_of[BaseTask子类判断]:", obj)
                     continue
                 # 判断是否到执行时间
-                global task_maps
-                task_state = task_maps.get(self.get_task_key(name))
-                if task_state is None:
-                    task_state = TaskState()
-                    task_maps[self.get_task_key(name)] = task_state
-                now_time = time.time()
-                if task_state.next_exec_time > now_time:
-                    utils_logger.log("时间还未到,继续等待", self.get_task_key(name), task_state,
-                                     "now:" + timestamp_to_date(now_time))
-                    continue
+                # global task_maps
+                # task_state = task_maps.get(self.get_task_key(name))
+                # if task_state is None:
+                #     task_state = TaskState()
+                #     task_maps[self.get_task_key(name)] = task_state
+                # now_time = time.time()
+                # if task_state.next_exec_time > now_time:
+                #     utils_logger.log("时间还未到,继续等待", self.get_task_key(name), task_state,
+                #                      "now:" + timestamp_to_date(now_time))
+                #     continue
 
                 # 反射执行task
-                utils_logger.log("instance to exec task", obj)
+                utils_logger.log("开始执行任务", obj)
                 my_class = getattr(module_dynamic_imported, name)
                 instance = my_class()
                 handle_callback = HandleCallback()
@@ -147,17 +147,17 @@ class DispatcherThread(threading.Thread):
                     utils_logger.log("执行任务成功", module_dynamic_imported, name)
                     handle_callback.notify_task_success(module_name, name)
                 else:
-                    utils_logger.log("执行任务失败", module_dynamic_imported, name)
+                    utils_logger.debug("执行任务失败", module_dynamic_imported, name)
                 instance.release_after_task()  # 环境清理
 
                 # 添加任务管理
-                task_state.update_time(self.get_task_key(name))
+                # task_state.update_time(self.get_task_key(name))
                 exec_result_state = True  # 仅有一个任务执行成功,也任务整个任务周期是执行成功的
         return exec_result_state
 
 
 thread_names = []  # 线程集合
-task_maps = dict()
+# task_maps = dict()
 
 # 任务调度器,用于执行task
 if __name__ == '__main__':

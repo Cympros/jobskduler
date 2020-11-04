@@ -58,9 +58,11 @@ class BaseTask(abc.ABC):
                  }
         send_content = json.dumps(error, ensure_ascii=False)
         utils_logger.debug("error is below:", send_content)
-
-        self.wrapper_send_email(title=email_title, content=str(send_content) + "\n堆栈信息：\n" + (
-            "None" if exception_info is None else exception_info), files=list(set(self.upload_files)))
+        if len(list(set(self.upload_files))) <= 0:
+            utils_logger.log("邮件必须包含附件文件")
+        else:
+            self.wrapper_send_email(title=email_title, content=str(send_content) + "\n堆栈信息：\n" + (
+                "None" if exception_info is None else exception_info), files=list(set(self.upload_files)))
 
     def wrapper_send_email(self, title=None, content=None, files=None):
         mail_title = title if title is not None else u'python邮件标题'

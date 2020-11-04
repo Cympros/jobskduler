@@ -69,6 +69,9 @@ class TaskAppiumHuitoutiaoCoreShiduanJiangli(TaskAppiumHuiToutiaoBase):
             else:
                 utils_logger.debug("点击后没有反应")
                 return False
+        elif self.query_ele_wrapper(self.get_query_str_by_viewid("com.cashtoutiao:id/tv_countdown_time")) is not None:
+            # 金币抽奖
+            return True
         else:
             self.task_scheduler_failed("没找到时段奖励")
             return False

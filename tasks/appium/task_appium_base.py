@@ -5,6 +5,7 @@
 import os
 import sys
 import abc
+import threading
 
 project_root_path = os.path.abspath(os.path.split(os.path.realpath(__file__))[0] + '/../../')
 sys.path.insert(0, project_root_path)
@@ -79,7 +80,8 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         pgres = utils_appium.get_pg_source(self.driver)
         if pgres is not None:
             utils_logger.debug(">> page_resource write to file ")
-            file_page_resource = self.get_project_output_dir() + "/page_resource_" + suffix + ".txt"
+            file_page_resource = self.get_project_output_dir() + "/page_resource_" + str(
+                threading.currentThread().getName()) + "_" + suffix + ".txt"
             # 删除历史文件
             if os.path.exists(file_page_resource) is True:
                 os.remove(file_page_resource)
@@ -154,7 +156,7 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         if self.target_device_name is None:
             utils_logger.debug("未连接设备")
             return False
-        utils_logger.log("target_device_name:", self.target_device_name)
+        utils_logger.debug("target_device_name:", self.target_device_name)
         # 检查应用是否安装
         check_installed_response, response_errror = utils_android.is_app_installed(
             self.target_device_name,
