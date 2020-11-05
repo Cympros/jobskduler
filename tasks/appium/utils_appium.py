@@ -113,29 +113,24 @@ def start_appium_service(device, appium_port, access_appium_bp_port, appium_serv
         return False
     utils_logger.debug("appium服务安装地址", check_res)
     utils_logger.debug("重试检查appium服务启动状态 ", retry_count)
+    if appium_port is None or access_appium_bp_port is None or device is None:
+        utils_logger.debug("参数异常", appium_port, access_appium_bp_port, device)
+        return False
+    appium_start_cmd = "appium -p %s -bp %s -U %s" % (str(appium_port), str(access_appium_bp_port), str(device))
     # 存在appium进程则输出success，否则输出空串
-    appium_state_check_cmd = "ps -ef | grep \'appium\' | grep " + str(device) \
-                             + " | grep -v \'grep\' >/dev/null && echo success"
+    appium_state_check_cmd = "ps -ef | grep '%s' | grep -v  \"$$\" >/dev/null && echo success" % appium_start_cmd
     res_apm, res_apm_error = utils_common.exec_shell_cmd(appium_state_check_cmd)
     utils_logger.debug("appium服务是否启动", appium_state_check_cmd, str(res_apm), str(res_apm_error))
     if res_apm is not None:
         return True
     else:
-        # # 关闭appium服务,保证同一时刻仅有唯一服务
-        # utils_common.exec_shell_cmd(
-        #     "ps -ef | grep appium | grep " + str(device) + " | grep nohup | grep -v \"$$\" | awk  '{print \"kill -9 \" "
-        #                                                    "$2}' | sh")
-        # 启动appium服务(屏蔽因日志太多堵塞)
-        if appium_port is None or access_appium_bp_port is None or device is None:
-            return False
-        appium_start_cmd = "nohup appium -p %s -bp %s -U %s >>%s 2>&1 &" % \
-                           (str(appium_port), str(access_appium_bp_port), str(device), str(appium_server_log),)
-        res, err = utils_common.exec_shell_cmd(appium_start_cmd)
+        # 关闭appium服务,保证同一时刻仅有唯一服务
+        utils_common.exec_shell_cmd("ps -ef | grep '%s'| grep -v \"$$\" | awk '{print \"kill -9 \" $2}' | sh"
+                                    % appium_start_cmd)
+        res, err = utils_common.exec_shell_cmd("nohup %s >>%s 2>&1 &" % (appium_start_cmd, appium_server_log))
         if interval_time > 0:
-            utils_logger.debug(
-                "sleep " + str(interval_time) + " to exec command [" + str(
-                    appium_start_cmd) + "] with response:[" + str(
-                    res) + "] and error:[" + str(err) + "]")
+            utils_logger.debug("sleep %s to exec command [%s] with response:[%s] and error:[%s]" %
+                               (str(interval_time), str(appium_start_cmd), str(res), str(err)))
             time.sleep(interval_time)  # 等待appium服务完全启动
         return False if retry_count <= 0 else start_appium_service(device=device,
                                                                    appium_port=appium_port,

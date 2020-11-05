@@ -29,7 +29,7 @@ def close_heads_up_notifycations(device=None):
 
 def lock_off_screen_if_need(device=None):
     """解锁当前屏幕"""
-    cmd_check_screen_off = "adb -s " + device + " shell dumpsys window policy | grep \'mShowingLockscreen=true\'"
+    cmd_check_screen_off = "adb -s " + device + " shell dumpsys window policy | grep 'mShowingLockscreen=true'"
     lock_status, lock_status_error = _check_adb_command_result(cmd_check_screen_off)
     if lock_status_error is not None:
         utils_logger.log("lock_off_screen_if_need caught exception:", lock_status_error)
@@ -86,19 +86,17 @@ def get_resolution_by_device(device=None):
 
 
 def kill_process_by_pkg_name(pkg_name):
-    '通过包名杀掉进程'
+    """通过包名杀掉进程"""
     if pkg_name is None:
         return
-    utils_logger.log("kill_process_by_pkg_name")
-    cmd = "adb shell am force-stop '" + pkg_name + "'"
+    cmd = "adb shell am force-stop '%s'" % pkg_name
     _check_adb_command_result(cmd)
 
 
 def get_device_tag(device=None):
     """获取android设备的唯一标识"""
     # 在第一次启用设备的时候随机生成，并且在用户使用设备时不会发生改变
-    cmd = "adb %s shell settings get secure android_id" % \
-          (" " if device is None else " -s " + str(device) + " ")
+    cmd = "adb %s shell settings get secure android_id" % ("" if device is None else "-s " + str(device))
     response, response_error = _check_adb_command_result(cmd)
     return response
 
@@ -135,7 +133,7 @@ def get_package_path_in_phone_within_applicationid(application_id):
     if application_id is None:
         return None
     utils_logger.debug("get_package_path_within_applicationid:", application_id)
-    cmd = "adb shell pm list packages -f | grep \"%s\" | awk -F 'package:|=' '{print $2}'" % application_id
+    cmd = "adb shell pm list packages -f | grep '%s' | awk -F 'package:|=' '{print $2}'" % application_id
     response, response_error = _check_adb_command_result(cmd)
     return response
 
@@ -144,7 +142,7 @@ def get_app_version_by_applicaionid(device, application_id):
     if application_id is None:
         return None
     cmd = "adb %s shell dumpsys package %s | grep versionName | awk -F '=' '{print $2}'" % \
-          ((" " if device is None else " -s " + str(device) + " "), str(application_id))
+          (("" if device is None else "-s " + str(device)), str(application_id))
     response, response_error = _check_adb_command_result(cmd)
     return None if response is None else response
 
@@ -165,7 +163,7 @@ def get_battery_status_by_device(device=None):
 def get_brand_by_device(device=None):
     """设备型号"""
     cmd = "adb %s shell getprop | grep ro.product.brand | awk -F ':' '{print $2}'" % \
-          (" " if device is None else " -s " + str(device))
+          ("" if device is None else "-s " + str(device))
     response, response_error = _check_adb_command_result(cmd)
     if response is not None:
         return response
@@ -177,8 +175,8 @@ def get_brand_by_device(device=None):
 
 def get_model_by_device(device=None):
     """设备版本"""
-    cmd = "adb %s shell getprop | grep 'ro.product.model' | awk -F ':'  '{print $2}'" % \
-          (" " if device is None else " -s " + str(device) + " ")
+    cmd = "adb %s shell getprop | grep 'ro.product.model' | awk -F ':' '{print $2}'" % \
+          ("" if device is None else "-s " + str(device))
     response, response_error = _check_adb_command_result(cmd)
     if response is not None:
         return response
@@ -203,16 +201,15 @@ def pull_file_from_phone(file_path_in_phone, target_dir_in_mac):
 def get_top_focuse_activity(device=None):
     """获取当前打开应用的信息"""
     cmd = "adb %s shell dumpsys activity | grep -E 'mFocusedActivity|ResumedActivity'" % \
-          (" " if device is None else " -s " + str(device) + " ")
+          ("" if device is None else "-s " + str(device))
     response, response_errror = _check_adb_command_result(cmd)
     return response
 
 
 def get_package_name_by_apk(apk_path):
     """解析apk获取包名"""
-    utils_logger.log("get_package_name_by_apk")
     cmd = "aapt dump badging %s | awk '{printf $0\"\\\n\"}' | head -1 | awk -F 'name=' '{print $2}' | awk '{print $1}'" \
-          % (apk_path)
+          % apk_path
     response, response_errror = _check_adb_command_result(cmd)
     return None if response is None else response.replace("'", "").replace("\n", "")
 
@@ -252,7 +249,7 @@ def get_connected_devcies(target_device=None, except_emulater=False):
 
 
 def get_start_activity_by_application_id(application_id):
-    '通过apk解析启动页'
+    """通过apk解析启动页"""
     if application_id is None:
         return None
     # todo:'adb shell dumpsys activity'需要应用在后台是存活的
@@ -276,7 +273,7 @@ def get_start_activity_by_application_id(application_id):
 
 def get_device_statue(device=None):
     """读取设备在线状态"""
-    cmd = "adb %s get-state" % (" " if device is None else " -s " + str(device) + " ")
+    cmd = "adb %s get-state" % ("" if device is None else "-s " + str(device))
     device_status, device_status_errror = _check_adb_command_result(cmd)
     return device_status
 
@@ -286,7 +283,7 @@ def is_app_installed(device, application_id):
         return None, None
     # "-3"参数表示仅过滤第三方应用
     cmd = "adb %s shell pm list packages -3 | grep '%s'" % \
-          (("" if device is None else "-s " + device + " "), str(application_id))
+          (("" if device is None else "-s " + device), str(application_id))
     check_installed_response, response_errror = _check_adb_command_result(cmd)
     # utils_logger.log(check_installed_response, response_errror)
     return check_installed_response, response_errror
