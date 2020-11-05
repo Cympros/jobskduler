@@ -1,6 +1,7 @@
 # coding=utf-8
 
 # appium相关工具类
+import socket
 import threading
 
 from appium import webdriver as appium_webdriver
@@ -386,23 +387,33 @@ def get_driver_by_launch_app(application_id, launch_activity, device_name_to_con
     return driver
 
 
+def check_port_avaiable(host, port):
+    lsof_out = utils_common.exec_shell_cmd('lsof -i:' + str(port))
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        s.connect((host, port))
+        s.shutdown(2)
+    except OSError as e:
+        utils_logger.debug('[%s]端口没有被其他服务占用，可以使用' % port)
+        return True
+    else:
+        utils_logger.debug('[%s]端口被其他服务占用了' % port)
+        utils_logger.debug("端口占用信息", lsof_out)
+        return False
+
+
 # 查询可用的port值
-# finish_if_found:找到时是否退出程序
-def query_avaiable_port(start_port, end_port, finish_if_found=True):
+def query_avaiable_appium_port(start_port, end_port):
     if start_port is None or end_port is None:
         return None
     if start_port > end_port:
         return None
     available_port = start_port
     while available_port <= end_port:
-        res, error = utils_common.exec_shell_cmd('lsof -i:' + str(available_port)
-                                                 + " && echo success")
-        if res is None:
-            if finish_if_found is True:
-                return available_port
-        # else:
-        # utils_logger.log("port已被使用", available_port)
-        available_port = available_port + 1
+        if check_port_avaiable(host="127.0.0.1", port=available_port) is True:
+            return available_port
+        else:
+            available_port = available_port + 1
     return None
 
 
@@ -426,4 +437,4 @@ def back_to_target_activity(driver, target_activity, retry_count=5):
 
 
 if __name__ == '__main__':
-    utils_logger.log(query_avaiable_port(0, 99999, False))
+    utils_logger.log(query_avaiable_appium_port(4723, 99999))

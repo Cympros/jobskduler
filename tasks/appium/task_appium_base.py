@@ -172,11 +172,11 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
             utils_logger.log("禁用抬头通知失败")
             return False
         # 分配appium服务端口
-        self.appium_port = utils_appium.query_avaiable_port(4273, 9999)
+        self.appium_port = utils_appium.query_avaiable_appium_port(4273, 9999)
         if self.appium_port is None:
             utils_logger.log("未指定appium服务端口")
             return False
-        self.appium_port_bp = utils_appium.query_avaiable_port(self.appium_port + 1, 9999)
+        self.appium_port_bp = utils_appium.query_avaiable_appium_port(self.appium_port + 1, 9999)
         utils_logger.debug(
             '指定端口:[appium_port:' + str(self.appium_port) + ',appium_port_bp:' + str(self.appium_port_bp) + "]")
         # 实例化该应用对应的driver对象
@@ -227,8 +227,17 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
             except Exception:
                 utils_logger.log("release_after_task caught failed")
 
-    def is_in_target_page(self, target_page_file, compare_rule=100, retry_count=10,
-                          interval_time=0):
+        # 关闭appium服务
+        utils_common.exec_shell_cmd("ps -ef | grep -v \"$$\" | grep 'appium -p %s -bp %s -U %s' "
+                                    "| awk '{print $2}' | xargs kill -9" %
+                                    (self.appium_port, self.appium_port_bp, self.target_device_name))
+        # 关闭端口占用
+        utils_logger.debug("进程id:", os.getpid(), os.getppid())
+        utils_common.exec_shell_cmd("lsof -i:%s" % self.appium_port)
+        utils_common.exec_shell_cmd("lsof -i:%s | grep -v -E '%s|^COMMAND' | awk '{print $2}' | xargs kill -9" %
+                                    (os.getpid(), self.appium_port))
+
+    def is_in_target_page(self, target_page_file, compare_rule=100, retry_count=10, interval_time=0):
 
         def wrapper(file):
             if os.path.exists(file):
