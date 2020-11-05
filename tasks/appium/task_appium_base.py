@@ -80,8 +80,8 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         pgres = utils_appium.get_pg_source(self.driver)
         if pgres is not None:
             utils_logger.debug(">> page_resource write to file ")
-            file_page_resource = self.get_project_output_dir() + "/page_resource_" + str(
-                threading.currentThread().ident) + "_" + suffix + ".txt"
+            file_page_resource = "%s/page_resource_%s_%s.txt " % (self.get_project_output_dir(), suffix,
+                                                                  str(threading.currentThread().ident))
             # 删除历史文件
             if os.path.exists(file_page_resource) is True:
                 os.remove(file_page_resource)
@@ -182,7 +182,7 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         # 实例化该应用对应的driver对象
         try:
             appium_server_log = self.handle_callback.read_config(self, "get_project_output_dir") \
-                                + str("/appium_server_nohup.log")
+                                + str("/appium_server_nohup_%s.log" % threading.currentThread().ident)
             self.driver = utils_appium.get_driver_by_launch_app(self.target_application_id,
                                                                 self.launch_activity,
                                                                 self.target_device_name,
@@ -450,10 +450,11 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         等待页面绘制完成
         @:return <页面是否绘制完成，屏幕截图>
         """
+        screen_file_name = "screen_shot_tmp_wait_view_layout_finish_%s.png" % str(threading.currentThread().ident)
         file_screen_shot = utils_appium.get_screen_shots(driver=self.driver,
                                                          file_directory=self.get_project_output_dir(),
                                                          target_device=self.target_device_name,
-                                                         file_name="screen_shot_tmp_wait_view_layout_finish.png")
+                                                         file_name=screen_file_name)
         if file_screen_shot is None:  # 截图获取失败,此时认为页面已经加载完成
             return True, None
         if is_check_view_inflated is False:
@@ -469,7 +470,7 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
                 file_screen_shot = utils_appium.get_screen_shots(driver=self.driver,
                                                                  file_directory=self.get_project_output_dir(),
                                                                  target_device=self.target_device_name,
-                                                                 file_name="screen_shot_tmp_wait_view_layout_finish.png")
+                                                                 file_name=screen_file_name)
                 if file_screen_shot is None:  # 截图失败
                     return True, None
             else:  # 页面已经加载完成

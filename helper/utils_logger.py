@@ -19,7 +19,7 @@ def get_log_file():
     log_dir = handle_callback.get_out_dir()
     if os.path.exists(log_dir) is False:
         os.makedirs(log_dir)
-    return os.path.abspath(log_dir + "/logger_" + str(threading.currentThread().ident) + ".txt")
+    return os.path.abspath(log_dir + "/logger_" + str(threading.currentThread().getName()) + ".txt")
 
 
 # 普通日志信息，容量受限

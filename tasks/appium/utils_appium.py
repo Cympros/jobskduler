@@ -1,6 +1,8 @@
 # coding=utf-8
 
 # appium相关工具类
+import threading
+
 from appium import webdriver as appium_webdriver
 import os
 import sys
@@ -174,10 +176,9 @@ def get_screen_shots(driver, file_directory, target_device=None, file_name=None,
     if file_name is None:
         utils_logger.debug("[get_screen_shots] 构建默认截图存储路径")
         resolution_within_devices = utils_android.get_resolution_by_device(device=target_device)
-        file_name = "screen_shot" \
-                    + "_" + (target_device if target_device is not None else "none") \
-                    + "_" + (resolution_within_devices if resolution_within_devices is not None else "none") \
-                    + ".png"
+        file_name = "screen_shot_%s_%s.png" % (
+            threading.currentThread().ident,
+            resolution_within_devices if resolution_within_devices is not None else "none")
     file_path = os.path.abspath(file_directory + file_name)
     # 删除缓存
     if os.path.exists(file_path):
