@@ -104,7 +104,7 @@ def scroll_by(driver, target_device_name, is_down=True, tab_center=0.5, tab_inte
         driver.swipe(t_from, t_tab_center, t_to, t_tab_center, duration)
 
 
-def start_appium_service(device, appium_port, access_appium_bp_port, retry_count=5, interval_time=5):
+def start_appium_service(device, appium_port, access_appium_bp_port, appium_server_log, retry_count=5, interval_time=5):
     """启动appium服务,添加重试机制"""
     # 检测appium是否安装
     check_res, check_error = utils_common.exec_shell_cmd('which appium')
@@ -126,14 +126,10 @@ def start_appium_service(device, appium_port, access_appium_bp_port, retry_count
         #     "ps -ef | grep appium | grep " + str(device) + " | grep nohup | grep -v \"$$\" | awk  '{print \"kill -9 \" "
         #                                                    "$2}' | sh")
         # 启动appium服务(屏蔽因日志太多堵塞)
-        appium_start_cmd = "nohup appium "
-        if appium_port is not None:
-            appium_start_cmd += " -p " + str(appium_port)
-        if access_appium_bp_port is not None:
-            appium_start_cmd += " -bp " + str(access_appium_bp_port)
-        if device is not None:
-            appium_start_cmd += " -U " + str(device)
-        appium_start_cmd += " 1>/dev/null 2>&1 &"
+        if appium_port is None or access_appium_bp_port is None or device is None:
+            return False
+        appium_start_cmd = "nohup appium -p %s -bp %s -U %s >>%s 2>&1 &" % \
+                           (str(appium_port), str(access_appium_bp_port), str(device), str(appium_server_log),)
         res, err = utils_common.exec_shell_cmd(appium_start_cmd)
         if interval_time > 0:
             utils_logger.debug(
@@ -144,6 +140,7 @@ def start_appium_service(device, appium_port, access_appium_bp_port, retry_count
         return False if retry_count <= 0 else start_appium_service(device=device,
                                                                    appium_port=appium_port,
                                                                    access_appium_bp_port=access_appium_bp_port,
+                                                                   appium_server_log=appium_server_log,
                                                                    retry_count=retry_count - 1,
                                                                    interval_time=interval_time)
 
@@ -344,7 +341,7 @@ def wait_activity_with_status(driver, target):
 
 def get_driver_by_launch_app(application_id, launch_activity, device_name_to_connected,
                              is_need_setting_input_manager,
-                             appium_port, access_appium_bp_port):
+                             appium_port, access_appium_bp_port, appium_server_log):
     """
     启动待测试apk并返回driver对象
     :param access_appium_bp_port:
@@ -364,7 +361,7 @@ def get_driver_by_launch_app(application_id, launch_activity, device_name_to_con
         return None
 
     # 判断appium服务是否启动
-    if start_appium_service(device_name_to_connected, appium_port, access_appium_bp_port) is False:
+    if start_appium_service(device_name_to_connected, appium_port, access_appium_bp_port, appium_server_log) is False:
         utils_logger.log("appium服务启动失败[端口信息]：" + str(appium_port))
         return None
 
