@@ -23,7 +23,16 @@ class TaskAppiumDongFangToutiaoBase(AbsBasicAppiumTask, abc.ABC):
                                     "com.songheng.eastfirst.common.view.activity.MainActivity")
 
     def except_case_in_query_ele(self):
-        return AbsBasicAppiumTask.except_case_in_query_ele(self)
+        if AbsBasicAppiumTask.except_case_in_query_ele(self) is True:
+            return True
+        else:
+            if self.query_ele_wrapper(
+                    self.get_query_str_within_xpath_only_text("立即查看", view_type='android.widget.Button'),
+                    click_mode='click') is not None:
+                #  捕获到系统推送的消息内容,点击去随机滚动几次
+                self.random_scroll(11)
+                return False
+        return False
 
 
 class TaskAppiumDongFangtoutiaoCoreShiduanJiangli(TaskAppiumDongFangToutiaoBase):

@@ -319,26 +319,22 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
             return utils_appium.find_element_by_xpath(driver=self.driver, xpath=query_str)
 
     def except_case_in_query_ele(self):
-        # utils_logger.log("except_case_in_query_ele in AbsBasicAppiumTask")
-        '查询element的时候朋友的异常处理，True表示得以正常处理'
+        """查询element的时候朋友的异常处理，True表示得以正常处理"""
         # xpath模糊匹配速度太慢
         if self.query_ele_wrapper(
                 self.get_query_str_within_xpath_only_text('无响应', is_force_match=False),
                 is_ignore_except_case=True, retry_count=0) is not None:
             # 检测到无响应
             if self.query_ele_wrapper(
-                    self.get_query_str_within_xpath_only_text('等待',
-                                                              view_type='android.widget.Button'),
+                    self.get_query_str_within_xpath_only_text('等待', view_type='android.widget.Button'),
                     click_mode='click', is_ignore_except_case=True, retry_count=0) is not None:
                 return True
             else:
                 self.task_scheduler_failed("检测到'无响应，但是无法关闭'")
-        elif self.query_ele_wrapper(
-                self.get_query_str_within_xpath_only_text('打印纸未准备好', is_force_match=False),
-                is_ignore_except_case=True, retry_count=0) is not None:
-            if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('知道了'),
-                                      click_mode='click', is_ignore_except_case=True,
-                                      retry_count=0) is not None:
+        elif self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('打印纸未准备好', is_force_match=False),
+                                    is_ignore_except_case=True, retry_count=0) is not None:
+            if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('知道了'), click_mode='click',
+                                      is_ignore_except_case=True, retry_count=0) is not None:
                 return True
             else:
                 self.task_scheduler_failed("检测到'打印纸未准备好，请检查！'文案，但无法关闭")
@@ -347,8 +343,7 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
                 is_ignore_except_case=True, retry_count=0) is not None:
             # 监测到删除应用历史残留文件
             if self.query_ele_wrapper(
-                    self.get_query_str_within_xpath_only_text('立即删除',
-                                                              view_type='android.widget.Button'),
+                    self.get_query_str_within_xpath_only_text('立即删除', view_type='android.widget.Button'),
                     click_mode='click', is_ignore_except_case=True, retry_count=0) is not None:
                 return True
             else:
@@ -762,3 +757,14 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         else:
             utils_logger.log("query_matchs_within_check_region:", checked_region_matchs)
             return checked_region_matchs
+
+    def random_scroll(self, range_count):
+        # 随机滚动次数
+        for index in range(int(range_count)):
+            if utils_common.random_boolean_true(0.75) is True:
+                tab_interval = [0.65, 0.35]
+            else:
+                tab_interval = [0.25, 0.75]
+            if self.safe_scroll_by(tab_interval=tab_interval) is False:
+                utils_logger.log("----> safe_scroll_by caught exception")
+                break
