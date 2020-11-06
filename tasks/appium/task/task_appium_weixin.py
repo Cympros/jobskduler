@@ -17,53 +17,11 @@ from tasks.appium import utils_appium
 from tasks.appium.task_appium_base import AbsBasicAppiumTask
 
 
-class TaskAppiumWeixinExit(AbsBasicAppiumTask):
-    """微信退出应用,7点之后重复检测退出微信页面"""
-
-    def __init__(self):
-        AbsBasicAppiumTask.__init__(self, "com.tencent.mm", "com.tencent.mm.ui.LauncherUI")
-
-    def is_time_support(self, curent_time=None):
-        # 微信任务只支持早上7点之前执行，白天还要使用微信的
-        is_run_support = True if curent_time > 700 else False
-        utils_logger.log(str(curent_time) + "---> is_run_support(" + str(self.__class__) + "):" + (
-            "True" if is_run_support else "False"))
-        return is_run_support
-
-    def run_task(self, _handle_callback):
-        if AbsBasicAppiumTask.run_task(self, _handle_callback) is False:
-            return False
-        if self.wait_activity(self.driver, '.plugin.account.ui.LoginPasswordUI') is True:
-            utils_logger.log("是登录页面")
-            return True
-        elif self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('我'), click_mode="click") is not None:
-            if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('设置'), click_mode='click') is not None:
-                if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('退出'),
-                                          click_mode='click') is not None:
-                    if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("退出登录"),
-                                              click_mode='click') is not None:
-                        # '退出登录'弹框确认
-                        if self.query_ele_wrapper(
-                                self.get_query_str_within_xpath_only_text('退出', view_type='android.widget.Button'),
-                                click_mode='click') is not None:
-                            utils_logger.log("点击退出退出账号")
-                            time.sleep(10)
-                            return False
-                        else:
-                            self.task_scheduler_failed("退出失败")
-                    else:
-                        self.task_scheduler_failed("'退出登录'失败")
-                else:
-                    self.task_scheduler_failed("退出按钮 not found")
-            else:
-                self.task_scheduler_failed("未检测到'设置'入口")
-
-
 class TaskAppiumWeixinBase(AbsBasicAppiumTask, abc.ABC):
     """进入首页的基类"""
 
     def __init__(self):
-        AbsBasicAppiumTask.__init__(self, "com.tencent.mm", "com.tencent.mm.ui.LauncherUI")
+        AbsBasicAppiumTask.__init__(self, "com.tencent.mm", "com.tencent.mm.ui.LauncherUI", '.ui.LauncherUI')
 
     def is_time_support(self, curent_time=None):
         # 微信任务只支持早上7点之前执行，白天还要使用微信的
@@ -116,14 +74,6 @@ class TaskAppiumWeixinBase(AbsBasicAppiumTask, abc.ABC):
     def run_task(self, _handle_callback):
         if AbsBasicAppiumTask.run_task(self, _handle_callback) is False:
             return False
-        if self.wait_activity(self.driver, '.ui.LauncherUI') is False:
-            if self.wait_activity(self.driver,
-                                  ['.plugin.account.ui.LoginPasswordUI', '.app.WeChatSplashActivity']) is True:
-                utils_logger.log("resumed_activity", utils_android.get_resumed_activity(self.target_device_name))
-                return False
-            else:
-                self.task_scheduler_failed('why not in main page of weixin')
-                return False
 
 
 class TaskAppiumWeixinJimmieJDJingdonghuiyuan(TaskAppiumWeixinBase):

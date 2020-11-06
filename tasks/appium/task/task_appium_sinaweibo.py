@@ -15,7 +15,7 @@ from helper import utils_logger
 
 class TaskAppiumSinaWeiboBase(AbsBasicAppiumTask, abc.ABC):
     def __init__(self):
-        AbsBasicAppiumTask.__init__(self, "com.sina.weibo", "com.sina.weibo.MainTabActivity", ['.MainTabActivity'])
+        AbsBasicAppiumTask.__init__(self, "com.sina.weibo", "com.sina.weibo.MainTabActivity", '.MainTabActivity')
 
     def except_case_in_query_ele(self):
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('不了，谢谢'),

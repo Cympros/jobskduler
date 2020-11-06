@@ -350,8 +350,13 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
                 utils_logger.log("监测到删除应用的历史残留数据弹框，但没办法关闭")
                 return False
         elif utils_android.get_resume_application_id(self.target_device_name) == "com.android.packageinstaller":
-            utils_logger.log("为什么进入了自动安装页面呢?")
-            return False
+            utils_logger.log('关闭安装应用的系统页面')
+            # 关闭弹框
+            self.query_ele_wrapper(
+                self.get_query_str_within_xpath_only_text("允许", view_type='android.widget.Button'),
+                click_mode='click', is_ignore_except_case=True)
+            utils_appium.back_to_target(self.driver, self.target_device_name, self.target_application_id)
+            return utils_android.get_resume_application_id(self.target_device_name) == self.target_application_id
         return False
 
     def query_ele_wrapper(self, query_str, is_ignore_except_case=False, click_mode=None,

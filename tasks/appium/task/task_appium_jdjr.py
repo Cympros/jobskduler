@@ -10,7 +10,7 @@ sys.path.insert(0, project_root_path)
 from tasks.appium.task_appium_base import AbsBasicAppiumTask
 
 
-# from helper import utils_logger
+from helper import utils_logger
 
 
 class TaskAppiumJDJRSignBase(AbsBasicAppiumTask, abc.ABC):
@@ -19,9 +19,9 @@ class TaskAppiumJDJRSignBase(AbsBasicAppiumTask, abc.ABC):
     "'''
 
     def __init__(self):
-        search_fliter = ['.ver2.main.MainActivity', '.ver2.account.security.GestureLockActivity',
-                         '.bm.zhyy.account.security.GestureLockActivity']
-        AbsBasicAppiumTask.__init__(self, "com.jd.jrapp", "com.jd.jrapp.WelcomeActivity", search_fliter)
+        # search_fliter = [, '.ver2.account.security.GestureLockActivity',
+        #                  '.bm.zhyy.account.security.GestureLockActivity']
+        AbsBasicAppiumTask.__init__(self, "com.jd.jrapp", "com.jd.jrapp.WelcomeActivity", '.ver2.main.MainActivity')
 
     def __deal_within_login(self):
         '处理在登录界面的情况'

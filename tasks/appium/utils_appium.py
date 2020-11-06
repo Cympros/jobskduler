@@ -332,7 +332,7 @@ def wait_activity_with_status(driver, target):
         fliters = target
     show_activity = get_cur_act(driver=driver)
     if is_in_fliter(fliters, show_activity) is False:
-        utils_logger.debug("检索当前Activity元素失败", show_activity, str(fliters))
+        utils_logger.debug("当前Activity[%s]不在%s目标集合内" % (show_activity, str(fliters)))
         return False
     else:
         return True
@@ -419,7 +419,7 @@ def query_avaiable_appium_port(start_port, end_port):
     return None
 
 
-def back_to_target_activity(driver, target_activity, retry_count=5):
+def back_to_target(driver, target_device, application_id=None, target_activity=None, retry_count=5):
     # 回退至指定页
     try_count = 0
     while get_cur_act(driver) != target_activity:
@@ -432,10 +432,13 @@ def back_to_target_activity(driver, target_activity, retry_count=5):
         finally:
             try_count = try_count + 1
     utils_logger.log("返回键返回至首页,实际重试次数:" + str(try_count))
-    if get_cur_act(driver) == target_activity:
+    if target_activity is not None and get_cur_act(driver) == target_activity:
         return True
     else:
-        return False
+        if application_id is not None and utils_android.get_resume_application_id(target_device) == application_id:
+            return True
+        else:
+            return False
 
 
 if __name__ == '__main__':

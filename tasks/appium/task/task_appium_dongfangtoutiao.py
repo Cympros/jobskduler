@@ -88,7 +88,8 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
             utils_logger.log("开启第(" + str(index) + "/" + str(for_each_size) + ")次浏览")
             # 循环回到首页
             def_main_activity = 'com.songheng.eastfirst.common.view.activity.MainActivity'
-            if utils_appium.back_to_target_activity(self.driver, def_main_activity) is True:
+            if utils_appium.back_to_target(self.driver, self.target_device_name, self.target_application_id,
+                                                    def_main_activity) is True:
                 try:
                     if self.browser_news(def_main_activity) is True:
                         read_round_status = True
@@ -140,7 +141,8 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
                 break
             else:
                 # 进入详情页失败,则先回退至首页
-                if utils_appium.back_to_target_activity(self.driver, main_activity) is False:
+                if utils_appium.back_to_target(self.driver, self.target_device_name,
+                                                        self.target_application_id, main_activity) is False:
                     utils_logger.log("等待进入详情页失败,且无法回退至首页,则直接退出浏览")
                     return False
                 # 回退至首页时,增加随机滚动,避免又点入同一份广告
