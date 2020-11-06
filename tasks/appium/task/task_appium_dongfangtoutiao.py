@@ -27,12 +27,11 @@ class TaskAppiumDongFangToutiaoBase(AbsBasicAppiumTask, abc.ABC):
             return False
         if self.query_ele_wrapper(
                 self.get_query_str_within_xpath_only_text("我的", view_type='android.widget.RadioButton'),
-                is_ignore_except_case=True, click_mode='click') is not None:
-            if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("登录/注册"),
-                                      is_ignore_except_case=True) is not None:
+                click_mode='click') is not None:
+            if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("登录/注册"), ) is not None:
                 utils_logger.log("检测用户未登录")
                 return False
-            elif self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("新闻"), is_ignore_except_case=True,
+            elif self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("新闻"),
                                         click_mode='click') is not None:
                 return True
         return False
@@ -43,7 +42,7 @@ class TaskAppiumDongFangToutiaoBase(AbsBasicAppiumTask, abc.ABC):
         else:
             if self.query_ele_wrapper(
                     self.get_query_str_within_xpath_only_text("立即查看", view_type='android.widget.Button'),
-                    click_mode='click') is not None:
+                    click_mode='click', is_ignore_except_case=True) is not None:
                 #  捕获到系统推送的消息内容,点击去随机滚动几次
                 self.random_scroll(11)
                 return False
