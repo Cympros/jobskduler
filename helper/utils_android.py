@@ -309,7 +309,7 @@ def is_app_installed(device, application_id):
 
 def _check_adb_command_result(adb_cmd, retry_count=3):
     # 用于针对adb命令的异常处理
-    res_adb, error_adb = utils_common.exec_shell_cmd(adb_cmd)
+    res_adb, error_adb = utils_common.exec_shell_cmd("timeout 5 %s" % adb_cmd)
     if retry_count <= 0:
         # utils_logger.debug("命令[" + str(adb_cmd) + "]," + "retry_count[" + str(retry_count) + "]")
         # utils_logger.debug("response:[" + str(res_adb) + "]," + "error:[" + str(error_adb) + "]")
