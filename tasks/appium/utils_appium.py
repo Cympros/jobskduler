@@ -23,11 +23,13 @@ def get_appium_element_position(element):
         return None
     try:
         ele_position = element.location
-        utils_logger.debug("get_appium_element_position", ele_position)
-        return ele_position
+        utils_logger.debug("element.location获取的位置", ele_position)
+
+        ele_bounds = ele_position.get_attribute("bounds")
+        utils_logger.debug("get_attribute读取bounds属性的信息", ele_bounds)
     except Exception:
         utils_logger.log(traceback.format_exc())
-    return None
+    return ele_position
 
 
 def is_element_region_right_with_scale(element, device, region_rect_scale=None):
