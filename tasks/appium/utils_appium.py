@@ -25,8 +25,8 @@ def get_appium_element_position(element):
         ele_position = element.location
         utils_logger.debug("element.location获取的位置", ele_position)
 
-        ele_bounds = ele_position.get_attribute("bounds")
-        utils_logger.debug("get_attribute读取bounds属性的信息", ele_bounds)
+        utils_logger.debug("get_attribute('clickable')", element.get_attribute("clickable"))
+        utils_logger.debug("get_attribute('bounds')", element.get_attribute("bounds"))
     except Exception:
         utils_logger.log(traceback.format_exc())
     return ele_position

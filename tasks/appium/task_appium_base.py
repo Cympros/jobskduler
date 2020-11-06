@@ -358,7 +358,7 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
             utils_appium.back_to_target(self.driver, self.target_device_name, self.target_application_id)
             return utils_android.get_resume_application_id(self.target_device_name) == self.target_application_id
         elif self.query_ele_wrapper("//android.widget.ImageView", rect_scale_check_element_region=[0.4, 0.6, 0.6, 1],
-                                    click_mode='click') is not None:
+                                    is_ignore_except_case=True, click_mode='click') is not None:
             utils_logger.debug("可能是局部弹框,尝试点击关闭按钮")
             return True
         return False
