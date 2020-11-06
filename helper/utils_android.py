@@ -101,6 +101,24 @@ def get_device_tag(device=None):
     return response
 
 
+def get_resume_application_id(device=None):
+    """读取当前展示应用的applicationId"""
+    cmd = "adb %s shell dumpsys activity activities | grep 'ResumedActivity' | grep \"/\" |head -n 1" % \
+          ("" if device is None else "-s " + str(device))
+    response, response_error = _check_adb_command_result(cmd)
+    if response is None:
+        cmd = "adb %s shell dumpsys window | grep 'mCurrentFocus' | grep \"/\" | head -n 1" % \
+              ("" if device is None else "-s " + str(device))
+        response, response_error = _check_adb_command_result(cmd)
+    if response is not None:
+        cmd = "echo \"%s\" | awk -F ' |{|}' '{for(i=1;i<=NF;i++){if($i ~ \"'/'\"){print $i;}}}' " \
+              "| awk -F '/' '{print $1}'" % response
+        response, response_error = _check_adb_command_result(cmd)
+        return response
+    else:
+        return None
+
+
 def get_resumed_activity(device=None):
     cmd = "echo \"$(adb " + (" " if device is None else " -s " + str(device) + " ") \
           + "shell dumpsys activity activities | grep 'ResumedActivity') \\n $(adb " \
@@ -356,4 +374,5 @@ def is_page_loging(check_file, x_cut_count=5, y_cut_count=10):
 
 
 if __name__ == '__main__':
-    print(get_resumed_activity())
+    # print(get_resumed_activity())
+    print(get_resume_application_id())

@@ -353,6 +353,10 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
                 return True
             else:
                 utils_logger.log("监测到删除应用的历史残留数据弹框，但没办法关闭")
+                return False
+        elif utils_android.get_resume_application_id(self.target_device_name) == "com.android.packageinstaller":
+            utils_logger.log("为什么进入了自动安装页面呢?")
+            return False
         return False
 
     def query_ele_wrapper(self, query_str, is_ignore_except_case=False, click_mode=None,
