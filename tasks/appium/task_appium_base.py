@@ -370,7 +370,7 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         :param click_mode: 事件响应模式，None：不响应，click:element.click(),position:tab方式
         :param retry_count: 加上首次执行的那次，总共会执行(retry_count+1)次
         :param time_wait_page_completely_resumed: 查询之前的延时：pre of query
-        :param rect_scale_check_element_region:
+        :param rect_scale_check_element_region:[left,right,top,bottom]
         :return:
         """
         # TODO:添加element限制区域

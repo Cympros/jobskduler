@@ -82,7 +82,7 @@ class TaskAppiumQutoutiaoYuedu(TaskAppiumQutoutiaoBase):
             # 循环回到首页
             def_main_activity = 'com.jifen.qkbase.main.MainActivity'
             if utils_appium.back_to_target(self.driver, self.target_device_name, self.target_application_id,
-                                                    def_main_activity) is True:
+                                           def_main_activity) is True:
                 try:
                     self.browser_news(def_main_activity)
                 except Exception as e:
@@ -137,7 +137,7 @@ class TaskAppiumQutoutiaoYuedu(TaskAppiumQutoutiaoBase):
             else:
                 # 进入详情页失败,则先回退至首页
                 if utils_appium.back_to_target(self.driver, self.target_device_name,
-                                                        self.target_application_id, main_activity) is False:
+                                               self.target_application_id, main_activity) is False:
                     utils_logger.log("等待进入详情页失败,且无法回退至首页,则直接退出浏览")
                     return False
                 self.safe_scroll_by(tab_interval=[float(random.uniform(0.65, 0.35)), 0.35])
@@ -227,24 +227,20 @@ class TaskAppiumQutoutiaoCoreShiduanJiangli(TaskAppiumQutoutiaoBase):
                         '//android.widget.LinearLayout//android.widget.FrameLayout//android.widget.RelativeLayout' \
                         '//android.widget.FrameLayout//android.widget.LinearLayout//android.widget.RelativeLayout' \
                         '//android.widget.RelativeLayout//android.widget.RelativeLayout//android.widget.FrameLayout' \
-                        '//android.widget.TextView '
+                        '//android.widget.TextView'
         # 第一次点击小时签到
-        if self.query_ele_wrapper(btn_ele_xpath, click_mode="click",
-                                  time_wait_page_completely_resumed=5) is not None or self.query_ele_wrapper(
-            self.get_query_str_within_xpath_only_text("领取"), click_mode='click') is not None:
+        if self.query_ele_wrapper(btn_ele_xpath, click_mode="click") is not None or \
+                self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("领取"), click_mode='click') is not None:
             if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('时段奖励'), retry_count=0) is not None:
                 utils_logger.log("成功弹出时段奖励弹框")
                 return True
             else:
-                # 若第一次是成功签到，发起第二次查询是否已成功签到的检测
-                if self.query_ele_wrapper(btn_ele_xpath, click_mode="click", retry_count=0) is not None:
-                    if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('时段奖励'),
-                                              retry_count=0) is not None:
-                        utils_logger.log("成功弹出时段奖励弹框")
-                        return True
-                else:
-                    self.task_scheduler_failed('第二次未搜索到右上角按钮')
-                    return False
+                self.task_scheduler_failed("未检测到领取成功")
+                return False
+        elif self.query_ele_wrapper("//android.widget.ProgressBar",
+                                    rect_scale_check_element_region=[0.5, 1, 0, 0.5]) is not None:
+            utils_logger.debug("检测到正在倒计时")
+            return True
         else:
             self.task_scheduler_failed('第一次未搜索到右上角按钮')
             return False
