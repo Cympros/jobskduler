@@ -22,6 +22,21 @@ class TaskAppiumDongFangToutiaoBase(AbsBasicAppiumTask, abc.ABC):
         AbsBasicAppiumTask.__init__(self, 'com.songheng.eastnews', 'com.oa.eastfirst.activity.WelcomeActivity',
                                     "com.songheng.eastfirst.common.view.activity.MainActivity")
 
+    def run_task(self, handle_callback):
+        if AbsBasicAppiumTask.run_task(self, handle_callback) is False:
+            return False
+        if self.query_ele_wrapper(
+                self.get_query_str_within_xpath_only_text("我的", view_type='android.widget.RadioButton'),
+                is_ignore_except_case=True, click_mode='click') is not None:
+            if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("登录/注册"),
+                                      is_ignore_except_case=True) is not None:
+                utils_logger.log("检测用户未登录")
+                return False
+            elif self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("新闻"), is_ignore_except_case=True,
+                                        click_mode='click') is not None:
+                return True
+        return False
+
     def except_case_in_query_ele(self):
         if AbsBasicAppiumTask.except_case_in_query_ele(self) is True:
             return True
