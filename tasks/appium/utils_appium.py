@@ -83,11 +83,13 @@ def scroll_by(driver, target_device_name, is_down=True, tab_center=0.5, tab_inte
     :param duration: 滑动的时长
     :return:
     """
-    utils_logger.debug(
-        "[scroll_by] tab_interval=" + str(tab_interval) + ",is_down=" + str(is_down) + ",tab_center=" + str(
-            tab_center))
+    utils_logger.debug("tab_interval=%s,is_down=%s,tab_center=%s" % (str(tab_interval), str(is_down), str(tab_center)))
     'TODO：Peform Action的使用'
-    resolution = utils_android.get_resolution_by_device(target_device_name).split('x')
+    resolution_str_by_device = utils_android.get_resolution_by_device(target_device_name)
+    if resolution_str_by_device is None:
+        utils_logger.log("读取设备分辨率失败")
+        return
+    resolution = resolution_str_by_device.split('x')
     screen_width = float(resolution[0])
     screen_heigh = float(resolution[1])
     time.sleep(1)  # driver.swipe经常崩溃,添加延时任务
@@ -114,7 +116,7 @@ def start_appium_service(device, appium_port, access_appium_bp_port, appium_serv
     if not check_res:  # 空串表示未安装appium服务
         utils_logger.log("appium服务还未安装,调用'npm install -g appium'执行安装程序")
         return False
-    utils_logger.debug("appium服务安装地址", check_res)
+    # utils_logger.debug("appium服务安装地址", check_res)
     utils_logger.debug("重试检查appium服务启动状态 ", retry_count)
     if appium_port is None or access_appium_bp_port is None or device is None:
         utils_logger.debug("参数异常", appium_port, access_appium_bp_port, device)
@@ -123,7 +125,7 @@ def start_appium_service(device, appium_port, access_appium_bp_port, appium_serv
     # 存在appium进程则输出success，否则输出空串
     appium_state_check_cmd = "ps -ef | grep '%s' | grep -v  \"$$\" >/dev/null && echo success" % appium_start_cmd
     res_apm, res_apm_error = utils_common.exec_shell_cmd(appium_state_check_cmd)
-    utils_logger.debug("appium服务是否启动", appium_state_check_cmd, str(res_apm), str(res_apm_error))
+    # utils_logger.debug("appium服务是否启动", appium_state_check_cmd, str(res_apm), str(res_apm_error))
     if res_apm is not None:
         return True
     else:

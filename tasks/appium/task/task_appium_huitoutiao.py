@@ -14,6 +14,7 @@ from tasks.appium.task_appium_base import AbsBasicAppiumTask
 from tasks.appium import utils_appium
 
 from helper import utils_logger
+from helper import utils_common
 
 
 class TaskAppiumHuiToutiaoBase(AbsBasicAppiumTask, abc.ABC):

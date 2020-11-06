@@ -55,6 +55,7 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
     def run_task(self, _handle_callback):
         if TaskAppiumDongFangToutiaoBase.run_task(self, _handle_callback) is False:
             return False
+        read_round_status = False  # 任务执行状态
         for_each_size = int(random.randint(1, 15))
         for index in range(for_each_size):
             # 观测是否直接抛异常导致回到桌面
@@ -66,12 +67,14 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
             def_main_activity = 'com.songheng.eastfirst.common.view.activity.MainActivity'
             if utils_appium.back_to_target_activity(self.driver, def_main_activity) is True:
                 try:
-                    self.browser_news(def_main_activity)
+                    if self.browser_news(def_main_activity) is True:
+                        read_round_status = True
                 except Exception as e:
                     utils_logger.log("browser_news caught exception:", traceback.format_exc())
             else:
                 utils_logger.log("不再首页，没办法执行新闻浏览任务")
                 break
+        return read_round_status
 
     def browser_news(self, main_activity):
         # TODO: 不要指定具体的tab
@@ -150,8 +153,7 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
                     utils_logger.debug(
                         "[" + str(time_to_foreach) + "] for tab_interval[" + str(tab_interval) + "] with index:" + str(
                             index))
-                    if self.safe_scroll_by(tab_interval=tab_interval,
-                                              duration=int(float(period * 1000))) is False:
+                    if self.safe_scroll_by(tab_interval=tab_interval, duration=int(float(period * 1000))) is False:
                         utils_logger.log("----> safe_scroll_by caught exception")
                         return False
                     # 东方头条有可能向下拖动的时候退出详情页,因此添加检测机制

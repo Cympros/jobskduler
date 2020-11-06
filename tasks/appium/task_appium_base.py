@@ -237,7 +237,7 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
             utils_logger.debug("进程id:", os.getpid(), os.getppid())
             utils_common.exec_shell_cmd("lsof -i:%s" % self.appium_port)
             utils_common.exec_shell_cmd("lsof -i:%s | grep -v -E '%s|^COMMAND' | awk '{print $2}' | xargs kill -9" %
-                                        (os.getpid(), self.appium_port))
+                                        (self.appium_port, os.getpid()))
 
     def is_in_target_page(self, target_page_file, compare_rule=100, retry_count=10, interval_time=0):
 
