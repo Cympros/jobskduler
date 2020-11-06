@@ -139,15 +139,18 @@ class DispatcherThread(threading.Thread):
                 #     continue
 
                 # 反射执行task
+                task_start_time = utils_common.get_shanghai_time()
                 utils_logger.log("开始执行任务", obj)
                 my_class = getattr(module_dynamic_imported, name)
                 instance = my_class()
                 handle_callback = HandleCallback()
                 if instance.run_task(handle_callback) is True:
-                    utils_logger.log("执行任务成功", module_dynamic_imported, name)
+                    utils_logger.log("执行任务成功耗时[%s]" % (int(utils_common.get_shanghai_time()) - task_start_time),
+                                     module_dynamic_imported, name)
                     handle_callback.notify_task_success(module_name, name)
                 else:
-                    utils_logger.debug("执行任务失败", module_dynamic_imported, name)
+                    utils_logger.debug("执行任务失败耗时[%s]" % (int(utils_common.get_shanghai_time()) - task_start_time),
+                                       module_dynamic_imported, name)
                 instance.release_after_task()  # 环境清理
 
                 # 添加任务管理
