@@ -111,7 +111,6 @@ class TaskAppiumJingDongSignNormal(TaskAppiumJingDongEarnJingDou):
 class TaskAppiumJingDongSignAdditional(TaskAppiumJingDongSignNormal):
     def run_task(self, _handle_callback):
         if TaskAppiumJingDongSignNormal.run_task(self, _handle_callback) is False:
-            utils_logger.log("run_task for TaskAppiumJingDongSignAdditional failed")
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('今日已翻1张牌')) \
                 or self.query_ele_wrapper(

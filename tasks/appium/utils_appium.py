@@ -55,22 +55,21 @@ def is_element_region_right(element, region_rect=None):
     """
     if region_rect is None:
         # 为什么为空时，不构造[0,1,0,1]的默认值？  因为有时候有些情况下比如浮框类似的，坐标并不是理想中的样子
-        utils_logger.debug("[is_element_region_right] 待校验区域为空，因此认为搜索的element在屏幕内")
+        utils_logger.debug("待校验区域为空，因此认为搜索的element在屏幕内")
         return True
-    utils_logger.log("[is_element_region_right] 校验元素是否在指定区域")
     ele_location = get_appium_element_position(element)
     if ele_location is None:
-        utils_logger.log("[is_element_region_right] 当前元素获取location失败,则认为元素可见")
+        utils_logger.debug("当前元素获取location失败,则认为元素可见")
         return True
-    utils_logger.log("[is_element_region_right] region_rect:", region_rect)
-    utils_logger.log("[is_element_region_right] ele_location:", ele_location)
+    utils_logger.debug("region_rect:", region_rect)
+    utils_logger.debug("ele_location:", ele_location)
     if region_rect[0] <= int(ele_location['x']) <= region_rect[1] and region_rect[2] <= int(
             ele_location['y']) <= \
             region_rect[3]:
-        utils_logger.log("[is_element_region_right] 元素区域校验 success")
+        utils_logger.debug("元素区域校验 success")
         return True
     else:
-        utils_logger.log("[is_element_region_right] 元素区域校验 failed")
+        utils_logger.debug("元素区域校验 failed")
         return False
 
 
@@ -131,9 +130,9 @@ def start_appium_service(device, appium_port, access_appium_bp_port, appium_serv
     if res_apm is not None:
         return True
     else:
-        # 关闭appium服务,保证同一时刻仅有唯一服务
-        utils_common.exec_shell_cmd("ps -ef | grep '%s'| grep -v \"$$\" | awk '{print \"kill -9 \" $2}' | sh"
-                                    % appium_start_cmd)
+        # 关闭appium服务,保证同一时刻同一个设备仅有唯一appium服务
+        utils_common.exec_shell_cmd("ps -ef | grep '\-U %s'| grep -v \"$$\" | awk '{print \"kill -9 \" $2}' | sh"
+                                    % str(device))
         res, err = utils_common.exec_shell_cmd("nohup %s >>%s 2>&1 &" % (appium_start_cmd, appium_server_log))
         if interval_time > 0:
             utils_logger.debug("sleep %s to exec command [%s] with response:[%s] and error:[%s]" %

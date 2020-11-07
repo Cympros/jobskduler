@@ -99,7 +99,7 @@ class DispatcherThread(threading.Thread):
             else:
                 fail_count += 1
             pass_time = time.time() - exec_start_time  # 单位为秒
-            utils_logger.log("pass time is :" + str(pass_time))
+            utils_logger.debug("pass time is :" + str(pass_time))
             if pass_time < 2 * 60:  # 两分钟以内
                 utils_logger.log("单个执行周期执行时间过短,休眠当前线程", self.name)
                 self.thread_sleep()
