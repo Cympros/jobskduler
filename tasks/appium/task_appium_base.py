@@ -81,8 +81,8 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         pgres = utils_appium.get_pg_source(self.driver)
         if pgres is not None:
             utils_logger.debug(">> page_resource write to file ")
-            file_page_resource = "%s/page_resource_%s_%s.txt " % (self.get_project_output_dir(), suffix,
-                                                                  str(threading.currentThread().ident))
+            file_page_resource = "%s/page_resource_%s_%s.txt" % (self.get_project_output_dir(), suffix,
+                                                                 str(threading.currentThread().ident))
             # 删除历史文件
             if os.path.exists(file_page_resource) is True:
                 os.remove(file_page_resource)

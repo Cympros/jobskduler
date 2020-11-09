@@ -55,8 +55,7 @@ class TaskAppiumDongFangtoutiaoCoreShiduanJiangli(TaskAppiumDongFangToutiaoBase)
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("领取"),
                                   click_mode="click") is not None:
-            if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("时段奖励领取成功"),
-                                      click_mode="click") is not None:
+            if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("时段奖励领取成功")) is not None:
                 utils_logger.log("时段奖励领取成功")
                 return True
             else:
