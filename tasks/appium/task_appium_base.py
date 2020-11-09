@@ -161,6 +161,10 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
             utils_logger.debug("未连接设备")
             return False
         utils_logger.debug("target_device_name:", self.target_device_name)
+        # 检查电量是否满足运行条件
+        if utils_android.get_battery_level(self.target_device_name, 0) <= 20:
+            utils_logger.debug("电量不够支持程序运行")
+            return False
         # 检查应用是否安装
         check_installed_response, response_errror = utils_android.is_app_installed(
             self.target_device_name,

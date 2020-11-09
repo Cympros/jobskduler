@@ -147,19 +147,6 @@ def get_app_version_by_applicaionid(device, application_id):
     return None if response is None else response
 
 
-def get_battery_status_by_device(device=None):
-    """读取电源状态
-    2:充电状态
-    """
-    cmd = "adb %s shell dumpsys battery | grep 'AC powered:' | awk -F \":\" '{print $2}'" % \
-          ("" if device is None else "-s" + str(device))
-    response, response_error = _check_adb_command_result(cmd)
-    battery_status = (None if response is None else response)
-    if battery_status is None or battery_status != "true":
-        utils_logger.log("设备不在线：[", device, "][", response, "][", response_error, "]")
-    return battery_status
-
-
 def get_brand_by_device(device=None):
     """设备型号"""
     cmd = "adb %s shell getprop | grep ro.product.brand | awk -F ':' '{print $2}'" % \
@@ -268,13 +255,13 @@ def _check_adb_command_result(adb_cmd, retry_count=3):
 
 
 def is_page_loging(check_file, x_cut_count=5, y_cut_count=10):
-    '''
+    """
     判断图片是否有大片留白,方案：先大图裁剪成不同部分的小图，然后针对每张小图校验是否其为纯色图片
     # 注释：x_cut_count与y_cut_count最好不要自定义，太细会使得每张小图都是纯色图片，但纯色图的色值不同
     @:param x_cut_count  横向拆分数
     @:param y_cut_count 纵向拆分数
     :return: 
-    '''
+    """
     image_resorce = Image.open(check_file)
     # 这里务必根据图片自身宽高来进行切片，不要会用分辨率的宽高
     utils_logger.debug("---image_resorce:", image_resorce.size)
@@ -316,6 +303,17 @@ def is_page_loging(check_file, x_cut_count=5, y_cut_count=10):
             return False
 
 
+def get_battery_level(device=None, default=0):
+    # 获取剩余电量
+    cmd = "adb %s shell dumpsys battery | grep 'level:'" % ("" if device is None else "-s " + str(device))
+    response, error = _check_adb_command_result(cmd)
+    if response is not None:
+        return int(response.split(':')[1].strip())
+    else:
+        return default
+
+
 if __name__ == '__main__':
     # print(get_resumed_activity())
-    print(get_resume_application_id())
+    # print(get_resume_application_id())
+    print("[" + str(get_battery_level()) + "]")
