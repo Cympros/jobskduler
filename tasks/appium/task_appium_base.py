@@ -49,6 +49,7 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         self.driver = None
         self.appium_port = None
         self.appium_port_bp = None
+        self.target_device_name = None
         self.upload_files = []  # 待上传至远端的文件列表
 
     def wait_activity(self, driver, target, check_period=2, retry_count=0):

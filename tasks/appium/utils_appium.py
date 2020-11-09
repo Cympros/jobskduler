@@ -355,9 +355,7 @@ def get_driver_by_launch_app(application_id, launch_activity, device_name_to_con
     if application_id is None:
         return None
     if launch_activity is None:
-        cmd = "adb shell dumpsys activity | grep -v bnds | grep 'android.intent.category.LAUNCHER'  " \
-              + " | grep '" + application_id + "'"
-        utils_logger.log("打开应用，并执行\"" + cmd + "\"获取启动activity")
+        utils_logger.log("请先绑定LAUNCHER页面")
         return None
 
     # 判断appium服务是否启动
@@ -375,7 +373,7 @@ def get_driver_by_launch_app(application_id, launch_activity, device_name_to_con
                     'appPackage': application_id,
                     'appActivity': launch_activity,
                     # 'newCommandTimeout': 3 * 60,  # 无响应再关闭
-                    # 'adbExecTimeout': 50000,
+                    'adbExecTimeout': 50000,
                     'disableWindowAnimation': True,
                     # 'automationName':'uiautomator2'   # todo:还不稳定，观望中
                     }

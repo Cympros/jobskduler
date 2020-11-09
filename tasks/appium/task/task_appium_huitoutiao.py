@@ -114,7 +114,7 @@ class TaskAppiumHuiToutiaoYueDu(TaskAppiumHuiToutiaoBase):
             return False
         # 搜索应该阅读的文章
         scroll_size = int(random.randint(0, 10))
-        utils_logger.log("页面滚动次数：", scroll_size)
+        utils_logger.debug("页面滚动次数：", scroll_size)
         for index in range(scroll_size):
             # 滑动以选择文章开启阅读任务
             self.safe_scroll_by(tab_interval=[float(random.uniform(0.65, 0.35)), 0.35])
@@ -150,7 +150,7 @@ class TaskAppiumHuiToutiaoYueDu(TaskAppiumHuiToutiaoBase):
             self.task_scheduler_failed('why 还在首页')
             return False
         # 根据页面调用指定阅读策略
-        utils_logger.log("cur_activity:", cur_activity)
+        utils_logger.debug("cur_activity:", cur_activity)
         if cur_activity in news_activitys:
             # 开始模拟阅读
             time_to_foreach = random.randint(5, 10)  # 5~10s，因为每30秒就可以获得10积分的奖励

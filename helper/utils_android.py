@@ -16,9 +16,8 @@ from helper import utils_logger
 
 def close_heads_up_notifycations(device=None):
     """禁用抬头通知"""
-    close_cmd = "adb " \
-                + ("" if device is None else "-s " + str(device) + " ") \
-                + "shell settings put global heads_up_notifications_enabled 0"
+    close_cmd = "adb %s shell settings put global heads_up_notifications_enabled 0" % \
+                ("" if device is None else "-s " + str(device))
     close_status, close_status_error = _check_adb_command_result(close_cmd)
     if close_status_error is not None:
         return False
@@ -29,19 +28,20 @@ def close_heads_up_notifycations(device=None):
 
 def lock_off_screen_if_need(device=None):
     """解锁当前屏幕"""
-    cmd_check_screen_off = "adb -s " + device + " shell dumpsys window policy | grep 'mShowingLockscreen=true'"
+    cmd_check_screen_off = "adb %s shell dumpsys window policy | grep 'mShowingLockscreen=true'" % \
+                           ("" if device is None else "-s " + str(device))
     lock_status, lock_status_error = _check_adb_command_result(cmd_check_screen_off)
     if lock_status_error is not None:
         utils_logger.log("lock_off_screen_if_need caught exception:", lock_status_error)
     if lock_status is not None:
         # 锁屏状态
         touch_home, touch_home_error = _check_adb_command_result(
-            "adb -s " + device + " shell input keyevent 26 & echo success")
+            "adb %s shell input keyevent 26 & echo success" % ("" if device is None else "-s " + str(device)))
         if touch_home is None:
             utils_logger.log("按home键遭遇异常")
             return False
         swipe_state, swipe_state_error = _check_adb_command_result(
-            "adb -s " + device + " shell input swipe 500 50 500 700 & echo success")
+            "adb %s shell input swipe 500 50 500 700 & echo success" % ("" if device is None else "-s " + str(device)))
         if swipe_state is None:
             utils_logger.log("滑动屏幕解锁失败")
             return False
@@ -71,7 +71,7 @@ def get_resolution_by_device(device=None):
     parame = str("" if device is None else "-s " + str(device))
     # 废弃：该命令不支持一加手机 for result:[init=1080x1920 420dpi base=1080x1920 380dpi cur=1080x1920 app=1080x1920 rng=1080x1023-1920x1863]
     # cmd = "adb " + parame + " shell dumpsys window displays | grep cur= | awk '{print $3}'"
-    cmd = "adb " + parame + " shell wm size | awk '{print $3}'"
+    cmd = "adb %s shell wm size | awk '{print $3}'" % parame
     display, display_error = _check_adb_command_result(cmd)
     if display is not None:
         # 正则校验:最多四位数字 --> \d4 
@@ -83,14 +83,6 @@ def get_resolution_by_device(device=None):
         #     return display.replace("cur=", "").lstrip().rstrip()
         # else:
         return None
-
-
-def kill_process_by_pkg_name(pkg_name):
-    """通过包名杀掉进程"""
-    if pkg_name is None:
-        return
-    cmd = "adb shell am force-stop '%s'" % pkg_name
-    _check_adb_command_result(cmd)
 
 
 def get_device_tag(device=None):
@@ -146,16 +138,6 @@ def get_deivce_android_version(device=None):
     return None if response is None else response.replace("\n", "")  # 删除换行符
 
 
-def get_package_path_in_phone_within_applicationid(application_id):
-    """通过包名解析出系统目录的apk文件路径"""
-    if application_id is None:
-        return None
-    utils_logger.debug("get_package_path_within_applicationid:", application_id)
-    cmd = "adb shell pm list packages -f | grep '%s' | awk -F 'package:|=' '{print $2}'" % application_id
-    response, response_error = _check_adb_command_result(cmd)
-    return response
-
-
 def get_app_version_by_applicaionid(device, application_id):
     if application_id is None:
         return None
@@ -202,18 +184,6 @@ def get_model_by_device(device=None):
     response_vender, response_vender_error = _check_adb_command_result(
         cmd + "ro.product.vendor.model" + " | awk -F ':'  '{print $2}'")
     return response_vender
-
-
-def pull_file_from_phone(file_path_in_phone, target_dir_in_mac):
-    """copy 手机中的文件至电脑当中(todo:需要root权限)
-    @:param file_path_in_phone
-    @:param target_dir_in_mac 
-    """
-    cmd = "adb pull " + file_path_in_phone + " " + target_dir_in_mac
-    response = _check_adb_command_result(cmd)
-    if response is not None:
-        return target_dir_in_mac
-    return None
 
 
 def get_top_focuse_activity(device=None):
@@ -266,29 +236,6 @@ def get_connected_devcies(target_device=None, except_emulater=False):
     return contected_devices
 
 
-def get_start_activity_by_application_id(application_id):
-    """通过apk解析启动页"""
-    if application_id is None:
-        return None
-    # todo:'adb shell dumpsys activity'需要应用在后台是存活的
-    cmd = "adb shell dumpsys activity | grep 'android.intent.category.LAUNCHER' " \
-          + " | awk '{for(i=1;i<=NF;i++){if($i~/cmp/){print $i}}}' | awk -F 'cmp=' '{print $2}'" \
-          + " | grep -v 'bnds='" \
-          + " | grep '" + application_id + "'"
-    response, response_errror = _check_adb_command_result(cmd)
-    # 拼接launcher_activity
-    launcher_activity = None
-    if response is not None:
-        split_activity = response.split("/")[1]
-        utils_logger.log("[split_activity]", split_activity)
-        if split_activity.startswith(".") is True:
-            launcher_activity = application_id + split_activity
-        else:
-            launcher_activity = split_activity
-    utils_logger.log("[get_start_activity_by_application_id]", launcher_activity)
-    return launcher_activity
-
-
 def get_device_statue(device=None):
     """读取设备在线状态"""
     cmd = "adb %s get-state" % ("" if device is None else "-s " + str(device))
@@ -311,16 +258,12 @@ def _check_adb_command_result(adb_cmd, retry_count=3):
     # 用于针对adb命令的异常处理
     res_adb, error_adb = utils_common.exec_shell_cmd("timeout 5 %s" % adb_cmd)
     if retry_count <= 0:
-        # utils_logger.debug("命令[" + str(adb_cmd) + "]," + "retry_count[" + str(retry_count) + "]")
-        # utils_logger.debug("response:[" + str(res_adb) + "]," + "error:[" + str(error_adb) + "]")
         return res_adb, error_adb
     if error_adb is not None:  # 表示有异常
-        if "error: device " in error_adb and " not found" in error_adb:
+        if "adb: protocol fault" in error_adb:
             # 重启adb服务
             utils_common.exec_shell_cmd("adb kill-server && adb start-server")
             return _check_adb_command_result(adb_cmd, retry_count - 1)
-    # utils_logger.debug("命令[" + str(adb_cmd) + "]," + "retry_count[" + str(retry_count) + "]")
-    # utils_logger.debug("response:[" + str(res_adb) + "]," + "error:[" + str(error_adb) + "]")
     return res_adb, error_adb
 
 

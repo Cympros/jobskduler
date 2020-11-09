@@ -55,12 +55,18 @@ class HandleCallback(metaclass=ABCMeta):
                 connected_devcies = utils_android.get_connected_devcies()
                 if connected_devcies is not None and len(connected_devcies) > 0:
                     tmp_device = connected_devcies[0]
-            # 若是ip地址,则尝试重连
-            compile_rule = re.compile(r'\d+[\.]\d+[\.]\d+[\.]\d+')
-            match_list = re.findall(compile_rule, tmp_device)
-            if match_list:
-                reconect_res, reconnect_error = utils_common.exec_shell_cmd("adb connect %s" % tmp_device)
-                utils_logger.debug("reconect_res:", reconect_res)
+            if tmp_device is not None:
+                # 若是ip地址,则尝试重连
+                compile_rule = re.compile(r'\d+[\.]\d+[\.]\d+[\.]\d+')
+                match_list = re.findall(compile_rule, tmp_device)
+                if match_list:
+                    reconect_res, reconnect_error = utils_common.exec_shell_cmd("adb connect %s" % tmp_device)
+                    utils_logger.debug("reconect_res:", reconect_res)
+                # 判断设备链接状态
+                connected_status, connected_error = utils_common.exec_shell_cmd("adb -s %s get-state" % tmp_device)
+                if connected_status != "device" or connected_error is not None:
+                    utils_logger.debug("设备断开连接,停止任务")
+                    return None
             return tmp_device
 
     def notify_task_success(self, module_name, task_name):
