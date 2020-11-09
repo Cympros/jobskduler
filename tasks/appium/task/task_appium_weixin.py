@@ -74,6 +74,8 @@ class TaskAppiumWeixinBase(AbsBasicAppiumTask, abc.ABC):
     def run_task(self, _handle_callback):
         if AbsBasicAppiumTask.run_task(self, _handle_callback) is False:
             return False
+        # TODO 补全任务判断
+        return False
 
 
 class TaskAppiumWeixinJimmieJDJingdonghuiyuan(TaskAppiumWeixinBase):

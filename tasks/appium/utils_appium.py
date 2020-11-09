@@ -130,6 +130,8 @@ def start_appium_service(device, appium_port, access_appium_bp_port, appium_serv
     if res_apm is not None:
         return True
     else:
+        utils_logger.debug("关闭appium服务占用",
+                           utils_common.exec_shell_cmd("ps -ef | grep '\-U %s'| grep -v \"$$\"" % str(device)))
         # 关闭appium服务,保证同一时刻同一个设备仅有唯一appium服务
         utils_common.exec_shell_cmd("ps -ef | grep '\-U %s'| grep -v \"$$\" | awk '{print \"kill -9 \" $2}' | sh"
                                     % str(device))

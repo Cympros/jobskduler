@@ -197,8 +197,6 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
             if except_name == "MaxRetryError":
                 utils_logger.log("获取appium服务失败", except_name)
                 utils_logger.debug("appium服务列表", utils_common.exec_shell_cmd("ps -ef | grep appium"))
-                # utils_common.exec_shell_cmd(
-                #     "ps -ef | grep appium | grep -v \"$$\" | awk  '{print \"kill -9 \" $2}' | sh")
                 return False
 
         if self.driver is None:
@@ -229,14 +227,11 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
                 utils_logger.log("release_after_task caught failed")
 
         if self.appium_port is not None:
-            if self.target_device_name is not None:
-                # 关闭appium服务
-                utils_common.exec_shell_cmd("ps -ef | grep -v \"$$\" | grep 'appium -p %s -bp %s -U %s' "
-                                            "| awk '{print $2}' | xargs kill -9" %
-                                            (self.appium_port, self.appium_port_bp, self.target_device_name))
             # 关闭端口占用
             utils_logger.debug("进程id:", os.getpid(), os.getppid())
             utils_common.exec_shell_cmd("lsof -i:%s" % self.appium_port)
+            utils_logger.debug("关闭端口占用", utils_common.exec_shell_cmd("lsof -i:%s | grep -v -E '%s|^COMMAND'"
+                                                                     % (self.appium_port, os.getpid())))
             utils_common.exec_shell_cmd("lsof -i:%s | grep -v -E '%s|^COMMAND' | awk '{print $2}' | xargs kill -9" %
                                         (self.appium_port, os.getpid()))
 
