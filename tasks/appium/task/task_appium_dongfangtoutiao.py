@@ -55,7 +55,8 @@ class TaskAppiumDongFangtoutiaoCoreShiduanJiangli(TaskAppiumDongFangToutiaoBase)
             return False
         if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("领取"),
                                   click_mode="click") is not None:
-            if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("时段奖励领取成功")) is not None:
+            if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("时段奖励领取成功"),
+                                      time_wait_page_completely_resumed=10) is not None:
                 utils_logger.log("时段奖励领取成功")
                 return True
             else:
@@ -130,7 +131,7 @@ class TaskAppiumDongFangToutiaoYueDu(TaskAppiumDongFangToutiaoBase):
                            'com.songheng.eastfirst.common.view.activity.WebViewActivity',
                            'com.uc.browser.InnerUCMobile', '.WebActivity', '.PackageInstallerActivity',
                            'com.bytedance.sdk.openadsdk.activity.TTVideoLandingPageActivity']
-        for tab_index in range(10):
+        for tab_index in range(20):
             if utils_android.get_resumed_activity(self.target_device_name) != main_activity:
                 utils_logger.log("尝试进入文章时发现不在新闻列表页,直接退出")
                 return False
