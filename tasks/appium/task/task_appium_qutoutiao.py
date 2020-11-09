@@ -234,11 +234,17 @@ class TaskAppiumQutoutiaoCoreShiduanJiangli(TaskAppiumQutoutiaoBase):
             if self.query_ele_wrapper(self.get_query_str_within_xpath_only_text('时段奖励'), retry_count=0) is not None:
                 utils_logger.log("成功弹出时段奖励弹框")
                 return True
+            # 覆盖点击'领取'后没有弹窗,仅仅按钮变为"再领**"的文案
+            elif self.query_ele_wrapper(self.get_query_str_within_xpath_only_text("再领", is_force_match=False),
+                                        rect_scale_check_element_region=[0.5, 1, 0, 0.3]) is not None:
+                return True
             else:
                 self.task_scheduler_failed("未检测到领取成功")
                 return False
         elif self.query_ele_wrapper("//android.widget.ProgressBar",
-                                    rect_scale_check_element_region=[0.5, 1, 0, 0.5]) is not None:
+                                    rect_scale_check_element_region=[0.5, 1, 0, 0.3]) is not None or \
+                self.query_ele_wrapper(self.get_query_str_within_xpath_only_text(":", is_force_match=False),
+                                       rect_scale_check_element_region=[0.5, 1, 0, 0.3]) is not None:
             utils_logger.debug("检测到正在倒计时")
             return True
         else:
