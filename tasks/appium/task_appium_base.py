@@ -161,7 +161,7 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
             utils_logger.debug("未连接设备")
             return False
         utils_logger.debug("target_device_name:", self.target_device_name)
-        # 检查电量是否满足运行条件
+        # 检查电量是否满足运行条件(有可能充电模式下电量依旧越来越少)
         if utils_android.get_battery_level(self.target_device_name, 0) <= 20:
             utils_logger.debug("电量不够支持程序运行")
             return False
@@ -186,7 +186,7 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
             '指定端口:[appium_port:' + str(self.appium_port) + ',appium_port_bp:' + str(self.appium_port_bp) + "]")
         # 实例化该应用对应的driver对象
         try:
-            appium_server_log = self.handle_callback.read_config(self, "get_project_output_dir") \
+            appium_server_log = self.get_project_output_dir() \
                                 + str("/appium_server_nohup_%s.log" % threading.currentThread().ident)
             self.driver = utils_appium.get_driver_by_launch_app(self.target_application_id,
                                                                 self.launch_activity,
@@ -691,7 +691,7 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
                                                                cutted_rect_scale=part_rect_scale,
                                                                cutted_save_file_path=file_utils.generate_suffix_file(
                                                                    part_pic_path,
-                                                                   save_to_dir=envs.get_out_dir(),
+                                                                   save_to_dir=self.get_project_output_dir(),
                                                                    suffix="cutted"))
         child_template = Template(cutted_file_path)
         # cutted_file_path与当前截图比对:其中根据check_rect_scale裁剪截图
