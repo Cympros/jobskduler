@@ -125,7 +125,7 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
                 }
         if self.driver is not None:
             msgs['current_activity'] = utils_appium.get_cur_act(self.driver)
-        # 截取日志并上传
+        # 截取日志并上传(基本上传最近的两份日志就能找到具体执行日志)
         default_log_file_path = utils_logger.get_log_file()
         self.upload_files.append(default_log_file_path)
         self.upload_files.append(default_log_file_path + ".1")
