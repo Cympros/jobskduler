@@ -5,7 +5,7 @@ import sys
 root_path = os.path.split(os.path.realpath(__file__))[0] + '/../'
 sys.path.append(root_path)
 
-import yaml  # pip install pyyaml
+import yaml
 
 
 def load_yaml(yaml_path):

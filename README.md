@@ -1,6 +1,6 @@
 # 导出pip依赖信息
 pip freeze > requirements.txt
-cat requirements.txt | xargs -n 1 pip install --timeout 300 --verbose 
+cat requirements.txt | xargs -n 1 sudo pip3 install --timeout 300 --verbose 
 
 # daily-task支持功能简介
 1.支持功能说明
