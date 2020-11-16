@@ -123,8 +123,8 @@ def start_appium_service(device, appium_port, access_appium_bp_port, appium_serv
         utils_logger.debug("参数异常", appium_port, access_appium_bp_port, device)
         return False
     appium_start_cmd = "appium -p %s -bp %s -U %s" % (str(appium_port), str(access_appium_bp_port), str(device))
-    # 存在appium进程则输出success，否则输出空串
-    appium_state_check_cmd = "ps -ef | grep '%s' | grep -v 'grep' >/dev/null && echo success" % appium_start_cmd
+    # 存在appium进程
+    appium_state_check_cmd = "ps -ef | grep '%s' | grep -v 'grep'" % appium_start_cmd
     res_apm, res_apm_error = utils_common.exec_shell_cmd(appium_state_check_cmd)
     # utils_logger.debug("appium服务是否启动", appium_state_check_cmd, str(res_apm), str(res_apm_error))
     if res_apm is not None:
