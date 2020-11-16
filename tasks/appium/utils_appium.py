@@ -343,15 +343,18 @@ def wait_activity_with_status(driver, target):
 
 def get_driver_by_launch_app(application_id, launch_activity, device_name_to_connected,
                              is_need_setting_input_manager,
-                             appium_port, access_appium_bp_port, appium_server_log):
+                             appium_port, access_appium_bp_port,
+                             appium_server_log, retry_count=5):
     """
     启动待测试apk并返回driver对象
-    :param access_appium_bp_port:
-    :param appium_port: appium服务端口
-    :param application_id:
-    :param launch_activity: 
-    :param device_name_to_connected: 
-    :param is_need_setting_input_manager: 是否需要添加appium输入法支持
+    @param application_id:应用名称
+    @param access_appium_bp_port:
+    @param appium_port: appium服务端口
+    @param launch_activity:
+    @param device_name_to_connected:
+    @param is_need_setting_input_manager: 是否需要添加appium输入法支持
+    @param appium_server_log: appium服务的日志输出路径
+    @param retry_count:重试次数
     :return: 
     """
     if application_id is None:
@@ -384,10 +387,18 @@ def get_driver_by_launch_app(application_id, launch_activity, device_name_to_con
         desired_caps['unicodeKeyboard'] = True
         desired_caps['resetKeyboard'] = True
     utils_logger.log("Appium配置参数:", desired_caps, "端口:" + str(appium_port))
-    driver = appium_webdriver.Remote("http://127.0.0.1:" + str(appium_port) + '/wd/hub',
-                                     desired_caps)
-    # driver.implicitly_wait(10)  # 设置全局隐性等待时间，单位秒
-    return driver
+
+    # for循环是用来解决ps查看appium服务存在但实际上appium还未完全启动的情况,此时添加延时重试机制
+    for retry_index in range(retry_count):
+        try:
+            driver = appium_webdriver.Remote("http://127.0.0.1:" + str(appium_port) + '/wd/hub', desired_caps)
+            if driver is not None:
+                return driver
+        except:
+            utils_logger.log("appium服务还未启动[" + str(retry_index) + "],继续等待5秒")
+            time.sleep(10)
+    traceback.print_exc()
+    return None
 
 
 def check_port_avaiable(host, port):

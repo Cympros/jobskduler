@@ -185,28 +185,15 @@ class AbsBasicAppiumTask(BaseTask, abc.ABC):
         utils_logger.debug(
             '指定端口:[appium_port:' + str(self.appium_port) + ',appium_port_bp:' + str(self.appium_port_bp) + "]")
         # 实例化该应用对应的driver对象
-        try:
-            appium_server_log = self.get_project_output_dir() \
-                                + str("/appium_server_nohup_%s.log" % threading.currentThread().ident)
-            self.driver = utils_appium.get_driver_by_launch_app(self.target_application_id,
-                                                                self.launch_activity,
-                                                                self.target_device_name,
-                                                                self.is_need_setting_input_manager(),
-                                                                self.appium_port,
-                                                                self.appium_port_bp,
-                                                                appium_server_log)
-        except Exception as exception:
-            traceback.print_exc()
-            except_name = exception.__class__.__name__
-            if except_name == "MaxRetryError":
-                utils_logger.log("获取appium服务失败", except_name)
-                utils_logger.debug("appium服务列表", utils_common.exec_shell_cmd("ps -ef | grep appium"))
-                return False
-
-        if self.driver is None:
-            utils_logger.log("not init appium driver")
-            return False
-
+        appium_server_log = self.get_project_output_dir() \
+                            + str("/appium_server_nohup_%s.log" % threading.currentThread().ident)
+        self.driver = utils_appium.get_driver_by_launch_app(self.target_application_id,
+                                                            self.launch_activity,
+                                                            self.target_device_name,
+                                                            self.is_need_setting_input_manager(),
+                                                            self.appium_port,
+                                                            self.appium_port_bp,
+                                                            appium_server_log)
         if self.driver is None or self.target_device_name is None:
             utils_logger.log("cureent env not right:[" + str(self.driver) + "," + str(self.target_device_name) + "]")
             return False
