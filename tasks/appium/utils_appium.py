@@ -124,16 +124,16 @@ def start_appium_service(device, appium_port, access_appium_bp_port, appium_serv
         return False
     appium_start_cmd = "appium -p %s -bp %s -U %s" % (str(appium_port), str(access_appium_bp_port), str(device))
     # 存在appium进程则输出success，否则输出空串
-    appium_state_check_cmd = "ps -ef | grep '%s' | grep -v  \"$$\" >/dev/null && echo success" % appium_start_cmd
+    appium_state_check_cmd = "ps -ef | grep '%s' | grep -v 'grep' >/dev/null && echo success" % appium_start_cmd
     res_apm, res_apm_error = utils_common.exec_shell_cmd(appium_state_check_cmd)
     # utils_logger.debug("appium服务是否启动", appium_state_check_cmd, str(res_apm), str(res_apm_error))
     if res_apm is not None:
         return True
     else:
         utils_logger.debug("关闭appium服务占用",
-                           utils_common.exec_shell_cmd("ps -ef | grep '\-U %s'| grep -v \"$$\"" % str(device)))
+                           utils_common.exec_shell_cmd("ps -ef | grep '\-U %s'| grep -v 'grep'" % str(device)))
         # 关闭appium服务,保证同一时刻同一个设备仅有唯一appium服务
-        utils_common.exec_shell_cmd("ps -ef | grep '\-U %s'| grep -v \"$$\" | awk '{print \"kill -9 \" $2}' | sh"
+        utils_common.exec_shell_cmd("ps -ef | grep '\-U %s'| grep -v 'grep' | awk '{print \"kill -9 \" $2}' | sh"
                                     % str(device))
         res, err = utils_common.exec_shell_cmd("nohup %s >>%s 2>&1 &" % (appium_start_cmd, appium_server_log))
         if interval_time > 0:
