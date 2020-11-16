@@ -379,6 +379,7 @@ def get_driver_by_launch_app(application_id, launch_activity, device_name_to_con
                     'appActivity': launch_activity,
                     # 'newCommandTimeout': 3 * 60,  # 无响应再关闭
                     'adbExecTimeout': 50000,
+                    'uiautomator2ServerLaunchTimeout': 50000,  # 默认20000
                     'disableWindowAnimation': True,
                     # 'automationName':'uiautomator2'   # todo:还不稳定，观望中
                     }
