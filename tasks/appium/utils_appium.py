@@ -133,8 +133,11 @@ def start_appium_service(device, appium_port, access_appium_bp_port, appium_serv
         utils_logger.debug("关闭appium服务占用",
                            utils_common.exec_shell_cmd("ps -ef | grep '\-U %s'| grep -v 'grep'" % str(device)))
         # 关闭appium服务,保证同一时刻同一个设备仅有唯一appium服务
-        utils_common.exec_shell_cmd("ps -ef | grep '\-U %s'| grep -v 'grep' | awk '{print \"kill -9 \" $2}' | sh"
-                                    % str(device))
+        utils_common.exec_shell_cmd(
+            "ps -ef | grep '%s*io.appium.uiautomator2.server.test/androidx.test.runner.AndroidJUnitRunner'| grep -v 'grep' | awk '{print \"kill -9 \" $2}' | sh" % str(
+                device))
+        utils_common.exec_shell_cmd(
+            "ps -ef | grep '\-U %s'| grep -v 'grep' | awk '{print \"kill -9 \" $2}' | sh" % str(device))
         res, err = utils_common.exec_shell_cmd("nohup %s >>%s 2>&1 &" % (appium_start_cmd, appium_server_log))
         if interval_time > 0:
             utils_logger.debug("sleep %s to exec command [%s] with response:[%s] and error:[%s]" %
