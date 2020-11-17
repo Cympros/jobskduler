@@ -398,10 +398,11 @@ def get_driver_by_launch_app(application_id, launch_activity, device_name_to_con
             driver = appium_webdriver.Remote("http://127.0.0.1:" + str(appium_port) + '/wd/hub', desired_caps)
             if driver is not None:
                 return driver
-        except:
-            utils_logger.log("appium服务还未启动[" + str(retry_index) + "],继续等待5秒")
-            time.sleep(10)
-    traceback.print_exc()
+        except Exception as exception:
+            implicat = 20  # 根据日志发现一般在30秒至40秒之内响应
+            utils_logger.log("appium服务还未启动[" + str(retry_index) + "],继续等待" + str(implicat) + "秒,异常信息:"
+                             + str(exception.__class__.__name__))
+            time.sleep(implicat)
     return None
 
 
