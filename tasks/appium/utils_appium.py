@@ -1,6 +1,7 @@
 # coding=utf-8
 
 # appium相关工具类
+import re
 import socket
 import threading
 
@@ -18,18 +19,30 @@ from helper import utils_android
 
 
 def get_appium_element_position(element):
-    """获取元素位置"""
+    """获取元素位置
+    @return 结果类似:{'x': 870, 'y': 1692}
+    """
     if element is None:
         return None
+    # 先基于bounds解析中间位置
+    try:
+        utils_logger.debug("get_attribute('clickable')", element.get_attribute("clickable"))
+        bounds_attr = element.get_attribute("bounds")
+        utils_logger.debug("get_attribute('bounds')", bounds_attr)
+        # 解析结果: [870,1692][1063,1912]
+        location_array = re.split('\[|,|\]', bounds_attr)
+        return {'x': (int(location_array[1]) + int(location_array[4])) / 2,
+                'y': (int(location_array[2]) + int(location_array[5])) / 2}
+    except Exception as e:
+        utils_logger.log(e, traceback.format_exc())
+    # 使用element自带的位置
     try:
         ele_position = element.location
         utils_logger.debug("element.location获取的位置", ele_position)
-
-        utils_logger.debug("get_attribute('clickable')", element.get_attribute("clickable"))
-        utils_logger.debug("get_attribute('bounds')", element.get_attribute("bounds"))
-    except Exception:
-        utils_logger.log(traceback.format_exc())
-    return ele_position
+        return ele_position
+    except Exception as e:
+        utils_logger.log(e, traceback.format_exc())
+    return None
 
 
 def is_element_region_right_with_scale(element, device, region_rect_scale=None):
